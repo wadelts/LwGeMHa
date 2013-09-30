@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:simpleType name="RequiredString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="MESSAGE">
+		<xs:complexType>
+			<xs:all>
+				<xs:element name="C0">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="DD" type="RequiredString"/>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="HEADER_INFORMATION">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="DATA_CONTRACT_NAME" type="RequiredString"/>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="DELV">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="ORD">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="SERVICE_ORDER_NUMBER" type="RequiredString"/>
+										<xs:element name="MAIN_NATIONAL_DEST_CODE" type="RequiredString"/>
+										<xs:element name="MAIN_TELEPHONE_NO" type="RequiredString"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

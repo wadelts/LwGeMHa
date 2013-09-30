@@ -1,0 +1,36 @@
+<!-- DERBY Notes:
+	All char/varchar must be enclosed in single quotes.
+	Numbers must NOT be enclosed in quotes.
+	DATE data supplied in a normal statement (i.e. not a Prepared Statement) must be enclosed in single quotes.
+	DATE data supplied to a Prepared Statement must NOT be enclosed in quotes.
+	 ORACLE Notes:
+	Everything can be wrapped in quotes, but obv no need to wrap numbers.
+-->
+<MESSAGE>
+	<DBACTION>
+		<KEY>1002</KEY>
+		<ACTION_ON_ERROR>RESPOND</ACTION_ON_ERROR>
+		<INSERT>
+			<PREPARED_STATEMENT_NAME>LW_delme1_insert_001</PREPARED_STATEMENT_NAME>
+			<IMMEDIATE_COMMIT>YES</IMMEDIATE_COMMIT>
+			<COLUMNS>
+				<USERID>1</USERID>
+				<USERCODENAME>'098rety'</USERCODENAME>
+				<USERSTATUS>'SUSPENDERS'</USERSTATUS>
+				<ADMINCOMMENT>'lemmo1'</ADMINCOMMENT>
+				<UPDATEDATETIME>2008-08-13</UPDATEDATETIME>
+			</COLUMNS>
+		</INSERT>
+		<INSERT>
+			<TABLENAME>LW_delme1</TABLENAME>
+			<PREPARED_STATEMENT_NAME>LW_delme1_insert_001</PREPARED_STATEMENT_NAME>
+			<COLUMNS>
+				<USERID>2</USERID>
+				<USERCODENAME>'098rety'</USERCODENAME>
+				<USERSTATUS>'SUSPENDERS'</USERSTATUS>
+				<ADMINCOMMENT>'lemmo1'</ADMINCOMMENT>
+				<UPDATEDATETIME>2008-08-20</UPDATEDATETIME>
+			</COLUMNS>
+		</INSERT>
+	</DBACTION>
+</MESSAGE>

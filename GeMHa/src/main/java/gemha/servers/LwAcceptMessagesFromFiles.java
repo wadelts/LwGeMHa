@@ -15,6 +15,9 @@ import gemha.interfaces.LwIAcceptMesssages;
 
 /**
   * This class retrieves messages from files.
+  * A message may be a record from CSV file
+  * or
+  * the complete contents of the file, in which case a 'filter' list of filenames may be processed.
   *
   * @author Liam Wade
   * @version 1.0 30/10/2008
@@ -51,11 +54,15 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////
+	// Start: Implementation methods for LwIProcessMesssage Interface...
+	//////////////////////////////////////////////////////////////////
 	/**
 	  * Set the wait interval for accepting messages
 	  *
 	  * @param waitInterval how many milliseconds to wait for a message before returning nothing (0 = block indefinitely)
 	  */
+	@Override
 	public void setWaitInterval(int waitInterval) {
 	}
 
@@ -63,14 +70,16 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  * Set the wait interval setting to block forever
 	  *
 	  */
+	@Override
 	public void setWaitIntervalBlockIndefinitely() {
 	}
 
 	/**
-	  * Set up conditions for accepting messages
+	  * Set up conditions for accepting messages.
 	  *
 	  * @return true for success, false for failure
 	  */
+	@Override
 	public boolean performSetup()
 								throws LwMessagingException {
 
@@ -112,6 +121,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  *
 	  * @return the next message retrieved
 	  */
+	@Override
 	public String acceptNextMessage()
 									throws LwMessagingException {
 
@@ -156,6 +166,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  * Do not consume the message
 	  *
 	  */
+	@Override
 	public void stayMessage(String auditKey)
 							throws LwMessagingException {
 	}
@@ -164,6 +175,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  * Consume the message now
 	  *
 	  */
+	@Override
 	public void consumeMessage(String auditKey)
 							throws LwMessagingException {
 	}
@@ -172,6 +184,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  * Perform any clean-up actions before closing down
 	  *
 	  */
+	@Override
 	public void performCleanup(LwLogger shutdownLogger) {
 		try {
 			shutdownLogger.appendln("I0100 LwAcceptMessagesFromFiles.performCleanup(): Total of " + recsRead + " record(s) read from file(s)");

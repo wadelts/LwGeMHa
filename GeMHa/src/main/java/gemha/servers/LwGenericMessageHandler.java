@@ -13,10 +13,10 @@ import gemha.interfaces.*;
 import gemha.support.*;
 
 /**
-  * This server class processes a message from MQ or File(s) and places the response(s) on an MQ queue or in file(s).
+  * This server class processes a message from a chosen source (e.g. MQ, Database, Socket or File(s)) and places the response(s) on an MQ queue, to a Socket or in file(s).
   * This class employs the services of IApp interface to allow graceful shutdown.
   * 
-  * NOTE: This implementation will only work/be useful for source input that can be read continuously by one thread
+  * NOTE: This implementation will only work/be useful for a source input that can be read continuously by one thread
   * 	  and processed by other threads, without having to commit the retrieval of the input message.
   * 	  For example, retrieving from a queue usually means only committing the "get" after the message has been
   * 	  successfully processed, effectively killing any possibility of processing in parallel.

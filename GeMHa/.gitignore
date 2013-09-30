@@ -1,7 +1,6 @@
 /target
 /.settings
 /bin
-/data
 /errors
 /logs
 /responses
@@ -9,3 +8,4 @@
 /.project
 /build.xml
 /desktop.ini
+/output

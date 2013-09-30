@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RexRunNotification RequestType="MailRequest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="RexRunNotification.xsd">
+	<MsgKey>1</MsgKey>
+	<SourceMsgType>errorX</SourceMsgType>
+	<NotificationMessage>Job backupDbX has Failed</NotificationMessage>
+</RexRunNotification>
