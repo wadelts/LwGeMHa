@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:simpleType name="RequiredString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DataFormatType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="XML"/>
+			<xs:enumeration value="TEXT"/>
+			<xs:enumeration value="CSV"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SystemEnvironmentType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Development"/>
+			<xs:enumeration value="Test"/>
+			<xs:enumeration value="Production"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LoggingLevelType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="FINEST"/>
+			<xs:enumeration value="FINER"/>
+			<xs:enumeration value="FINE"/>
+			<xs:enumeration value="CONFIG"/>
+			<xs:enumeration value="INFO"/>
+			<xs:enumeration value="WARNING"/>
+			<xs:enumeration value="SEVERE"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ActionOnErrorType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="shutdown"/>
+			<xs:enumeration value="discard"/>
+			<xs:enumeration value="none"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SchemaValidationType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="off"/>
+			<xs:enumeration value="on"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Action_On_ErrorType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="RESPOND"/>
+			<xs:enumeration value="EXCEPTION"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Immediate_CommitType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="YES"/>
+			<xs:enumeration value="NO"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DbActionType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="insert"/>
+			<xs:enumeration value="update"/>
+			<xs:enumeration value="delete"/>
+			<xs:enumeration value="select"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Applic">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Params" minOccurs="0">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="ExternalShell" type="RequiredString" minOccurs="1"/>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Input">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="InputSource">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="InputLimit" type="xs:positiveInteger" minOccurs="0"/>
+										<xs:element name="DataFormat" type="DataFormatType" />
+										<xs:element name="DataContractName" minOccurs="0">
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="RequiredString">
+														<xs:attribute name="Location" type="xs:string" use="required"/>
+														<xs:attribute name="ActionOnError" type="ActionOnErrorType" default="shutdown"/>
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+										<xs:choice minOccurs="0">
+											<xs:element name="InputQueue">
+												<xs:complexType>
+													<xs:all>
+														<xs:element name="UrlJMSserver" type="RequiredString" minOccurs="0"/>
+														<xs:element name="QueueName" type="RequiredString" />
+														<xs:element name="MilliSecondsBeforeQuiet" type="xs:positiveInteger" minOccurs="0"/>
+													</xs:all>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="InputSocket">
+												<xs:complexType>
+													<xs:all>
+														<xs:element name="PortNumber" type="xs:positiveInteger"/>
+													</xs:all>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="InputFile">
+												<xs:complexType>
+													<xs:all>
+														<xs:element name="FileNameFilter" type="RequiredString"/>
+														<xs:element name="FileDir" type="RequiredString" minOccurs="0"/>
+														<xs:element name="CSVParams" minOccurs="0">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="FieldSeparator" type="RequiredString" minOccurs="0"/>
+																	<xs:element name="MaxRecsPerMessage" type="xs:positiveInteger" minOccurs="0"/>
+																	<xs:element name="NumRecordsToSkip" type="xs:positiveInteger" minOccurs="0"/>
+																	<xs:element name="ColumnOrder">
+																		<xs:complexType>
+																			<xs:sequence>
+																				<xs:element name="Column" type="RequiredString" minOccurs="1" maxOccurs="unbounded"/>
+																			</xs:sequence>
+																		</xs:complexType>
+																	</xs:element>
+																	<xs:element name="XMLFormat" type="DbActionType"/>
+																	<xs:element name="InsertParams" minOccurs="0">
+																		<xs:complexType>
+																			<xs:sequence>
+																				<xs:element name="Action_On_Error" type="Action_On_ErrorType" minOccurs="0"/>
+																				<xs:element name="Prepared_Statement_Name" type="RequiredString" minOccurs="0"/>
+																				<xs:element name="Immediate_Commit" type="Immediate_CommitType" minOccurs="0"/>
+																			</xs:sequence>
+																		</xs:complexType>
+																	</xs:element>
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+													</xs:all>
+												</xs:complexType>
+											</xs:element>
+										</xs:choice>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="InputValidation" minOccurs = "0">
+								<xs:complexType>
+									<xs:attribute name="SchemaValidation" type="SchemaValidationType" default="off"/>
+									<xs:attribute name="SchemaDefinitionFileName" type="RequiredString"/>
+									<xs:attribute name="SchemaLanguage" type="RequiredString" default="http://www.w3.org/2001/XMLSchema"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Output" minOccurs="0">
+					<xs:complexType>
+						<xs:choice>
+							<xs:element name="OutputQueue">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="UrlJMSserver" type="RequiredString" minOccurs="0"/>
+										<xs:element name="QueueName" type="RequiredString"/>
+										<xs:element name="ReplyToQueueName" type="RequiredString" minOccurs="0"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="OutputFile">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="FileNameTemplate" type="RequiredString" />
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="OutputHTTP">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="ServerUrl" type="RequiredString" minOccurs="0"/>
+										<xs:element name="EndPointName" type="RequiredString" minOccurs="0"/>
+										<xs:element name="HTTPWithBackoff" type="RequiredString" minOccurs="0"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Processing">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="MessageProcessingClassName" type="RequiredString"/>
+							<xs:element name="MessageProcessingSettingsFileName" type="RequiredString" minOccurs="0"/>
+							<xs:element name="MinResponsesExpected" type="xs:integer" minOccurs="0"/>
+							<xs:element name="MindElements" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ElementName" type="RequiredString" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="SendElements">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ElementName" type="RequiredString" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="TargetMainDocElementName" type="RequiredString" minOccurs="0"  default="MESSAGE"/>
+							<xs:element name="ResponseMainDocElementName" type="RequiredString" minOccurs="0"  default="MESSAGE"/>
+							<xs:element name="ResponseLiterals" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ResponseLiteral" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="RequiredString">
+														<xs:attribute name="Location" type="xs:string" use="required"/>
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Auditing" minOccurs="0">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="AuditKeys" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="KeyName" type="RequiredString" maxOccurs="unbounded"/>
+									</xs:sequence>
+									<xs:attribute name="ActionOnError" type="ActionOnErrorType" default="none"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="AuditKeysSeparator" type="RequiredString" minOccurs="0"/>
+							<xs:element name="ErrorFiles" minOccurs="0">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="ErrorFilesDir" type="RequiredString" minOccurs="0"/>
+										<xs:element name="ErrorFileNameTemplate" type="RequiredString" minOccurs="0"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Logging">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="Level" minOccurs="0">
+								<xs:complexType>
+									<xs:choice>
+										<xs:element name="EnvironmentLoggingLevel" type="SystemEnvironmentType"/>
+										<xs:element name="GeneralLoggingLevel" type="LoggingLevelType"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="LogFileDir" type="RequiredString" minOccurs="0"/>
+							<xs:element name="LogFileNameTemplate" type="RequiredString" minOccurs="0"/>
+							<xs:element name="ShutDownLogFileNameTemplate" type="RequiredString" minOccurs="0"/>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

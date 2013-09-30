@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:simpleType name="RequiredString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FileOpenModeType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="create"/>
+			<xs:enumeration value="append"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Applic">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Params">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="MessagesFileNameTemplate" type="RequiredString"/>
+							<xs:element name="FieldSeparator" type="RequiredString" minOccurs="0"/>
+							<xs:element name="IncludeColumnNames" type="xs:boolean" minOccurs="0" default="false"/>
+							<xs:element name="FileOpenMode" type="FileOpenModeType" minOccurs="0" default="create"/>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Auditing" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AuditKeys" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="KeyName" type="RequiredString" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="AuditKeysSeparator" type="RequiredString" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

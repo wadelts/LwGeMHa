@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<DataFormat>XML</DataFormat>
+			<InputQueue>
+				<QueueManagerName>QMA_DPWDEV02</QueueManagerName>
+				<QueueName>DELIVERY_DEV_INPUT_02</QueueName>
+			</InputQueue>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputFile>
+			<FileNameTemplate>data/response_*_?.xml</FileNameTemplate>
+		</OutputFile>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>EirProcessMessageForDb</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>EirProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
+		<MindElements>
+			<ElementName>MESSAGE/DBACTION/KEY</ElementName>
+		</MindElements>
+		<SendElements>
+			<ElementName>MESSAGE/DBACTION</ElementName>
+		</SendElements>
+	</Processing>
+	<Auditing>
+		<AuditKeys ActionOnError="shutdown">
+			<KeyName>MESSAGE/DBACTION/KEY</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+		<ErrorFiles>
+			<ErrorFilesDir>data</ErrorFilesDir>
+			<ErrorFileNameTemplate>ErrorMessage_*_?.xml</ErrorFileNameTemplate>
+		</ErrorFiles>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>/mv1/delv/middleware/CRDB/apps/mqXmq/</LogFileDir>
+		<LogFileNameTemplate>EirGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>EirGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

@@ -1,0 +1,186 @@
+/mv1/delv/middleware/CRDB/apps/mqXmq
+
+--------------------------------------------------------------------------
+Compile...
+--------------------------------------------------------------------------
+
+/opt/java1.5/bin/javac EirSettingsException.java
+/opt/java1.5/bin/javac EirMessagingException.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirIAcceptMesssages.java
+/opt/java1.5/bin/javac -classpath .:../ EirIStoreMesssage.java
+/opt/java1.5/bin/javac -classpath .:../ EirIProcessMesssage.java
+
+/opt/java1.5/bin/javac EirFilenameFilter.java
+/opt/java1.5/bin/javac -classpath .:../ EirAcceptMessagesFromQueue.java
+/opt/java1.5/bin/javac -classpath .:../ EirAcceptMessagesFromFiles.java
+/opt/java1.5/bin/javac -classpath .:../ EirAcceptMessagesFromSocket.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirStoreMesssageToQueue.java
+/opt/java1.5/bin/javac -classpath .:../ EirStoreMesssageToFile.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageDoNothing.java
+/opt/java1.5/bin/javac -classpath .:../ EirGetTISInfoForOrdStd.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForDbSettings.java
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForDb.java
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForDbAction.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForSocketSettings.java
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForSocket.java
+/opt/java1.5/bin/javac EirProcessMessageForSocket_testserv.java
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForSocket_testclient.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForFileSettings.java
+/opt/java1.5/bin/javac -classpath .:../ EirProcessMessageForFile.java
+
+/opt/java1.5/bin/javac -classpath .:../ EirGenericMessageHandlerSettings.java
+/opt/java1.5/bin/javac -classpath .:../:/opt/mqm/java/lib/jms.jar EirGenericMessageHandler.java
+
+
+/opt/java1.5/bin/javac -classpath .:../:../mqXmq/ testEirProcessMessageForDb.java
+
+/opt/java1.5/bin/java -classpath .:../:../mqXmq/ testEirProcessMessageForDb
+
+--------------------------------------------------------------------------
+LIB Path setting...
+--------------------------------------------------------------------------
+To avoid this link error, we must have mq lib in shared lib...
+Exception in thread "main" java.lang.UnsatisfiedLinkError: no mqjbnd05 in java.library.path
+
+SHLIB_PATH=$SHLIB_PATH:/opt/mqm/java/lib
+
+
+
+--------------------------------------------------------------------------
+Validate an XML file (against it's Schema)...
+--------------------------------------------------------------------------
+/opt/java1.5/bin/java -classpath ../eirXML/:../ validateXMLFile Applic.xml >validateXMLFile.txt
+
+--------------------------------------------------------------------------
+Run EirGenericMessageHandler - when talking to MQ
+(Add & when running as TSR.)
+Note: -Dppid=$$ sets up a system property pid with value =[pid] available to the System object
+(using getProperty("ppid")), which allows us get at the Parent process ID
+--------------------------------------------------------------------------
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/opt/mqm/java/lib/com.ibm.mq.jar:\
+/opt/mqm/java/lib/com.ibm.mqjms.jar:/opt/mqm/java/lib/connector.jar:/opt/mqm/java/lib/jms.jar:\
+/opt/mqm/java/lib/jndi.jar:/opt/mqm/java/lib/jta.jar:/opt/mqm/java/lib/providerutil.jar:\
+/opt/mqm/java/lib/fscontext.jar:/opt/mqm/java/lib/ldap.jar EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_FtoQ_002.xml" 2>&1 >delme
+
+
+Performance Note: Processed 1000 messages in 34 seconds (with EirProcessMessageDoNothing plugged in as the Processor)
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/opt/mqm/java/lib/com.ibm.mq.jar:\
+/opt/mqm/java/lib/com.ibm.mqjms.jar:/opt/mqm/java/lib/connector.jar:/opt/mqm/java/lib/jms.jar:\
+/opt/mqm/java/lib/jndi.jar:/opt/mqm/java/lib/jta.jar:/opt/mqm/java/lib/providerutil.jar:\
+/opt/mqm/java/lib/fscontext.jar:/opt/mqm/java/lib/ldap.jar EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_QtoQ.xml" 2>&1 >delme
+
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/opt/mqm/java/lib/com.ibm.mq.jar:\
+/opt/mqm/java/lib/com.ibm.mqjms.jar:/opt/mqm/java/lib/connector.jar:/opt/mqm/java/lib/jms.jar:\
+/opt/mqm/java/lib/jndi.jar:/opt/mqm/java/lib/jta.jar:/opt/mqm/java/lib/providerutil.jar:\
+/opt/mqm/java/lib/fscontext.jar:/opt/mqm/java/lib/ldap.jar EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_QtoF.xml" 2>&1 >delme
+
+--------------------------------------------------------------------------
+Run EirGenericMessageHandler - when talking to Sockets
+(Add & when running as TSR.)
+Note: -Dppid=$$ sets up a system property pid with value =[pid] available to the System object
+(using getProperty("ppid")), which allows us get at the Parent process ID
+--------------------------------------------------------------------------
+
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../ EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic.xml" 2>&1 >delme
+
+
+--------------------------------------------------------------------------
+Run EirGenericMessageHandler - when talking to Oracle
+(Add & when running as TSR.)
+Note: -Dppid=$$ sets up a system property pid with value =[pid] available to the System object
+(using getProperty("ppid")), which allows us get at the Parent process ID
+--------------------------------------------------------------------------
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/u01/app/oracle/product/9.2.0.6/jdbc/lib/classes12.jar \
+EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic.xml" 2>&1 >delme
+
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/u01/app/oracle/product/9.2.0.6/jdbc/lib/classes12.jar \
+EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_FtoDBtoF.xml" 2>&1 >delme
+
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/u01/app/oracle/product/9.2.0.6/jdbc/lib/classes12.jar \
+EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_CtoDBtoF.xml" 2>&1 >delme
+
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../ EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic.xml" 2>&1
+
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../ EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_CtoF.xml" 2>&1
+
+--------------------------------------------------------------------------
+Run EirGenericMessageHandler - when talking to Oracle and MQ
+(Add & when running as TSR.)
+Note: -Dppid=$$ sets up a system property pid with value =[pid] available to the System object
+(using getProperty("ppid")), which allows us get at the Parent process ID
+--------------------------------------------------------------------------
+/opt/java1.5/bin/java -Dppid=$$ -classpath .:../:/u01/app/oracle/product/9.2.0.6/jdbc/lib/classes12.jar:/opt/mqm/java/lib/com.ibm.mq.jar:\
+/opt/mqm/java/lib/com.ibm.mqjms.jar:/opt/mqm/java/lib/connector.jar:/opt/mqm/java/lib/jms.jar:\
+/opt/mqm/java/lib/jndi.jar:/opt/mqm/java/lib/jta.jar:/opt/mqm/java/lib/providerutil.jar:\
+/opt/mqm/java/lib/fscontext.jar:/opt/mqm/java/lib/ldap.jar EirGenericMessageHandler "/mv1/delv/middleware/CRDB/apps/mqXmq/Applic_QtoDBtoQ.xml" 2>&1 >delme
+
+
+
+--------------------------------------------------------------------------
+Run EirProcessMessageForSocket_test
+--------------------------------------------------------------------------
+
+/opt/java1.5/bin/java -classpath . EirProcessMessageForSocket_testserv
+
+/opt/java1.5/bin/java -classpath .:../ EirProcessMessageForSocket_testclient
+
+--------------------------------------------------------------------------
+Note:
+--------------------------------------------------------------------------
+
+Was getting authentication exception (MQ Reason code 2035 - no permission to Queue Manager).
+
+Tony sorted this for me in a flash.
+He said that, for JMS, he had to add another permission in the Queue Manager
+for the group to which xbc_adm1 belonged. It was an "enquire" permission
+for the Queue Manager itself.
+
+
+--------------------------------------------------------------------------
+Notes on Logging:
+--------------------------------------------------------------------------
+Levels of Logging are (as defined by Level class):
+
+SEVERE (highest value)
+WARNING
+INFO
+CONFIG
+FINE
+FINER
+FINEST (lowest value)
+
+In addition there is a level OFF that can be used to turn off logging, and a level ALL that can be used to enable logging of all messages.
+
+
+For MQ mini-server, might have levels...
+
+------------------------------- Dev -------------------------------------
+FINER
+Intermediate results
+Debug "am here" messages
+But use entering()/exiting() convenience methods for start/end of methods (they are @ FINER level)
+
+-------------------------------- Test --------------------------------------
+FINE
+Full message being processed
+Db Updates
+
+---------------------------- Production -----------------------------------
+CONFIG
+Initialisation and shutdown messages
+
+INFO
+Production "am here" messages
+Audit messages (e.g. trans ids, message ids)
+
+WARNING
+
+SEVERE
+Errors causing server to close
+Errors with un-servicable messages

@@ -1,0 +1,11 @@
+/target
+/.settings
+/bin
+/data
+/errors
+/logs
+/responses
+/.classpath
+/.project
+/build.xml
+/desktop.ini

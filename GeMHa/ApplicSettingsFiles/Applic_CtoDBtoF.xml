@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<InputLimit>7</InputLimit>
+			<DataFormat>CSV</DataFormat>
+			<InputFile>
+				<FileDir>data/</FileDir>
+				<FileNameFilter>input_CSV_[0-9]*.txt</FileNameFilter>
+				<CSVParams>
+					<FieldSeparator>\t</FieldSeparator>
+					<MaxRecsPerMessage>2</MaxRecsPerMessage>
+					<ColumnOrder>
+						<Column>USERID</Column>
+						<Column>USERCODENAME</Column>
+						<Column>USERSTATUS</Column>
+						<Column>ADMINCOMMENT</Column>
+						<Column>UPDATEDATETIME</Column>
+					</ColumnOrder>
+					<XMLFormat>insert</XMLFormat>
+					<InsertParams>
+						<Action_On_Error>RESPOND</Action_On_Error>
+						<Immediate_Commit>YES</Immediate_Commit>
+					</InsertParams>
+				</CSVParams>
+			</InputFile>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputFile>
+			<FileNameTemplate>response_*_?.xml</FileNameTemplate>
+		</OutputFile>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>EirProcessMessageForDb</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>EirProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
+		<SendElements>
+			<ElementName>/MESSAGE/DBACTION</ElementName>
+		</SendElements>
+	</Processing>
+	<Auditing>
+		<AuditKeys>
+			<KeyName>/MESSAGE/DBACTION/INSERT/COLUMNS/USERID</KeyName>
+			<KeyName>/MESSAGE/DBACTION/INSERT/COLUMNS/USERCODENAME</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>/mv1/delv/middleware/CRDB/apps/mqXmq/</LogFileDir>
+		<LogFileNameTemplate>EirGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>EirGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

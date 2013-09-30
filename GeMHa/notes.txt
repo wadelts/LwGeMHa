@@ -1,0 +1,3 @@
+Have saved all GeMHa Project classes (plus supporting project classes) to one jar file...
+D:\JavaExecs\GeMHa.jar
+and added to CLASSPATH env variable

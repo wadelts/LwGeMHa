@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Input>
+		<InputSource>
+			<DataFormat>XML</DataFormat>
+			<InputFile>
+				<FileDir>data/</FileDir>
+				<FileNameFilter>fileme_001.xml</FileNameFilter>
+			</InputFile>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputFile>
+			<FileNameTemplate>responses/response_*_?.xml</FileNameTemplate>
+		</OutputFile>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>gemha.servers.LwProcessMessageForFile</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>ApplicSettingsFiles/LwProcessMessageForFileSettings.xml</MessageProcessingSettingsFileName>
+		<SendElements>
+			<ElementName>/MESSAGE/FILE_REQUEST</ElementName>
+		</SendElements>
+	</Processing>
+	<Auditing>
+		<AuditKeys>
+			<KeyName>/MESSAGE/FILE_REQUEST/KEY</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>CONFIG</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>logs\</LogFileDir>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

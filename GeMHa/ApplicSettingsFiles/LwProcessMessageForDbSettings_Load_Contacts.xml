@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForDbSettings.xsd">
+	<Params>
+<!--	Oracle connection over JDBC...
+		<JdbcClass>oracle.jdbc.driver.OracleDriver</JdbcClass>
+		<DbURL>jdbc:oracle:thin:@localhost:1521:DR2D</DbURL>
+  -->
+<!--	Derby Jdbc EmbeddedDriver in C:\glassfish3\javadb\lib\derby.jar
+		Derby Jdbc ClientDriver   in C:\glassfish3\javadb\lib\derbyclient.jar
+ -->
+		<JdbcClass>org.apache.derby.jdbc.ClientDriver</JdbcClass>
+		<DbURL>jdbc:derby://localhost:1527/lw_contacts</DbURL>
+  		<UserName>APP</UserName>
+		<UserPass>APP</UserPass>
+		<AutoCommit>off</AutoCommit>
+		<DefaultTablename>CONTACT_ALL</DefaultTablename>
+		<UpdateLockingStrategy>none</UpdateLockingStrategy>
+<!--
+		Only needed for Oracle...
+		<DateFormat>YYYY-MM-DD</DateFormat>
+ -->
+	</Params>
+	<PreparedStatements>
+		<PreparedStatement>
+			<PreparedStatementName>CONTACT_ALL_insert_001</PreparedStatementName>
+			<PreparedStatementSQL>INSERT INTO CONTACT_ALL (NAME,GIVEN_NAME,ADDITIONAL_NAME,FAMILY_NAME,YOMI_NAME,NOTES,GROUP_MEMBERSHIP,EMAIL_1_TYPE,EMAIL_1_VALUE,EMAIL_2_TYPE,EMAIL_2_VALUE,PHONE_1_TYPE,PHONE_1_VALUE,PHONE_2_TYPE,PHONE_2_VALUE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</PreparedStatementSQL>
+			<ParameterOrder>
+				<Column>NAME</Column>
+				<Column>GIVEN_NAME</Column>
+				<Column>ADDITIONAL_NAME</Column>
+				<Column>FAMILY_NAME</Column>
+				<Column>YOMI_NAME</Column>
+				<Column>NOTES</Column>
+				<Column>GROUP_MEMBERSHIP</Column>
+				<Column>EMAIL_1_TYPE</Column>
+				<Column>EMAIL_1_VALUE</Column>
+				<Column>EMAIL_2_TYPE</Column>
+				<Column>EMAIL_2_VALUE</Column>
+				<Column>PHONE_1_TYPE</Column>
+				<Column>PHONE_1_VALUE</Column>
+				<Column>PHONE_2_TYPE</Column>
+				<Column>PHONE_2_VALUE</Column>
+			</ParameterOrder>
+		</PreparedStatement>
+<!-- 	This is an Oracle-specific type query
+		<PreparedStatement>
+			<PreparedStatementName>LW_delme1_select_002</PreparedStatementName>
+			<PreparedStatementSQL ReturnType="XML">SELECT XMLElement("USER",XMLAttributes(userid), XMLElement("DETAILS", XMLForest(userCodeName,userStatus,adminComment))).getStringVal() AS theXML FROM LW_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
+			<ParameterOrder>
+				<Column>USERSTATUS</Column>
+			</ParameterOrder>
+		</PreparedStatement>
+ -->
+	</PreparedStatements>
+	<Auditing>
+		<AuditKeys DbAction="insert">
+			<KeyName>INSERT/COLUMNS/NAME</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+</Applic>

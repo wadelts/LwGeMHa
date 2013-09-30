@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<InputLimit>10000</InputLimit>
+			<DataFormat>CSV</DataFormat>
+			<InputFile>
+				<FileDir>C:\Users\wadel\Contacts\Backup_20120912\</FileDir>
+				<FileNameFilter>google_lw_relevant_fields.txt</FileNameFilter>
+				<CSVParams>
+					<FieldSeparator>\t</FieldSeparator>
+					<MaxRecsPerMessage>1</MaxRecsPerMessage>
+					<ColumnOrder>
+						<Column>NAME</Column>
+						<Column>GIVEN_NAME</Column>
+						<Column>ADDITIONAL_NAME</Column>
+						<Column>FAMILY_NAME</Column>
+						<Column>YOMI_NAME</Column>
+						<Column>NOTES</Column>
+						<Column>GROUP_MEMBERSHIP</Column>
+						<Column>EMAIL_1_TYPE</Column>
+						<Column>EMAIL_1_VALUE</Column>
+						<Column>EMAIL_2_TYPE</Column>
+						<Column>EMAIL_2_VALUE</Column>
+						<Column>PHONE_1_TYPE</Column>
+						<Column>PHONE_1_VALUE</Column>
+						<Column>PHONE_2_TYPE</Column>
+						<Column>PHONE_2_VALUE</Column>
+					</ColumnOrder>
+					<XMLFormat>insert</XMLFormat>
+					<InsertParams>
+						<Action_On_Error>RESPOND</Action_On_Error>
+						<Immediate_Commit>YES</Immediate_Commit>
+					</InsertParams>
+				</CSVParams>
+			</InputFile>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputFile>
+			<FileNameTemplate>C:\Users\wadel\workspace\GeMHa\responses\response_*_?.xml</FileNameTemplate>
+		</OutputFile>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>gemha.servers.LwProcessMessageForDb</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>C:\Users\wadel\workspace\GeMHa\ApplicSettingsFiles\LwProcessMessageForDbSettings_Load_Contacts.xml</MessageProcessingSettingsFileName>
+		<MindElements>
+			<ElementName>/MESSAGE/DBACTION/INSERT/COLUMNS/NAME</ElementName>
+		</MindElements>
+		<SendElements>
+			<ElementName>/MESSAGE/DBACTION</ElementName>
+		</SendElements>
+	</Processing>
+	<Auditing>
+		<AuditKeys ActionOnError="shutdown">
+			<KeyName>/MESSAGE/DBACTION/INSERT/COLUMNS/NAME</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+		<ErrorFiles>
+			<ErrorFilesDir>C:\Users\wadel\workspace\GeMHa\errors\</ErrorFilesDir>
+			<ErrorFileNameTemplate>ErrorMessage_*_?.xml</ErrorFileNameTemplate>
+		</ErrorFiles>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>C:\Users\wadel\workspace\GeMHa\logs\</LogFileDir>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<DataFormat>XML</DataFormat>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Processing>
+		<MessageProcessingClassName>gemha.servers.LwProcessMessageForDb</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>C:\Users\wadel\workspace\GeMHa\ApplicSettingsFiles\LwProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
+		<MindElements>
+			<ElementName>/MESSAGE/DBACTION/KEY</ElementName>
+		</MindElements>
+		<SendElements>
+			<ElementName>/MESSAGE/DBACTION</ElementName>
+		</SendElements>
+	</Processing>
+	<Auditing>
+		<AuditKeys ActionOnError="shutdown">
+			<KeyName>/MESSAGE/DBACTION/KEY</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+		<ErrorFiles>
+			<ErrorFilesDir>C:\Users\wadel\workspace\GeMHa\errors\</ErrorFilesDir>
+			<ErrorFileNameTemplate>ErrorMessage_*_?.xml</ErrorFileNameTemplate>
+		</ErrorFiles>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>C:\Users\wadel\workspace\GeMHa\logs\</LogFileDir>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

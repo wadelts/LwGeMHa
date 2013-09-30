@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForDbSettings.xsd">
+	<Params>
+<!--	Oracle connection over JDBC...
+		<JdbcClass>oracle.jdbc.driver.OracleDriver</JdbcClass>
+		<DbURL>jdbc:oracle:thin:@localhost:1521:DR2D</DbURL>
+  -->
+<!--	Derby Jdbc EmbeddedDriver in C:\glassfish3\javadb\lib\derby.jar
+		Derby Jdbc ClientDriver   in C:\glassfish3\javadb\lib\derbyclient.jar
+ -->
+		<JdbcClass>org.apache.derby.jdbc.EmbeddedDriver</JdbcClass>
+		<DbURL>jdbc:derby:C:/Users/wadel/DERBYTUTOR/firstdb</DbURL>
+<!--
+		Not needed for Derby...
+  		<UserName>system</UserName>
+		<UserPass>manager</UserPass>
+ -->
+		<AutoCommit>off</AutoCommit>
+		<DefaultTablename>LW_delme1</DefaultTablename>
+		<UpdateLockingStrategy>none</UpdateLockingStrategy>
+<!--
+		Only needed for Oracle...
+		<DateFormat>YYYY-MM-DD</DateFormat>
+ -->
+	</Params>
+	<PreparedStatements>
+		<PreparedStatement>
+			<PreparedStatementName>LW_delme1_insert_001</PreparedStatementName>
+			<PreparedStatementSQL>INSERT INTO LW_delme1 (ADMINCOMMENT,USERCODENAME,USERID,USERSTATUS,UPDATEDATETIME) VALUES (?,?,?,?,?)</PreparedStatementSQL>
+			<ParameterOrder>
+				<Column>ADMINCOMMENT</Column>
+				<Column>USERCODENAME</Column>
+				<Column>USERID</Column>
+				<Column>USERSTATUS</Column>
+				<Column>UPDATEDATETIME</Column>
+			</ParameterOrder>
+		</PreparedStatement>
+		<PreparedStatement>
+			<PreparedStatementName>LW_delme1_update_001</PreparedStatementName>
+			<PreparedStatementSQL>UPDATE LW_delme1 SET USERSTATUS = 'ACTIVE' WHERE USERID = ?</PreparedStatementSQL>
+			<ParameterOrder>
+				<Column>USERID</Column>
+			</ParameterOrder>
+		</PreparedStatement>
+		<PreparedStatement>
+			<PreparedStatementName>LW_delme1_select_001</PreparedStatementName>
+			<PreparedStatementSQL>SELECT * FROM LW_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
+			<ParameterOrder>
+				<Column>USERSTATUS</Column>
+			</ParameterOrder>
+		</PreparedStatement>
+<!-- 	This is an Oracle-specific type query
+		<PreparedStatement>
+			<PreparedStatementName>LW_delme1_select_002</PreparedStatementName>
+			<PreparedStatementSQL ReturnType="XML">SELECT XMLElement("USER",XMLAttributes(userid), XMLElement("DETAILS", XMLForest(userCodeName,userStatus,adminComment))).getStringVal() AS theXML FROM LW_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
+			<ParameterOrder>
+				<Column>USERSTATUS</Column>
+			</ParameterOrder>
+		</PreparedStatement>
+ -->
+	</PreparedStatements>
+	<Auditing>
+		<AuditKeys DbAction="insert">
+			<KeyName>INSERT/COLUMNS/USERID</KeyName>
+			<KeyName>INSERT/COLUMNS/USERCODENAME</KeyName>
+		</AuditKeys>
+		<AuditKeys DbAction="update">
+			<KeyName>UPDATE/WHERE/USERID</KeyName>
+			<KeyName>UPDATE/WHERE/USERCODENAME</KeyName>
+		</AuditKeys>
+		<AuditKeys DbAction="delete">
+			<KeyName>DELETE/WHERE/USERID</KeyName>
+			<KeyName>DELETE/WHERE/USERCODENAME</KeyName>
+		</AuditKeys>
+		<AuditKeys DbAction="select">
+			<KeyName>SELECT/COLUMNS/USERSTATUS</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+</Applic>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<InputLimit>3</InputLimit>
+			<DataFormat>XML</DataFormat>
+			<InputSocket>
+				<PortNumber>11819</PortNumber>
+			</InputSocket>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputFile>
+			<FileNameTemplate>response_*_?.xml</FileNameTemplate>
+		</OutputFile>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>EirProcessMessageDoNothing</MessageProcessingClassName>
+		<SendElements>
+			<ElementName>/MESSAGE/SOCKET_REQUEST</ElementName>
+		</SendElements>
+		<ResponseMainDocElementName>MESSAGE_RESPONSE</ResponseMainDocElementName>
+	</Processing>
+	<Auditing>
+		<AuditKeys>
+			<KeyName>/MESSAGE/SOCKET_REQUEST/KEY</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>/mv1/delv/middleware/CRDB/apps/mqXmq/</LogFileDir>
+		<LogFileNameTemplate>EirGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>EirGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

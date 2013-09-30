@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<InputLimit>1</InputLimit>
+			<DataFormat>XML</DataFormat>
+			<InputFile>
+				<FileDir>data\</FileDir>
+				<FileNameFilter>Batchuler_Failure_Report_XML_[0-9]*.xml</FileNameFilter>
+			</InputFile>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputHTTP>
+			<ServerUrl>HTTP://localhost:8080</ServerUrl>
+			<EndPointName>RegisterNotifiedDeviceServlet</EndPointName>
+			<HTTPWithBackoff>false</HTTPWithBackoff> <!-- This should normally be set to true (default) -->
+		</OutputHTTP>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>gemha.servers.LwProcessMessageDoNothing</MessageProcessingClassName>
+		<SendElements>
+			<ElementName>RexRunNotification/SourceMsgType</ElementName>
+			<ElementName>RexRunNotification/NotificationMessage</ElementName>
+		</SendElements>
+		<ResponseLiterals>
+			<ResponseLiteral Location='RexRunNotification/TargetApplicationName'>RexBark</ResponseLiteral>
+			<ResponseLiteral Location='RexRunNotification/Source'>batchuler</ResponseLiteral>
+			<ResponseLiteral Location='RexRunNotification/RecipientList'>ingelsc;wadel</ResponseLiteral>
+		</ResponseLiterals>
+	</Processing>
+	<Auditing>
+		<AuditKeys>
+			<KeyName>RexRunNotification/MsgKey</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+	<Logging>
+		<Level>
+			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
+		</Level>
+		<LogFileDir>logs\</LogFileDir>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>

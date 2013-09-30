@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForFileSettings.xsd">
+	<Params>
+		<MessagesFileNameTemplate>output/LwProcessMessageForFile_Output_all.txt</MessagesFileNameTemplate>
+		<FieldSeparator>\t</FieldSeparator>
+		<IncludeColumnNames>true</IncludeColumnNames>
+		<FileOpenMode>create</FileOpenMode>
+	</Params>
+	<Auditing>
+		<AuditKeys>
+			<KeyName>/MESSAGE/FILE_REQUEST/KEY</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+</Applic>

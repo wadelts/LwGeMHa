@@ -1,0 +1,19 @@
+Rename src folder to src2
+Create src/main/java folder
+Create src/test/java folder
+
+Set above folders to be recognised as source (for eclipse)
+Right-Click on Project, select New¦Source Folder, chose src/main/java
+Right-Click on Project, select New¦Source Folder, chose src/test/java
+
+Move packages from src2 to src/main/java
+
+Copy POM file from some other project and change artifactId etc.
+OR
+Allow next command help you create new POM
+
+Right-Click on Project, select Configure¦Convert to Maven Project
+
+That's it!
+
+The 'Run As' context menu will now include Maven options.
