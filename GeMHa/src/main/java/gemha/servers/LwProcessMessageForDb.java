@@ -2,6 +2,7 @@ package gemha.servers;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -232,6 +233,7 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 				}
 
 				LwProcessResponse.Builder responseBuilder = new LwProcessResponse.Builder(ProcessResponseCode.SUCCESS, numActionsApplied)
+					.setAuditKeyValues(auditKeyValues)
 					.setResponse(response.toString())
 					.setInputDoc(inputDoc);
 		
@@ -274,21 +276,29 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	}
 
 	/**
-	  * Return the response message as a String, and remove it
+	  * Return the next response message.
+	  * When all responses have been received, null will be returned.
 	  *
-	  * @return the response, null if none exists
+	  * LwProcessResponse is immutable
+	  * 
+	  * @return the next response from process, null if no more results will ever arrive
+	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws InterruptedException if CALLING thread is noticed as interrupted while getting response
 	  */
-	public LwProcessResponse getResponse() {
-		return null;
-/*
-		if (response == null) {
-			return null;
+	@Override
+	public LwProcessResponse getResponse() throws LwMessagingException, InterruptedException {
+		LwProcessResponse response = null;
+		try {
+			Future<LwProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
+			response = fr.get(); // will block here if next task in queue not yet finished
+		} catch (ExecutionException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof LwMessagingException)
+				throw (LwMessagingException) cause;
+			else
+				throw launderThrowable(cause);
 		}
-
-		String tempResponse = response.toString();
-		response = null;
-		return tempResponse;
-*/
+		return response;
 	}
 
 	/**
@@ -359,10 +369,12 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 		// Process all actions...
 		// The processing order is, all INSERTs, then all UPDATEs, then all DELETEs, and finally all  SELECTs  
 		//////////////////////////////////////////////////////////////////////////
-		String[] actions = {"INSERT", "UPDATE", "DELETE", "SELECT"}; // aid to select actions in order
 		int totalActionsApplied = 0;
+		String[] actions = {"INSERT", "UPDATE", "DELETE", "SELECT"}; // aid to select actions in order
 		for (String action : actions) {
-			while (inputDoc.setCurrentNodeByPath("MESSAGE/DBACTION/" + action, ++totalActionsApplied)) {
+			int numThisTypeOfActionApplied = 0;
+			while (inputDoc.setCurrentNodeByPath("MESSAGE/DBACTION/" + action, ++numThisTypeOfActionApplied)) {
+				logger.fine("Found " + action + " action to process.");
 				LwProcessMessageForDbAction dbAction = new LwProcessMessageForDbAction(action, inputDoc, settings.getAuditKeyNamesSet(action), settings.getAuditKeysSeparator());
 				allActions.addElement(dbAction);
 
@@ -372,6 +384,7 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 
 				inputDoc.setCurrentNodeToFirstElement(); // need to go back to top of doc, for next search
 			}
+			totalActionsApplied += numThisTypeOfActionApplied-1;
 		}
 
 		return totalActionsApplied;
@@ -387,7 +400,7 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 		LwXMLDocument newResponse = null;
 
 		try {
-			newResponse = LwXMLDocument.createDoc("<FILE_REQUEST></FILE_REQUEST>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newResponse = LwXMLDocument.createDoc("<MESSAGE><DBACTION></DBACTION></MESSAGE>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
 		}
 		catch(LwXMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
@@ -397,6 +410,23 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 		return newResponse;
 	}
 
+	/**
+	  * Extract and validate a Throwable that would have been contained within another Exception (eg ExcutionException)
+	  *
+	  * @param t the Throwable to be interpreted
+	  * 
+	  * @return a RuntimeException
+	  * @throws IllegalStateException if the Exception was not expected (known exceptions should have been dealt with prior to calling launderThrowable
+	  */
+	private static RuntimeException launderThrowable(Throwable t) {
+		if (t instanceof RuntimeException) 
+			return (RuntimeException) t;
+		else if (t instanceof Error)
+			throw (Error) t;
+		else
+			throw new IllegalStateException("launderThrowable: Exception not checked! : ", t);
+	}
+	
 	/**
 	  * This method creates a Poison Pill and places it in the queue for the Executor, which will be returned to the
 	  * response handler.

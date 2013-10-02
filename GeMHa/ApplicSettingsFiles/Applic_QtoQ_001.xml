@@ -27,7 +27,7 @@
 		</OutputQueue>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>EirProcessMessageDoNothing</MessageProcessingClassName>
+		<MessageProcessingClassName>LwProcessMessageDoNothing</MessageProcessingClassName>
 		<MindElements>
 			<ElementName>MESSAGE/C0</ElementName>
 			<ElementName>MESSAGE/XBCCTL</ElementName>

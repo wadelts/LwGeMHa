@@ -60,7 +60,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	volatile private String messagesFileName = null;
 	volatile private PrintWriter outFile;			// Write access to this file is limited to our execPool
 	volatile private boolean outFileIsEmpty = true;	// true if nothing yet written to file
-	volatile private LwProcessMessageForFileSettings settings = null;
+	volatile private LwProcessMessageForFileSettings fileSettings = null;
 
 	public LwProcessMessageForFile() {
 	}
@@ -78,19 +78,19 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  */
 	@Override
 	public void performSetup(String settingsFileName) throws LwSettingsException {
-		if (settings != null)
+		if (fileSettings != null)
 			throw new IllegalStateException("LwProcessMessageForFile.performSetup can only be called once");
 
 		if (settingsFileName == null) {
 			throw new LwSettingsException("Parameter settingsFileName was null.");
 		}
 
-		settings = new LwProcessMessageForFileSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
+		fileSettings = new LwProcessMessageForFileSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
 
-		messagesFileName = LwLogger.createFileNameFromTemplate(settings.getMessagesFileNameTemplate(), null);
+		messagesFileName = LwLogger.createFileNameFromTemplate(fileSettings.getMessagesFileNameTemplate(), null);
 
 		try {
-			openMessagesFile(messagesFileName, settings.getFileOpenMode().equals("append"));
+			openMessagesFile(messagesFileName, fileSettings.getFileOpenMode().equals("append"));
 		}
 		catch (LwMessagingException e) {
 			logger.severe("LwMessagingException: " + e.getMessage());
@@ -176,13 +176,13 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 				///////////////////////////////////////////////
 				// Get audit information from message (or make it up)...
 				///////////////////////////////////////////////
-				String auditKeyValues = getConcatenatedAuditKeyValues(newDoc, settings.getAuditKeyNamesSet(), settings.getAuditKeysSeparator()); // works at "current node" level
+				String auditKeyValues = getConcatenatedAuditKeyValues(newDoc, fileSettings.getAuditKeyNamesSet(), fileSettings.getAuditKeysSeparator()); // works at "current node" level
 		
 		
 				///////////////////////////////////////////////
 				// Send column names to the file, if requested...
 				///////////////////////////////////////////////
-				if (outFileIsEmpty && settings.columnNamesToBeIncluded()) {
+				if (outFileIsEmpty && fileSettings.columnNamesToBeIncluded()) {
 					outFileIsEmpty = false;
 					// Just take names from first-found row
 					if (newDoc.setCurrentNodeByPath("/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS", 1)) {
@@ -192,7 +192,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 						for (LwXMLTagValue col : row) {
 							outFile.print(col.getTagName());
 							if (++colNum < row.size()) { // then not last column, so add separator
-								outFile.print(settings.getFieldSeparator());
+								outFile.print(fileSettings.getFieldSeparator());
 							}
 						}
 						outFile.println();
@@ -211,7 +211,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 					for (LwXMLTagValue col : row) {
 						outFile.print(col.getTagValue());
 						if (++colNum < row.size()) { // then not last column, so add separator
-							outFile.print(settings.getFieldSeparator());
+							outFile.print(fileSettings.getFieldSeparator());
 						}
 					}
 					outFile.println();
@@ -322,19 +322,31 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  */
 	@Override
 	public void performCleanup(LwLogger shutdownLogger) {
-		// Don't want to do this immediately, otherwise a queued task would re-open, a running task would fail
 		// So, put on queue, to follow any previous requests to process a message
 		if (outFile != null) {
-			execPool.execute( new Runnable() {
-				public void run() {
-					if (outFile != null) outFile.close(); // Have to ask again, as am now executing later, in another thread
-					outFile = null;
-				}
-			});
+			if ( ! execPool.isShutdown()) { // this check in case we,ve already called this method
+				execPool.execute( new Runnable() {
+					public void run() {
+					}
+				});
+			}
 		}
 		
 		// Flush responseQueue (reading thread then has option to close down itself, on receiving this Poison Pill)
+		// (subMitPoisonPill() could have been called prior to this.)
 		subMitPoisonPill();
+		
+		// Wait for things to stop
+		try {
+			execPool.awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e1) {
+			// Just reset interruption and continue
+			Thread.currentThread().interrupt();
+		}
+
+		// Don't want to do this immediately, otherwise a queued task would re-open, a running task would fail
+		if (outFile != null) outFile.close(); // Have to ask again, as am now executing later, in another thread
+			outFile = null;
 
 		if (shutdownLogger != null) {
 			try { shutdownLogger.appendln("Closed output file.");} catch (IOException e) { /* do nothing */}

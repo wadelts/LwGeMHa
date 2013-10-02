@@ -18,7 +18,12 @@
     </plugins>
   </build>
 	<dependencies>
-	    <dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbyclient</artifactId>
+			<version>10.9.1.0</version>
+		</dependency>
+  	    <dependency>
 	      <groupId>${project.groupId}</groupId>
 	      <artifactId>LwUtils</artifactId>
 	      <version>0.0.1-SNAPSHOT</version>

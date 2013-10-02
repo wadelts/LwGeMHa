@@ -52,7 +52,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 
 	volatile private LwProcessMessageForSocketSettings settings = null;
 	volatile private int fallBackTransactionID = 0; // to be used to create unique trans ids, if no audit keys supplied
-    volatile private LwSocketComms socketComms;
+    volatile private LwSocketComms socketComms = null;
 
 	public LwProcessMessageForSocket() {
 	}
@@ -131,7 +131,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  * 
 	  * @throws LwMessagingException if a problem was encountered processing the message
 	  */
-	private LwProcessResponse processMessage(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues, ProcessingMode processingMode)
+	private LwProcessResponse processMessage(final String messageText, final LwXMLDocument inputDoc, final String auditKeyValues, final ProcessingMode processingMode)
 											throws LwMessagingException {
 
 		Callable<LwProcessResponse> processMessageTask = new Callable<LwProcessResponse>() {
@@ -158,13 +158,18 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 				///////////////////////////////////////////////
 				// Get audit information from message (or make it up)...
 				///////////////////////////////////////////////
-				String auditKeyValues = getConcatenatedAuditKeyValues(newDoc, settings.getAuditKeyNamesSet(), settings.getAuditKeysSeparator()); // works at "current node" level
+//				String auditKeyValues = getConcatenatedAuditKeyValues(newDoc, settings.getAuditKeyNamesSet(), settings.getAuditKeysSeparator()); // works at "current node" level
 		
 				///////////////////////////////////////////////
 				// Send the data (in chunks, if necessary)...
 				///////////////////////////////////////////////
 				LwSocketComms.SocketService service = (settings.getApplicationLevelResponse().equals("synchronous") ? LwSocketComms.SocketService.CONSUME_RESPOND : LwSocketComms.SocketService.CONSUME);
 				try {
+					if (socketComms == null) {
+						logger.severe("socketComms IS NULL!!!!!");
+						throw new LwMessagingException("Could not send XML document: socketComms IS NULL!!!!!");
+					}
+						
 					socketComms.sendMessage(new LwSocketTransferMessage(new Integer(0), auditKeyValues, service, LwSocketComms.SocketFormat.XML, messageText));
 				} catch (LwSocketException e) {
 					logger.severe("LwSocketException: " + e.getMessage());
@@ -224,6 +229,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 				
 				return null;
 			} catch(InterruptedException e) { // thrown by responseQueue.put
+				logger.info("[" + Thread.currentThread().getName() + "]: put to responseQueue interrupted.");
 				// Flush responseQueue (reading thread then has option to close down itself, on receiving this Poison Pill)
 				subMitPoisonPill();
 				
@@ -281,6 +287,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 
 		try {
 			s.close();
+			socketComms = null;
 		}
 		catch (IOException e) {
 			logger.severe("Caught IOException trying to close socket connection (no action taken): " + e.getMessage());
@@ -300,7 +307,8 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  */
 	@Override
 	public void  awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-			execPool.awaitTermination(timeout, unit) ;
+		logger.info("[" + Thread.currentThread().getName() + "]: Going to block on awaitTermination...");
+		execPool.awaitTermination(timeout, unit) ;
 	}
 		
 	/**
@@ -308,7 +316,13 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  *
 	  */
 	public void performCleanup(LwLogger shutdownLogger) {
-		if (s != null) {
+		try {
+			awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e1) {
+			// Closing down anyway, so no prob with interrupt
+		}
+		
+		if (s != null && socketComms != null) {
 			try {
 				socketComms.sendMessage(new LwSocketTransferMessage(new Integer(0), "AutoRequest", LwSocketComms.SocketService.CLOSE, LwSocketComms.SocketFormat.XML, "Close me"));
 			} catch (LwSocketException e) {
@@ -317,6 +331,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 			
 			try {
 				s.close();
+				socketComms = null;
 			}
 			catch (IOException e) {
 				if (shutdownLogger != null) {
@@ -365,7 +380,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 
 		// May throw LwSocketException
 		try {
-			LwSocketComms socketComms = new LwSocketComms(s, SocketType.CLIENT);
+			socketComms = new LwSocketComms(s, SocketType.CLIENT);
 			logger.info("Socket Comms object created.");
 			// Read Server Ready message.
 			socketComms.next();
@@ -422,7 +437,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 		LwXMLDocument newResponse = null;
 
 		try {
-			newResponse = LwXMLDocument.createDoc("<FILE_REQUEST></FILE_REQUEST>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newResponse = LwXMLDocument.createDoc("<MESSAGE></MESSAGE>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
 		}
 		catch(LwXMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
@@ -491,7 +506,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  * 
 	  */
 	private void subMitPoisonPill() {
-		logger.info("Submitting Poison Pill to Executor queue, so will cause responseProcessor to close down.");
+		logger.info("[" + Thread.currentThread().getName() + "]: Submitting Poison Pill to Executor queue, so will cause responseProcessor to close down.");
 		try {
 			if ( ! execPool.isShutdown()) { // this check in case we,ve already called this method
 				responseQueue.put(execPool.submit( new Callable<LwProcessResponse>() {

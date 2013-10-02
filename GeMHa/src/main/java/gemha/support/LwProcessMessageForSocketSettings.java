@@ -17,6 +17,17 @@ public class LwProcessMessageForSocketSettings
 
     private static final Logger logger = Logger.getLogger("gemha");
 	
+	private String settingsFileName = null;
+	private boolean settingsFileSchemaValidation = false;
+
+    private int portNumber = 0;
+    private String hostName = null;
+    private String applicationLevelResponse = null;
+
+	private Vector<LwXMLTagValue> auditKeyNamesSet = null; // Note: the concatenated values of these keys should not generally exceed 255 chars (to include any separators)
+															// If they do exceed this value, only the first 255 chars will be used as the Transaction ID for socket sends
+	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
+
 	/**
     * Will create a new LwProcessMessageForSocketSettings object.
     *
@@ -156,14 +167,4 @@ public class LwProcessMessageForSocketSettings
 		logger.config("AuditKeysSeparator is " + auditKeysSeparator);
 	}
 
-	private String settingsFileName = null;
-	private boolean settingsFileSchemaValidation = false;
-
-    private int portNumber = 0;
-    private String hostName = null;
-    private String applicationLevelResponse = null;
-
-	private Vector<LwXMLTagValue> auditKeyNamesSet = null; // Note: the concatenated values of these keys should not generally exceed 255 chars (to include any separators)
-															// If they do exceed this value, only the first 255 chars will be used as the Transaction ID for socket sends
-	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
 }

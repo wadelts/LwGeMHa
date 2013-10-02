@@ -14,6 +14,17 @@ import gemha.support.*;
 
 /**
   * This server class processes a message from a chosen source (e.g. MQ, Database, Socket or File(s)) and places the response(s) on an MQ queue, to a Socket or in file(s).
+  * The sequence of events is as follows:
+  * Messages flow in the direction: messageListener --> messageProcessor --> messageResponder
+  * We accept messages from the messageListener, which retrieves them from a File/Queue/Socket.
+  * The messageProcessor is passed the message, processes it, sends it to the Database/Socket/File and returns
+  * a response (if required).
+  * If a response IS required the ResponseProcessorTask will accept the response from the messageProcessor and
+  * send it to the appropriate medium (File/Socket/HTTP Connection), via the messageResponder.
+  * 
+  * One example would be a (simple) SELECT request retrieved from a Queue, processed against the database and
+  * the resulting dataset returned to another Queue.
+  *  
   * This class employs the services of IApp interface to allow graceful shutdown.
   * 
   * NOTE: This implementation will only work/be useful for a source input that can be read continuously by one thread
@@ -23,6 +34,7 @@ import gemha.support.*;
   * 
   * @author Liam Wade
   * @version 1.0 15/10/2008
+  * @version 1.1 30/09/2013 Implemented ResponseProcessorTask as runnable, accepting responses from Processor on separate thread. 
   */
 public class LwGenericMessageHandler implements IApp
 {
@@ -365,7 +377,7 @@ public class LwGenericMessageHandler implements IApp
 		//////////////////////////////////////////////////////////////////
 		// Perform XML-based checks and actions or simply pass on message "as is"...
 		//////////////////////////////////////////////////////////////////
-		if (settings.getConvertedInputDataFormat() != null && settings.getConvertedInputDataFormat().equals("XML")) {
+		if ("XML".equals(settings.getConvertedInputDataFormat())) { // CSV input would be converted to XML
 			inputDoc = createXMLDocFromInput(receivedMessage, settings);
 
 			if (inputDoc != null) {
@@ -385,11 +397,13 @@ public class LwGenericMessageHandler implements IApp
 				if ( ! skipMessage) {
 					try {
 						messageForProcessor = buildMessageForTarget(inputDoc, settings);
-						logger.fine("Message for target with AuditKey Value " + auditKeyValues + " built. See next line for content...");
+						logger.info("Message for target with AuditKey Value " + auditKeyValues + " built. See next line for content (if logging @ level FINE)...");
 						logger.fine(messageForProcessor);
 					}
 					catch (LwXMLException e) {
 						logger.severe("Message with AuditKey Value " + auditKeyValues + " caused an LwXMLException: "  + e);
+						messageListener.stayMessage(auditKeyValues);
+						throw new LwMessagingException("Caught LwXMLException from buildMessageForTarget() (see root cause)", e);
 					}
 				}
 			}
@@ -401,7 +415,9 @@ public class LwGenericMessageHandler implements IApp
 		if ( ! skipMessage) {
 			if (messageForProcessor == null) { // then nothing to process - BIG PROBLEM!
 				logger.severe("No Target message was built from Message with AuditKey Value " + auditKeyValues);
+				messageListener.stayMessage(auditKeyValues);
 				mainProcessToCloseDown = true;
+				throw new LwMessagingException("No Target message was built from Message with AuditKey Value " + auditKeyValues);
 			}
 			else {
 				//////////////////////////////////////////////////////////////////
@@ -412,6 +428,7 @@ public class LwGenericMessageHandler implements IApp
 			} // end if (messageForProcessor == null)
 		} // end if ( ! skipMessage)
 		
+		messageListener.consumeMessage(auditKeyValues);
 		return numMessagesProcessed;
 	}
 
@@ -429,7 +446,7 @@ public class LwGenericMessageHandler implements IApp
 	 */
 	private String handleIncomingEmptyMessage(LwGenericMessageHandlerSettings settings) throws LwMessagingException {
 		
-		messageProcessor.goQuiet(); // tell processor we're not busy now.
+//		messageProcessor.goQuiet(); // tell processor we're not busy now, but only when running in blocking mode (i.e. not batch).
 
 		if (messageListener instanceof LwAcceptMessagesFromQueue) { // then want to block now, await next message and, possibly, close output queue
 			// Close targetConnection here, if is a Queue, because not busy
@@ -468,17 +485,20 @@ public class LwGenericMessageHandler implements IApp
 	 * @param auditKeyValues transaction ID for message being processed
 	 * @param inputDoc the original input message
 	 * @return true if should skip this message, false if should continue processing the message
+	 * @throws LwMessagingException if problem encountered staying or consuming message
 	 */
 	private boolean determineActionOnInvalidDataContractName(LwGenericMessageHandlerSettings settings, boolean skipMessage,
-															 String auditKeyValues, LwXMLDocument inputDoc) {
+															 String auditKeyValues, LwXMLDocument inputDoc) throws LwMessagingException {
 		LwXMLTagValue dataContractName = settings.getDataContractName();
 		String actionOnError = null;
 		if (dataContractName != null) { actionOnError = dataContractName.getAttributeValue("ActionOnError");}
 
 		if (actionOnError == null || actionOnError.equals("shutdown")) {
 			logger.severe("Data Contract Name did not match" + (settings.getDataContractName() == null ? "" : " " + settings.getDataContractName().getTagValue()) + ". Message with AuditKey Value " + auditKeyValues + " rejected. Will shut down.");
+			messageListener.stayMessage(auditKeyValues);
 			skipMessage = true;
 			mainProcessToCloseDown = true;
+			throw new LwMessagingException("Data Contract Name did not match" + (settings.getDataContractName() == null ? "" : " " + settings.getDataContractName().getTagValue()) + ". Message with AuditKey Value " + auditKeyValues + " rejected. Will shut down.");
 		}
 		else if (actionOnError.equals("discard")) {
 			logger.warning("Data Contract Name did not match" + (settings.getDataContractName() == null ? "" : " " + settings.getDataContractName().getTagValue()) + ". Message with AuditKey Value " + auditKeyValues + " rejected. Will discard message.");
@@ -504,15 +524,17 @@ public class LwGenericMessageHandler implements IApp
 	 * @param auditKeyValues transaction ID for message being processed
 	 * @param inputDoc the original input message
 	 * @return true if should skip this message, false if should continue processing the message
+	 * @throws LwMessagingException if problem encountered staying or consuming message
 	 */
-	private boolean determineActionOnMissingAuditKeys(
-			LwGenericMessageHandlerSettings settings, boolean skipMessage,
-			String auditKeyValues, LwXMLDocument inputDoc) {
+	private boolean determineActionOnMissingAuditKeys(LwGenericMessageHandlerSettings settings, boolean skipMessage,
+														String auditKeyValues, LwXMLDocument inputDoc) throws LwMessagingException {
 		String actionOnError = settings.getAuditKeysAggregate().getAttributeValue("ActionOnError");
 		if (actionOnError == null || actionOnError.equals("shutdown")) {
 			logger.severe("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will shut down.");
+			messageListener.stayMessage(auditKeyValues);
 			skipMessage = true;
 			mainProcessToCloseDown = true;
+			throw new LwMessagingException("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will shut down.");
 		}
 		else if (actionOnError.equals("discard")) {
 			logger.warning("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will discard message.");
@@ -666,9 +688,13 @@ public class LwGenericMessageHandler implements IApp
 						// Position "pointer" in targetDoc to correct parent aggregate, creating it if we have to...
 						// (Note that the first ELEMENT in the path for the input may have a different name than the new Target message, so we may ignore it)
 						LwXMLTagValue tempTagNoValue = new LwXMLTagValue(tv.getTagValue(), null); // just to help split out path e.g. MESSAGE.DELV.ORD or MESSAGE.DELV.ORD.ORDER_NUMBER
+						String pathToParent = tempTagNoValue.getPathToParent();
+						if (pathToParent == null) { // then SendElement is the top-level element - so no parent
+							pathToParent = tv.getTagValue();
+						}
 
 						//search under both inputDoc top-level Name and that of Target top-level Name
-						if ( ! (targetDoc.setCurrentNodeByPath(tempTagNoValue.getPathToParent(), 1) || targetDoc.setCurrentNodeByPath((targetMainDocElementName + "/" + tempTagNoValue.getPathToParentLessFirstElement()), 1))
+						if ( ! (targetDoc.setCurrentNodeByPath(pathToParent, 1) || targetDoc.setCurrentNodeByPath((targetMainDocElementName + "/" + tempTagNoValue.getPathToParentLessFirstElement()), 1))
 						   ) { // try to go to parent recipient (if specified), create path if can't
 							String pathToParentLessFirstElement = tempTagNoValue.getPathToParentLessFirstElement();
 
@@ -867,6 +893,7 @@ public class LwGenericMessageHandler implements IApp
 		private final LwIStoreMesssage messageResponder;
 		private final LwIAcceptMesssages messageListener;		// the interface for accepting messages
 		private final boolean inLoopMode;						// true if we want to keep looping (i.e. this is run in its own thread)
+		private boolean errorEncountered = false;				// true if we find any error
 
 		public ResponseProcessorTask(boolean inLoopMode, LwIStoreMesssage messageResponder, LwIAcceptMesssages messageListener) {
 			if (messageResponder == null) throw new IllegalArgumentException("ResponseProcessorTask: messageResponder cannot be null.");
@@ -882,11 +909,14 @@ public class LwGenericMessageHandler implements IApp
 			do {
 				// Get the response object from the messageProcessor (may block)...
 				LwProcessResponse processedResponse = getProcessedResponse();
-				if ( ! mainProcessToCloseDown ) break;
+				if ( processedResponse == null) { // null is Poison Pill
+					break;
+				}
 
 				// Now check for any problems with response...
-				checkResponseForProblems(processedResponse);
-				if ( ! mainProcessToCloseDown ) break;
+				if (foundProblemInResponse(processedResponse)) {
+					break;
+				}
 				
 				//////////////////////////////////////////////////////////////////
 				// If got here, have valid response, with no errors reported from processor
@@ -894,9 +924,17 @@ public class LwGenericMessageHandler implements IApp
 				String processorResponseMessage = processedResponse.getResponse();
 				if (processorResponseMessage == null) { // No response expected, so consume input message now
 					logger.info("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " succcessfully processed by processing class, and no response returned or expected.");
+					try {
+						messageListener.consumeMessage(processedResponse.getAuditKeyValues());
+					} catch (LwMessagingException e) {
+						logger.severe("Error: Received LwMessagingException trying to consume message with AuditKey Value " + processedResponse.getAuditKeyValues() + ": " + e);
+						logger.severe("Going to tell main thread to stop processing.");
+						mainProcessToCloseDown = true;
+						break;
+					}
 				}
 				else { // then response is ready after success, see if we should do something with it...
-					logger.fine("Response message with AuditKey Value " + processedResponse.getAuditKeyValues() + " returned from processing class. See next line for content...");
+					logger.info("Response message with AuditKey Value " + processedResponse.getAuditKeyValues() + " returned from processing class. See next line for content (if logging @ level FINE)...");
 					logger.fine(processorResponseMessage);
 
 					//////////////////////////////////////////////////////////////////
@@ -909,6 +947,9 @@ public class LwGenericMessageHandler implements IApp
 						}
 						catch (LwXMLException e) {
 							logger.severe("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " caused an LwXMLException building Response message: " + e);
+							logger.severe("Going to tell main thread to stop processing.");
+							mainProcessToCloseDown = true;
+							break;
 						}
 					}
 					else { // don't make any changes, just return response
@@ -917,8 +958,9 @@ public class LwGenericMessageHandler implements IApp
 
 					if (applicationResponseMessage == null) {
 						logger.severe("Error: No Response message was built. Message with AuditKey Value " + processedResponse.getAuditKeyValues());
-						logger.severe("ResponseProcessorTask: Going to tell main thread to stop processing.");
+						logger.severe("Going to tell main thread to stop processing.");
 						mainProcessToCloseDown = true;
+						break;
 					}
 					else {
 						//////////////////////////////////////////////////////////////////
@@ -927,8 +969,29 @@ public class LwGenericMessageHandler implements IApp
 						forwardApplicationResponse(processedResponse, applicationResponseMessage);
 					}
 				} // end if (response == null)
-			} while ( ! mainProcessToCloseDown && inLoopMode);
 			
+				// Check to see if an error occurred during processing of response.
+				// If a problem, "stay" the input message and stop processing.
+				// If no problem, "consume" the input message and continue processing.
+				try {
+					if (errorEncountered) { 
+						messageListener.stayMessage(processedResponse.getAuditKeyValues());
+					} else {
+						messageListener.consumeMessage(processedResponse.getAuditKeyValues());
+						logger.info("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " consumed after processing to output medium.");
+					}
+				} catch (LwMessagingException e) {
+					logger.severe("ResponseProcessorTask: Caught LwMessagingException exception Staying or consuming message: " + e);
+					logger.severe("Going to tell main thread to stop processing.");
+					errorEncountered = true;
+					break;
+				}
+
+			} while ( ! mainProcessToCloseDown && inLoopMode && !errorEncountered);
+			
+			if (errorEncountered) {
+				mainProcessToCloseDown = true;				
+			}
 			logger.exiting("ResponseProcessorTask", "run");
 		}
 
@@ -949,11 +1012,11 @@ public class LwGenericMessageHandler implements IApp
 				try {
 					messageResponder.putMessage(applicationResponseMessage, processedResponse.getAuditKeyValues(), messageResponderInstructions);
 				} catch (LwMessagingException e) {
-					logger.severe("ResponseProcessorTask: Caught LwMessagingException exception from messageResponder.putMessage(): " + e);
+					logger.severe("ResponseProcessorTask: Caught LwMessagingException exception from messageResponder.putMessage(): ");
+					errorEncountered = true;
 				}
 			}
 
-			logger.info("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " consumed after processing to output medium.");
 		}
 
 		/**
@@ -967,11 +1030,11 @@ public class LwGenericMessageHandler implements IApp
 			} catch (LwMessagingException e) {
 				logger.severe("ResponseProcessorTask: Caught LwMessagingException exception from messageProcessor.getResponse(): " + e);
 				logger.severe("ResponseProcessorTask: Going to tell main thread to stop processing.");
-				mainProcessToCloseDown = true;
+				errorEncountered = true;
 			} catch (InterruptedException e) {
 				// Close down thread
 				logger.info("ResponseProcessorTask interrupted while getting response from messageProcessor - shutting down");
-				mainProcessToCloseDown = true;
+				errorEncountered = true;
 			}
 			
 			return null;
@@ -981,28 +1044,32 @@ public class LwGenericMessageHandler implements IApp
 		 * Now check for any problems with response.
 		 * 
 		 * @param processedResponse the response object to be checked/validated
+		 * 
+		 * @return true if we encountered a problem
 		 */
-		private void checkResponseForProblems(LwProcessResponse processedResponse) {
+		private boolean foundProblemInResponse(LwProcessResponse processedResponse) {
 			if (processedResponse == null) {
 				logger.info("ResponseProcessorTask received null response - shutting down");
 				logger.info("Received PoisonPill from Processor: Going to tell main thread to stop processing.");
-				mainProcessToCloseDown = true;
-				return;
+				errorEncountered = true;
+				return true;
 			}
 			
 			if (processedResponse.getResponseCode() != LwProcessResponse.ProcessResponseCode.SUCCESS) {
 				logger.severe("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " was not processed properly by messageProcessor. Error returned was " + processedResponse.getResponse());
 				logger.severe("ResponseProcessorTask: Going to tell main thread to stop processing.");
-				mainProcessToCloseDown = true;
-				return;
+				errorEncountered = true;
+				return true;
 			}
 			
-			if (processedResponse.getRowsProcessed() < settings.getMinResponsesExpected()) { // then serious problem
+			if (settings.getMinResponsesExpected() > 0 && processedResponse.getRowsProcessed() < settings.getMinResponsesExpected()) { // then serious problem
 				logger.severe("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " was not processed properly by messageProcessor. Insufficient Number of responses returned. Expected at least " + settings.getMinResponsesExpected() + ", received " + processedResponse.getRowsProcessed());
 				logger.severe("ResponseProcessorTask: Going to tell main thread to stop processing.");
-				mainProcessToCloseDown = true;
-				return;
+				errorEncountered = true;
+				return true;
 			}
+			
+			return false;
 		}
 
 		/**

@@ -3,7 +3,7 @@
 <Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForSocketSettings.xsd">
 	<Params>
 		<PortNumber>11819</PortNumber>
-		<HostName>127.0.0.1</HostName>
+		<HostName>localhost</HostName>
 		<ApplicationLevelResponse>asynchronous</ApplicationLevelResponse>
 	</Params>
 	<Auditing>

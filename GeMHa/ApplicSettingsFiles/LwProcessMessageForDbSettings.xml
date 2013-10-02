@@ -5,19 +5,41 @@
 <!--	Oracle connection over JDBC...
 		<JdbcClass>oracle.jdbc.driver.OracleDriver</JdbcClass>
 		<DbURL>jdbc:oracle:thin:@localhost:1521:DR2D</DbURL>
+  		<UserName>system</UserName>
+		<UserPass>manager</UserPass>
   -->
 <!--	Derby Jdbc EmbeddedDriver in C:\glassfish3\javadb\lib\derby.jar
 		Derby Jdbc ClientDriver   in C:\glassfish3\javadb\lib\derbyclient.jar
  -->
+<!--	Derby connection over JDBC Embedded version...
 		<JdbcClass>org.apache.derby.jdbc.EmbeddedDriver</JdbcClass>
 		<DbURL>jdbc:derby:C:/Users/wadel/DERBYTUTOR/firstdb</DbURL>
-<!--
-		Not needed for Derby...
-  		<UserName>system</UserName>
-		<UserPass>manager</UserPass>
  -->
+<!--	Derby connection over JDBC - Server version...
+		Note: The Derby server doesn't come up automatically with my Glassfish4. 
+ -->
+		<JdbcClass>org.apache.derby.jdbc.ClientDriver</JdbcClass>
+		<DbURL>jdbc:derby://localhost/lemmo</DbURL>
+  		<UserName>APP</UserName>
+		<UserPass>APP</UserPass>
+<!--
+		User name and password not normally needed for Derby Embedded.
+		<JdbcClass>com.mysql.jdbc.Driver</JdbcClass>
+		<DbURL>jdbc:mysql://localhost:3306/users</DbURL>
+  		<UserName>corpUser01</UserName>
+		<UserPass>dopple66ganger</UserPass>
+ -->
+		
+		<!-- Notes for MySQL:
+			 Do not incorrectly mix AutoCommit and the IMMEDIATE_COMMIT element of an individual
+			 statement. If both are true/on the database will complain, as we cannot explicitly
+			 commit when AutoCommit is on. 
+			 NEVER use an uppercase letter when creating a table. Even when MySQL tells you not allowed
+			 and changes name to lower case, GRANTS are not saved correctly and you keep getting 'insert
+			 command denied to user' errors.
+		-->
 		<AutoCommit>off</AutoCommit>
-		<DefaultTablename>LW_delme1</DefaultTablename>
+		<DefaultTablename>APP.lw_delme1</DefaultTablename>
 		<UpdateLockingStrategy>none</UpdateLockingStrategy>
 <!--
 		Only needed for Oracle...
@@ -27,7 +49,7 @@
 	<PreparedStatements>
 		<PreparedStatement>
 			<PreparedStatementName>LW_delme1_insert_001</PreparedStatementName>
-			<PreparedStatementSQL>INSERT INTO LW_delme1 (ADMINCOMMENT,USERCODENAME,USERID,USERSTATUS,UPDATEDATETIME) VALUES (?,?,?,?,?)</PreparedStatementSQL>
+			<PreparedStatementSQL>INSERT INTO APP.lw_delme1 (ADMINCOMMENT,USERCODENAME,USERID,USERSTATUS,UPDATEDATETIME) VALUES (?,?,?,?,?)</PreparedStatementSQL>
 			<ParameterOrder>
 				<Column>ADMINCOMMENT</Column>
 				<Column>USERCODENAME</Column>
@@ -38,14 +60,14 @@
 		</PreparedStatement>
 		<PreparedStatement>
 			<PreparedStatementName>LW_delme1_update_001</PreparedStatementName>
-			<PreparedStatementSQL>UPDATE LW_delme1 SET USERSTATUS = 'ACTIVE' WHERE USERID = ?</PreparedStatementSQL>
+			<PreparedStatementSQL>UPDATE APP.lw_delme1 SET USERSTATUS = 'ACTIVE' WHERE USERID = ?</PreparedStatementSQL>
 			<ParameterOrder>
 				<Column>USERID</Column>
 			</ParameterOrder>
 		</PreparedStatement>
 		<PreparedStatement>
 			<PreparedStatementName>LW_delme1_select_001</PreparedStatementName>
-			<PreparedStatementSQL>SELECT * FROM LW_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
+			<PreparedStatementSQL>SELECT * FROM APP.lw_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
 			<ParameterOrder>
 				<Column>USERSTATUS</Column>
 			</ParameterOrder>

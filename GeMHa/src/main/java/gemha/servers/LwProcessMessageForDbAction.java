@@ -398,7 +398,11 @@ public class LwProcessMessageForDbAction {
 				String nextValue = doc.getValueForTag(tv.getTagValue());
 
 				if (nextValue != null) {
-					concatenatedValues += nextValue + ((separator != null && enumAuditKeyNames.hasMoreElements()) ? separator : "");
+					if ("".equals(concatenatedValues)) {
+						concatenatedValues = nextValue;
+					} else {
+						concatenatedValues += ((separator != null && enumAuditKeyNames.hasMoreElements()) ? separator : "") + nextValue;
+					}
 				}
 			}
 		}

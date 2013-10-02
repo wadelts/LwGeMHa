@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- New document created with EditiX at Tue Oct 14 15:42:17 BST 2008 -->
+
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Applic.xsd">
+	<Params>
+		<ExternalShell>sh</ExternalShell>
+	</Params>
+	<Input>
+		<InputSource>
+			<InputLimit>1000</InputLimit>
+			<!-- Do not add this tag if using LwProcessMessageDoNothing (he doesn't care and would actually return NO response)... 
+			<DataFormat>XML</DataFormat>
+			-->
+			<InputQueue>
+				<!-- IBM MQ... 
+				<UrlJMSserver>failover://tcp://localhost:61616</UrlJMSserver>
+				-->
+				<UrlJMSserver>mq://localhost:7676</UrlJMSserver>
+				<QueueName>LWqueue006</QueueName>
+				<MilliSecondsBeforeQuiet>3000</MilliSecondsBeforeQuiet>
+			</InputQueue>
+		</InputSource>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+	</Input>
+	<Output>
+		<OutputQueue>
+				<UrlJMSserver>mq://localhost:7676</UrlJMSserver>
+				<QueueName>LWqueue007</QueueName>
+		</OutputQueue>
+	</Output>
+	<Processing>
+		<MessageProcessingClassName>gemha.servers.LwProcessMessageDoNothing</MessageProcessingClassName>
+		<SendElements>
+			<ElementName>RexRunNotification</ElementName>
+		</SendElements>
+		<ResponseLiterals>
+			<ResponseLiteral Location="RexRunNotification/Added_Element">with some data</ResponseLiteral>
+		</ResponseLiterals>
+	</Processing>
+	<Auditing>
+		<AuditKeys>
+			<KeyName>RexRunNotification/MsgKey</KeyName>
+		</AuditKeys>
+		<AuditKeysSeparator>-</AuditKeysSeparator>
+	</Auditing>
+	<Logging>
+		<Level>
+			<EnvironmentLoggingLevel>Development</EnvironmentLoggingLevel>
+		</Level>
+		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+	</Logging>
+</Applic>
