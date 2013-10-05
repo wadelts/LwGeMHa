@@ -16,7 +16,19 @@ public class LwProcessMessageForFileSettings
 	
     private static final Logger logger = Logger.getLogger("gemha");
 
-  /**
+	private String columnsLocation = "/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS";
+	private String settingsFileName = null;
+	private boolean settingsFileSchemaValidation = false;
+
+    private String messagesFileNameTemplate = null;
+    private String fieldSeparator = null;
+	private boolean includeColumnNames = false;			// should column names be included in output?
+    private String fileOpenMode = null;					// should we create or append (to) file when first starting up
+
+	private Vector<LwXMLTagValue> auditKeyNamesSet = null;
+	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
+
+	/**
     * Will create a new LwProcessMessageForFileSettings object.
     *
 	* @param logger the Logger for audit messages
@@ -42,6 +54,15 @@ public class LwProcessMessageForFileSettings
 		recordSettings();
 	}
 
+
+	/**
+	  * Get helper method for Columns Location
+	  *
+	  * @return the location of Column elements within the received message
+	  */
+	public String getColumnsLocation() {
+			return columnsLocation;
+	}
 
 	/**
 	  * Get helper method for Messages File Name Template
@@ -111,6 +132,12 @@ public class LwProcessMessageForFileSettings
 		//////////////////////////////////////////////////////////////////////////
 		// Get the application general Parameters...
 		//////////////////////////////////////////////////////////////////////////
+		// Get the Columns Location within the received message...
+		String tempColumnsLocation = settingsDoc.getValueForTag("Applic/Params/ColumnsLocation");
+		if (tempColumnsLocation != null) {
+			columnsLocation = tempColumnsLocation;
+		}
+				
 		// Get the Messages FileName Template
 		messagesFileNameTemplate = settingsDoc.getValueForTag("Applic/Params/MessagesFileNameTemplate");
 		if (messagesFileNameTemplate == null) {
@@ -172,6 +199,7 @@ public class LwProcessMessageForFileSettings
     *
 	*/
 	public void recordSettings() {
+		logger.config("Location of Columns in received message is " + columnsLocation);
 		logger.config("Messages FileName Template is " + messagesFileNameTemplate);
 		logger.config("Field Separator is " + fieldSeparator);
 		logger.config("Column Names will " + (includeColumnNames ? "" : "NOT ") + "be included in output.");
@@ -187,15 +215,4 @@ public class LwProcessMessageForFileSettings
 		logger.config("AuditKeysSeparator is " + auditKeysSeparator);
 	}
 
-
-	private String settingsFileName = null;
-	private boolean settingsFileSchemaValidation = false;
-
-    private String messagesFileNameTemplate = null;
-    private String fieldSeparator = null;
-	private boolean includeColumnNames = false;			// should column names be included in output?
-    private String fileOpenMode = null;					// should we create or append (to) file when first starting up
-
-	private Vector<LwXMLTagValue> auditKeyNamesSet = null;
-	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
 }

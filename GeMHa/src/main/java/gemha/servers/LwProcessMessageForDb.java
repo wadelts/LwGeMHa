@@ -298,6 +298,8 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 			else
 				throw launderThrowable(cause);
 		}
+
+		logger.info("[" + Thread.currentThread().getName() + "]: Returning response retrieved from Response Queue Future to response handler.");
 		return response;
 	}
 
@@ -381,10 +383,9 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 				dbAction.buildAction(settings.getDefaultTablename());
 				dbAction.performAction(dbConn, actionOnError);
 
-
+				totalActionsApplied += dbAction.getNumActions();
 				inputDoc.setCurrentNodeToFirstElement(); // need to go back to top of doc, for next search
 			}
-			totalActionsApplied += numThisTypeOfActionApplied-1;
 		}
 
 		return totalActionsApplied;

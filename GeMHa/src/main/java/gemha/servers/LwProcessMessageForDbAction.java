@@ -212,11 +212,17 @@ public class LwProcessMessageForDbAction {
 		//////////////////////////////////////////////////////////////////////////
 		// Add key columns and their values for reference to the message...
 		//////////////////////////////////////////////////////////////////////////
+		String keyColsElementName = null;
+		if (action.equals("INSERT")) {
+			keyColsElementName = "COLUMNS";
+		} else {
+			keyColsElementName = "WHERE";
+		}
 		if ( keySet != null) {
 			for (LwXMLTagValue tv : keySet) {
 				String val = tv.getTagValue();
 				if (val != null) { // add it
-					response.addElement(null, "COLUMNS/" + tv.getTagName(), val);
+					response.addElement(null, keyColsElementName + "/" + tv.getTagName(), val);
 				}
 			}
 		}

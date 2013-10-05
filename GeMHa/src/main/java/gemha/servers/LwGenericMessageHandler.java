@@ -150,10 +150,10 @@ public class LwGenericMessageHandler implements IApp
 			// Finished now, but give executors time to flush results
 			if (responseProcessorTask != null)
 				try {
-					messageProcessor.awaitTermination(10, TimeUnit.SECONDS);
+					messageProcessor.awaitTermination(1, TimeUnit.MINUTES);
 					// Flush execPool buffer and shut it down (no waiting)...
 					execPool.shutdown();
-					execPool.awaitTermination(10, TimeUnit.SECONDS);
+					execPool.awaitTermination(1, TimeUnit.MINUTES);
 				} catch (InterruptedException e) {
 					// Reset interrupted, finishing anyway
 					Thread.currentThread().interrupt();
@@ -235,7 +235,7 @@ public class LwGenericMessageHandler implements IApp
 					messageListener = new LwAcceptMessagesFromSocket(settings.getPortNumber());
 				}
 				else if (settings.getInputFileNameFilter() != null) {
-						messageListener = new LwAcceptMessagesFromFiles(settings.getInputFileDir(), settings.getInputFileNameFilter(), true, settings.getColNameList(),
+						messageListener = new LwAcceptMessagesFromFiles(settings.getInputFileDir(), settings.getInputFileNameFilter(), settings.sortFilteredFileNames(), settings.getColNameList(),
 																		settings.getInputDataFormat(), settings.getFieldSeparator(), settings.getMaxRecsPerMessage(),
 																		settings.getXMLFormat(), settings.getActionOnError(), settings.getPreparedStatementName(),
 																		settings.getImmediateCommit(), settings.getNumRecordsToSkip());
@@ -350,10 +350,14 @@ public class LwGenericMessageHandler implements IApp
 				}
 			}
 
-			if ( mainProcessToCloseDown) {
+			if ( mainProcessToCloseDown) { // There's a slight chance this msg may not output, if another thread sets mainProcessToCloseDown just after checking.
 				logger.info("Stopping processing and going to close down. (mainProcessToCloseDown is true)");
 			}
 		} // end while(mainProcessToCloseDown)
+	
+		if (messageProcessor != null) { // Tell it no more messages to process
+			messageProcessor.processMessageAsynch(null, null, null); // Send Poison Pill to processor
+		}
 	}
 
 	/**
@@ -464,7 +468,6 @@ public class LwGenericMessageHandler implements IApp
 			logger.info("Socket Server returned null, so closing down.");
 		}
 		else if (messageListener instanceof LwAcceptMessagesFromFiles) { // then am finished, so close down
-			messageProcessor.processMessageAsynch(null, null, null); // Send Poison Pill to processor
 			mainProcessToCloseDown = true;
 			logger.info("No more files to process, so closing down.");
 		}
@@ -910,6 +913,7 @@ public class LwGenericMessageHandler implements IApp
 				// Get the response object from the messageProcessor (may block)...
 				LwProcessResponse processedResponse = getProcessedResponse();
 				if ( processedResponse == null) { // null is Poison Pill
+					logger.info("Received null value (Poison Pill) from Processor - will stop processing responses now.");
 					break;
 				}
 
@@ -987,7 +991,7 @@ public class LwGenericMessageHandler implements IApp
 					break;
 				}
 
-			} while ( ! mainProcessToCloseDown && inLoopMode && !errorEncountered);
+			} while (inLoopMode && !errorEncountered);
 			
 			if (errorEncountered) {
 				mainProcessToCloseDown = true;				

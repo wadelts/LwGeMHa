@@ -22,12 +22,12 @@
 		<MessageProcessingClassName>gemha.servers.LwProcessMessageForFile</MessageProcessingClassName>
 		<MessageProcessingSettingsFileName>ApplicSettingsFiles/LwProcessMessageForFileSettings.xml</MessageProcessingSettingsFileName>
 		<SendElements>
-			<ElementName>/MESSAGE/FILE_REQUEST</ElementName>
+			<ElementName>/xxxMESSAGE/FILE_REQUEST</ElementName>
 		</SendElements>
 	</Processing>
 	<Auditing>
 		<AuditKeys>
-			<KeyName>/MESSAGE/FILE_REQUEST/KEY</KeyName>
+			<KeyName>/xxxMESSAGE/FILE_REQUEST/KEY</KeyName>
 		</AuditKeys>
 		<AuditKeysSeparator>-</AuditKeysSeparator>
 	</Auditing>

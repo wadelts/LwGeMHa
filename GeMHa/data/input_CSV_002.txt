@@ -1,3 +1,3 @@
-4	rt767w	ACTIVE	somecomment	18-12-2008
-5	erttr	DEAD	acomment	19-12-2008
-6	easdr	ALIVE	xcomment	20-12-2008
+4	'rt767w'	'ACTIVE'	'somecomment'	'2008-12-18'
+5	'erttr'	'DEAD'	'acomment'	'2008-12-19'
+6	'easdr'	'ALIVE'	'xcomment'	'2008-12-20'

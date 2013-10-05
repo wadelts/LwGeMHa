@@ -18,6 +18,7 @@
 				<xs:element name="Params">
 					<xs:complexType>
 						<xs:all>
+							<xs:element name="ColumnsLocation" type="RequiredString"/>
 							<xs:element name="MessagesFileNameTemplate" type="RequiredString"/>
 							<xs:element name="FieldSeparator" type="RequiredString" minOccurs="0"/>
 							<xs:element name="IncludeColumnNames" type="xs:boolean" minOccurs="0" default="false"/>

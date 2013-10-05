@@ -18,17 +18,19 @@
 <!--	Derby connection over JDBC - Server version...
 		Note: The Derby server doesn't come up automatically with my Glassfish4. 
  -->
+<!--
 		<JdbcClass>org.apache.derby.jdbc.ClientDriver</JdbcClass>
 		<DbURL>jdbc:derby://localhost/lemmo</DbURL>
   		<UserName>APP</UserName>
 		<UserPass>APP</UserPass>
+ -->
 <!--
 		User name and password not normally needed for Derby Embedded.
+ -->
 		<JdbcClass>com.mysql.jdbc.Driver</JdbcClass>
 		<DbURL>jdbc:mysql://localhost:3306/users</DbURL>
   		<UserName>corpUser01</UserName>
 		<UserPass>dopple66ganger</UserPass>
- -->
 		
 		<!-- Notes for MySQL:
 			 Do not incorrectly mix AutoCommit and the IMMEDIATE_COMMIT element of an individual
@@ -39,7 +41,7 @@
 			 command denied to user' errors.
 		-->
 		<AutoCommit>off</AutoCommit>
-		<DefaultTablename>APP.lw_delme1</DefaultTablename>
+		<DefaultTablename>users.lw_delme1</DefaultTablename>
 		<UpdateLockingStrategy>none</UpdateLockingStrategy>
 <!--
 		Only needed for Oracle...
@@ -49,7 +51,7 @@
 	<PreparedStatements>
 		<PreparedStatement>
 			<PreparedStatementName>LW_delme1_insert_001</PreparedStatementName>
-			<PreparedStatementSQL>INSERT INTO APP.lw_delme1 (ADMINCOMMENT,USERCODENAME,USERID,USERSTATUS,UPDATEDATETIME) VALUES (?,?,?,?,?)</PreparedStatementSQL>
+			<PreparedStatementSQL>INSERT INTO users.lw_delme1 (ADMINCOMMENT,USERCODENAME,USERID,USERSTATUS,UPDATEDATETIME) VALUES (?,?,?,?,?)</PreparedStatementSQL>
 			<ParameterOrder>
 				<Column>ADMINCOMMENT</Column>
 				<Column>USERCODENAME</Column>
@@ -60,14 +62,14 @@
 		</PreparedStatement>
 		<PreparedStatement>
 			<PreparedStatementName>LW_delme1_update_001</PreparedStatementName>
-			<PreparedStatementSQL>UPDATE APP.lw_delme1 SET USERSTATUS = 'ACTIVE' WHERE USERID = ?</PreparedStatementSQL>
+			<PreparedStatementSQL>UPDATE users.lw_delme1 SET USERSTATUS = 'ACTIVE' WHERE USERID = ?</PreparedStatementSQL>
 			<ParameterOrder>
 				<Column>USERID</Column>
 			</ParameterOrder>
 		</PreparedStatement>
 		<PreparedStatement>
 			<PreparedStatementName>LW_delme1_select_001</PreparedStatementName>
-			<PreparedStatementSQL>SELECT * FROM APP.lw_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
+			<PreparedStatementSQL>SELECT * FROM users.lw_delme1 WHERE USERSTATUS = ?</PreparedStatementSQL>
 			<ParameterOrder>
 				<Column>USERSTATUS</Column>
 			</ParameterOrder>
@@ -96,7 +98,7 @@
 			<KeyName>DELETE/WHERE/USERCODENAME</KeyName>
 		</AuditKeys>
 		<AuditKeys DbAction="select">
-			<KeyName>SELECT/COLUMNS/USERSTATUS</KeyName>
+			<KeyName>SELECT/WHERE/USERSTATUS</KeyName>
 		</AuditKeys>
 		<AuditKeysSeparator>-</AuditKeysSeparator>
 	</Auditing>

@@ -2,6 +2,7 @@
 
 <Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForFileSettings.xsd">
 	<Params>
+		<ColumnsLocation>/xxxMESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS</ColumnsLocation>
 		<MessagesFileNameTemplate>output/LwProcessMessageForFile_Output_all.txt</MessagesFileNameTemplate>
 		<FieldSeparator>\t</FieldSeparator>
 		<IncludeColumnNames>true</IncludeColumnNames>
@@ -9,7 +10,7 @@
 	</Params>
 	<Auditing>
 		<AuditKeys>
-			<KeyName>/MESSAGE/FILE_REQUEST/KEY</KeyName>
+			<KeyName>/xxxMESSAGE/FILE_REQUEST/KEY</KeyName>
 		</AuditKeys>
 		<AuditKeysSeparator>-</AuditKeysSeparator>
 	</Auditing>

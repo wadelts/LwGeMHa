@@ -133,6 +133,9 @@ public class LwProcessMessageForSocketSettings
 
 		// Get the Host Name
 		hostName = settingsDoc.getValueForTag("Applic/Params/HostName");
+		if (hostName == null) {
+			hostName = "localhost";
+		}
 
 		// Get the Response type at application level
 		applicationLevelResponse = settingsDoc.getValueForTag("Applic/Params/ApplicationLevelResponse");

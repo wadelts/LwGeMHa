@@ -185,7 +185,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 				if (outFileIsEmpty && fileSettings.columnNamesToBeIncluded()) {
 					outFileIsEmpty = false;
 					// Just take names from first-found row
-					if (newDoc.setCurrentNodeByPath("/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS", 1)) {
+					if (newDoc.setCurrentNodeByPath(fileSettings.getColumnsLocation(), 1)) {
 						Vector<LwXMLTagValue> row = newDoc.getValuesForTagsChildren();
 		
 						int colNum = 0;
@@ -204,7 +204,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 				// Send all rows of data to the file...
 				///////////////////////////////////////////////
 				int numRowsProcessed = 0;
-				while (newDoc.setCurrentNodeByPath("/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS", ++numRowsProcessed)) {
+				while (newDoc.setCurrentNodeByPath(fileSettings.getColumnsLocation(), ++numRowsProcessed)) {
 					Vector<LwXMLTagValue> row = newDoc.getValuesForTagsChildren();
 		
 					int colNum = 0;

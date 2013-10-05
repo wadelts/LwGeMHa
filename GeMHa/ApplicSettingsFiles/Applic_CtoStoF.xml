@@ -8,7 +8,6 @@
 	</Params>
 	<Input>
 		<InputSource>
-			<InputLimit>7</InputLimit>
 			<DataFormat>CSV</DataFormat>
 			<InputFile>
 				<FileDir>C:\Users\wadel\git\GeMHa\GeMHa\data\</FileDir>

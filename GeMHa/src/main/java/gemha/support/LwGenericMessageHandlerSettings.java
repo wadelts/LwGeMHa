@@ -54,11 +54,12 @@ public class LwGenericMessageHandlerSettings {
 	// Server info for when outputting to HTTP
 	private final String HTTPServerUrl;
 	private final String HTTPEndPointName;
-	private final String HTTPWithBackoff;
+	private final boolean HTTPWithBackoff;
 
 	// File names, if queues not being used
 	private final String inputFileNameFilter ;
 	private final String inputFileDir ;
+	private boolean sortFilteredFileNames = true;			// should input from a fileset be sorted on file name
 	private final String fieldSeparator ;
 	private final int maxRecsPerMessage; // number of records to add to a
 										// particular message, before starting a
@@ -303,6 +304,13 @@ public class LwGenericMessageHandlerSettings {
 					if (tempInputFileDir.length() > 0 && !tempInputFileDir.endsWith(fileSeparator)) {
 						tempInputFileDir = tempInputFileDir + fileSeparator;
 					}
+
+					// Find out if we should include column names in the output file
+					String strSortFilteredFileNames = settingsDoc.getValueForTag("Applic/Input/InputSource/InputFile/SortFilteredFileNames");
+					if (strSortFilteredFileNames != null) {
+						sortFilteredFileNames = strSortFilteredFileNames.equals("true");
+					}
+
 				}
 				
 			}
@@ -344,7 +352,7 @@ public class LwGenericMessageHandlerSettings {
 			// Get the maximum number of records to be included in one message when
 			// dealing with a CSV input file...
 			// ////////////////////////////////////////////////////////////////////////
-			int tempMaxRecsPerMessage = 0;
+			int tempMaxRecsPerMessage = 1;
 			String strMaxRecsPerMessage = settingsDoc
 					.getValueForTag("Applic/Input/InputSource/InputFile/CSVParams/MaxRecsPerMessage");
 			if (strMaxRecsPerMessage != null) {
@@ -453,7 +461,7 @@ public class LwGenericMessageHandlerSettings {
 			}
 			HTTPServerUrl = tempHTTPServerUrl;
 			HTTPEndPointName = tempHTTPEndPointName;
-			HTTPWithBackoff = (tempHTTPWithBackoff == null ? "true" : tempHTTPWithBackoff);	// set default
+			HTTPWithBackoff = (tempHTTPWithBackoff == null ? true : tempHTTPWithBackoff.toLowerCase().equals("true"));	// set default to true
 
 			// ////////////////////////////////////////////////////////////////////////
 			// Get the Log files settings...
@@ -792,7 +800,7 @@ public class LwGenericMessageHandlerSettings {
 	 * @return the HTTPWithBackoff
 	 */
 	public boolean getHTTPWithBackoff() {
-		return HTTPWithBackoff == null ? false : HTTPWithBackoff.equalsIgnoreCase("true");
+		return HTTPWithBackoff;
 	}
 	
 	/**
@@ -802,6 +810,15 @@ public class LwGenericMessageHandlerSettings {
 	 */
 	public String getInputFileDir() {
 		return inputFileDir;
+	}
+
+	/**
+	  * Get helper method for File Names sorting when input is from a fileset
+	  *
+	  * @return true if the list of File Names are to be sorted before processing
+	  */
+	public boolean sortFilteredFileNames() {
+			return sortFilteredFileNames;
 	}
 
 	/**
@@ -1151,6 +1168,7 @@ public class LwGenericMessageHandlerSettings {
 			logger.config("Input Files Directory is "
 					+ (inputFileDir.equals(".") ? "the current one"
 							: inputFileDir));
+			logger.config("Input from a fileset will " + (sortFilteredFileNames ? "" : "NOT ") + "be sorted on filename.");
 			logger.config("Field Separator (for CSV files) is "
 					+ fieldSeparator);
 			logger.config("Max records per input message (for CSV files) is "
@@ -1198,9 +1216,8 @@ public class LwGenericMessageHandlerSettings {
 		if (HTTPEndPointName != null) {
 			logger.config("HTTP EndPointName is " + HTTPEndPointName);
 		}
-		if (HTTPWithBackoff != null) {
-			logger.config("HTTP EndPointName is " + HTTPWithBackoff);
-		}
+
+		logger.config("HTTP Post will " + (HTTPWithBackoff ? "" : "NOT") + " back off incrementally when trying to connect");
 		
 		// Record expected Data Contract Name, if exists
 		if (dataContractName != null) {

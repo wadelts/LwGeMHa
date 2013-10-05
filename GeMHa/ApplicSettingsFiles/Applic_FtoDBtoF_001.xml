@@ -12,7 +12,7 @@
 			<DataFormat>XML</DataFormat>
 			<InputFile>
 				<FileDir>C:\Users\wadel\git\GeMHa\GeMHa\data\</FileDir>
-				<FileNameFilter>insert_002.xml</FileNameFilter>
+				<FileNameFilter>select_001.xml</FileNameFilter>
 			</InputFile>
 		</InputSource>
 		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>

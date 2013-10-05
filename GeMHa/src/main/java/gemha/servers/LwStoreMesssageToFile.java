@@ -18,6 +18,11 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
+	private String outputFileNameTemplate = null;	// the template from which to build output filenames
+	private String dataFormat = null;				// the format of outgoing messages e.g "XML"
+
+	private int safetySequenceNo = 0;
+
 	public LwStoreMesssageToFile(String outputFileNameTemplate, String dataFormat) {
 		this.outputFileNameTemplate = outputFileNameTemplate;
 		this.dataFormat = dataFormat;
@@ -194,8 +199,4 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 			return null;
 		}
 	}
-
-	private String outputFileNameTemplate = null;	// the template from which to build output filenames
-	private String dataFormat = null;				// the format of outgoing messages e.g "XML"
-	private int safetySequenceNo = 0;
 }

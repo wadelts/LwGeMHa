@@ -15,6 +15,20 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+<!-- See notes.txt re running via Maven
+      <plugin>
+		  <groupId>org.codehaus.mojo</groupId>
+		  <artifactId>exec-maven-plugin</artifactId>
+  		  <version>1.1</version>
+		  <configuration>
+    	  	<mainClass>gemha.GemhaBatch</mainClass>
+    	  	<arguments>
+		      <argument>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\Applic_FtoFtoF.xml</argument>
+		    </arguments>
+    	  	
+  		  </configuration>
+		</plugin>
+ -->
     </plugins>
   </build>
 	<dependencies>

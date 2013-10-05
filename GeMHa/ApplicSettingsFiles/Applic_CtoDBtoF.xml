@@ -35,29 +35,32 @@
 	</Input>
 	<Output>
 		<OutputFile>
-			<FileNameTemplate>response_*_?.xml</FileNameTemplate>
+			<FileNameTemplate>C:\Users\wadel\git\GeMHa\GeMHa\responses\response_*_?.xml</FileNameTemplate>
 		</OutputFile>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>EirProcessMessageForDb</MessageProcessingClassName>
-		<MessageProcessingSettingsFileName>EirProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
+		<MessageProcessingClassName>gemha.servers.LwProcessMessageForDb</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\LwProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
 		<SendElements>
 			<ElementName>/MESSAGE/DBACTION</ElementName>
 		</SendElements>
 	</Processing>
 	<Auditing>
-		<AuditKeys>
+		<AuditKeys ActionOnError="shutdown">
 			<KeyName>/MESSAGE/DBACTION/INSERT/COLUMNS/USERID</KeyName>
-			<KeyName>/MESSAGE/DBACTION/INSERT/COLUMNS/USERCODENAME</KeyName>
 		</AuditKeys>
 		<AuditKeysSeparator>-</AuditKeysSeparator>
+		<ErrorFiles>
+			<ErrorFilesDir>C:\Users\wadel\git\GeMHa\GeMHa\errors\</ErrorFilesDir>
+			<ErrorFileNameTemplate>ErrorMessage_*_?.xml</ErrorFileNameTemplate>
+		</ErrorFiles>
 	</Auditing>
 	<Logging>
 		<Level>
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
-		<LogFileDir>/mv1/delv/middleware/CRDB/apps/mqXmq/</LogFileDir>
-		<LogFileNameTemplate>EirGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>EirGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

@@ -114,6 +114,7 @@
 													<xs:all>
 														<xs:element name="FileNameFilter" type="RequiredString"/>
 														<xs:element name="FileDir" type="RequiredString" minOccurs="0"/>
+														<xs:element name="SortFilteredFileNames" type="xs:boolean" minOccurs="0" default="true"/>
 														<xs:element name="CSVParams" minOccurs="0">
 															<xs:complexType>
 																<xs:sequence>
@@ -179,9 +180,9 @@
 							<xs:element name="OutputHTTP">
 								<xs:complexType>
 									<xs:all>
-										<xs:element name="ServerUrl" type="RequiredString" minOccurs="0"/>
-										<xs:element name="EndPointName" type="RequiredString" minOccurs="0"/>
-										<xs:element name="HTTPWithBackoff" type="RequiredString" minOccurs="0"/>
+										<xs:element name="ServerUrl" type="RequiredString"/>
+										<xs:element name="EndPointName" type="RequiredString"/>
+										<xs:element name="HTTPWithBackoff" type="xs:boolean" minOccurs="0" default="true"/>
 									</xs:all>
 								</xs:complexType>
 							</xs:element>

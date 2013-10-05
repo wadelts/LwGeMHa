@@ -76,7 +76,7 @@
 				<xs:element name="Auditing" minOccurs="0">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="AuditKeys" maxOccurs="unbounded">
+							<xs:element name="AuditKeys" maxOccurs="4">
 								<xs:complexType>
 									<xs:sequence>
 										<xs:element name="KeyName" type="RequiredString" maxOccurs="unbounded"/>
