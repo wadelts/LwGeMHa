@@ -11,7 +11,7 @@ DIDN'T GET THIS WORKING - taking data from CSV file creates a Db shape XML msg
 			<InputLimit>1</InputLimit>
 			<DataFormat>CSV</DataFormat>
 			<InputFile>
-				<FileDir>D:\eclipseWorkspaces\workspace\GeMHa\data\</FileDir>
+				<FileDir>C:\Users\wadel\git\GeMHa\GeMHa\data\</FileDir>
 				<FileNameFilter>Batchuler_Failure_Report_CSV_[0-9]*.txt</FileNameFilter>
 				<CSVParams>
 					<FieldSeparator>\t</FieldSeparator>
@@ -26,7 +26,7 @@ DIDN'T GET THIS WORKING - taking data from CSV file creates a Db shape XML msg
 				</CSVParams>
 			</InputFile>
 		</InputSource>
-		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Output>
 <!-- 
@@ -64,7 +64,7 @@ DIDN'T GET THIS WORKING - taking data from CSV file creates a Db shape XML msg
 		<Level>
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
-		<LogFileDir>D:\eclipseWorkspaces\workspace\GeMHa\logs\</LogFileDir>
+		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
 		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
 		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>

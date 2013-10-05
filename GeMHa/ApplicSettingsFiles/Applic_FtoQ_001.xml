@@ -16,7 +16,7 @@
 				<FileNameFilter>input_[0-9]*.xml</FileNameFilter>
 			</InputFile>
 		</InputSource>
-		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Output>
 		<OutputQueue>
@@ -52,7 +52,7 @@
 		<Level>
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
-		<LogFileDir>C:\Users\wadel\workspace\GeMHa\logs\</LogFileDir>
+		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
 		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
 		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>

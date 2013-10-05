@@ -21,7 +21,7 @@
 				<MilliSecondsBeforeQuiet>3000</MilliSecondsBeforeQuiet>
 			</InputQueue>
 		</InputSource>
-		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Output>
 		<OutputQueue>

@@ -16,11 +16,11 @@
 				<MilliSecondsBeforeQuiet>3000</MilliSecondsBeforeQuiet>
 			</InputQueue>
 		</InputSource>
-		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Output>
 		<OutputFile>
-			<FileNameTemplate>C:\Users\wadel\workspace\GeMHa\responses\response_*_?.xml</FileNameTemplate>
+			<FileNameTemplate>C:\Users\wadel\git\GeMHa\GeMHa\responses\response_*_?.xml</FileNameTemplate>
 		</OutputFile>
 	</Output>
 	<Processing>
@@ -51,7 +51,7 @@
 		<Level>
 			<EnvironmentLoggingLevel>Development</EnvironmentLoggingLevel>
 		</Level>
-		<LogFileDir>C:\Users\wadel\workspace\GeMHa\logs\</LogFileDir>
+		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
 		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
 		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>

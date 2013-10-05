@@ -41,16 +41,16 @@
 				</CSVParams>
 			</InputFile>
 		</InputSource>
-		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Output>
 		<OutputFile>
-			<FileNameTemplate>C:\Users\wadel\workspace\GeMHa\responses\response_*_?.xml</FileNameTemplate>
+			<FileNameTemplate>C:\Users\wadel\git\GeMHa\GeMHa\responses\response_*_?.xml</FileNameTemplate>
 		</OutputFile>
 	</Output>
 	<Processing>
 		<MessageProcessingClassName>gemha.servers.LwProcessMessageForDb</MessageProcessingClassName>
-		<MessageProcessingSettingsFileName>C:\Users\wadel\workspace\GeMHa\ApplicSettingsFiles\LwProcessMessageForDbSettings_Load_Contacts.xml</MessageProcessingSettingsFileName>
+		<MessageProcessingSettingsFileName>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\LwProcessMessageForDbSettings_Load_Contacts.xml</MessageProcessingSettingsFileName>
 		<MindElements>
 			<ElementName>/MESSAGE/DBACTION/INSERT/COLUMNS/NAME</ElementName>
 		</MindElements>
@@ -64,7 +64,7 @@
 		</AuditKeys>
 		<AuditKeysSeparator>-</AuditKeysSeparator>
 		<ErrorFiles>
-			<ErrorFilesDir>C:\Users\wadel\workspace\GeMHa\errors\</ErrorFilesDir>
+			<ErrorFilesDir>C:\Users\wadel\git\GeMHa\GeMHa\errors\</ErrorFilesDir>
 			<ErrorFileNameTemplate>ErrorMessage_*_?.xml</ErrorFileNameTemplate>
 		</ErrorFiles>
 	</Auditing>
@@ -72,7 +72,7 @@
 		<Level>
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
-		<LogFileDir>C:\Users\wadel\workspace\GeMHa\logs\</LogFileDir>
+		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
 		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
 		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>

@@ -14,7 +14,7 @@
 				<PortNumber>11819</PortNumber>
 			</InputSocket>
 		</InputSource>
-		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="/mv1/delv/middleware/CRDB/apps/mqXmq/data/sorts_transfer_service_order_to_delivery.xsd"/>
+		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Output>
 		<OutputFile>
@@ -22,7 +22,7 @@
 		</OutputFile>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>EirProcessMessageDoNothing</MessageProcessingClassName>
+		<MessageProcessingClassName>LwProcessMessageDoNothing</MessageProcessingClassName>
 		<SendElements>
 			<ElementName>/MESSAGE/SOCKET_REQUEST</ElementName>
 		</SendElements>
@@ -39,7 +39,7 @@
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
 		<LogFileDir>/mv1/delv/middleware/CRDB/apps/mqXmq/</LogFileDir>
-		<LogFileNameTemplate>EirGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>EirGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>
