@@ -16,7 +16,7 @@ public class ProcessMessageForFileSettings
 	
     private static final Logger logger = Logger.getLogger("gemha");
 
-	private String columnsLocation = "/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS";
+	private String columnsLocation = "/MESSAGE/FILE_REQUEST/TABLE/(ROW/COLUMNS)";
 	private String settingsFileName = null;
 	private boolean settingsFileSchemaValidation = false;
 

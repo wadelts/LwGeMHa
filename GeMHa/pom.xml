@@ -15,6 +15,18 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+	  <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+		  <artifactId>maven-source-plugin</artifactId>
+		  <executions>
+		    <execution>
+		      <id>attach-sources</id>
+		      <goals>
+		        <goal>jar</goal>
+		      </goals>
+		    </execution>
+		  </executions>
+	  </plugin>
 <!-- See notes.txt re running via Maven
       <plugin>
 		  <groupId>org.codehaus.mojo</groupId>
