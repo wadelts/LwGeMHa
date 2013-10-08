@@ -207,10 +207,7 @@ public class ProcessMessageForFile implements IProcessMesssage {
 				///////////////////////////////////////////////
 				
 				int numRowsProcessed = 0;
-				logger.info("[" + Thread.currentThread().getName() + "]: Column Location will be " + fileSettings.getColumnsLocation() + "[position()=" + (numRowsProcessed+1) + "]");
 				while (newDoc.setCurrentNodeByPath(fileSettings.getColumnsLocation(), ++numRowsProcessed)) {
-					logger.info("[" + Thread.currentThread().getName() + "]: Path to parent = " + XMLDocument.pathFromRoot(newDoc.getCurrentNode(), ""));
-					logger.info("[" + Thread.currentThread().getName() + "]: Path to node = " + XMLDocument.pathFromRoot(newDoc.getCurrentNode(), newDoc.getCurrentNodeName()));
 					Vector<XMLTagValue> row = newDoc.getValuesForTagsChildren();
 		
 					int colNum = 0;
