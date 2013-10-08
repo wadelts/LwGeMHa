@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForFileSettings.xsd">
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ProcessMessageForFileSettings.xsd">
 	<Params>
-		<ColumnsLocation>/xxxMESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS</ColumnsLocation>
-		<MessagesFileNameTemplate>output/LwProcessMessageForFile_Output_all.txt</MessagesFileNameTemplate>
+		<ColumnsLocation>/xxxMESSAGE/FILE_REQUEST/TABLE/(ROW/COLUMNS)</ColumnsLocation>
+		<MessagesFileNameTemplate>output/ProcessMessageForFile_Output_all.txt</MessagesFileNameTemplate>
 		<FieldSeparator>\t</FieldSeparator>
 		<IncludeColumnNames>true</IncludeColumnNames>
 		<FileOpenMode>create</FileOpenMode>

@@ -12,7 +12,7 @@ import lw.utils.*;
   * @author Liam Wade
   * @version 1.0 07/11/2008
   */
-public class LwProcessMessageForDbSettings
+public class ProcessMessageForDbSettings
 {
 
     private static final Logger logger = Logger.getLogger("gemha");
@@ -24,10 +24,10 @@ public class LwProcessMessageForDbSettings
 	* @param settingsFileName the name of the settings file, path included
 	* @param settingsFileSchemaValidation the set to true to have the settings file validate against its Schema definition
     */
-	public LwProcessMessageForDbSettings(String settingsFileName, boolean settingsFileSchemaValidation)
-																			throws LwSettingsException {
+	public ProcessMessageForDbSettings(String settingsFileName, boolean settingsFileSchemaValidation)
+																			throws SettingsException {
 		if (settingsFileName == null) {
-			throw new LwSettingsException("LwProcessMessageForDbSettings.constructor(): Required parameter is null.");
+			throw new SettingsException("LwProcessMessageForDbSettings.constructor(): Required parameter is null.");
 		}
 
 		this.settingsFileName = settingsFileName;
@@ -36,8 +36,8 @@ public class LwProcessMessageForDbSettings
 		try {
 			getSettings();
 		}
-		catch(LwXMLException e) {
-			throw new LwSettingsException("LwProcessMessageForDbSettings.constructor(): caught LwXMLException: " + e);
+		catch(XMLException e) {
+			throw new SettingsException("LwProcessMessageForDbSettings.constructor(): caught LwXMLException: " + e);
 		}
 
 		recordSettings();
@@ -132,7 +132,7 @@ public class LwProcessMessageForDbSettings
 	  *
 	  * @return the a Vector of the audit Key Names For whichever action was specified
 	  */
-	public Vector<LwXMLTagValue> getAuditKeyNamesSet(String action) {
+	public Vector<XMLTagValue> getAuditKeyNamesSet(String action) {
 			if (action == null) {
 				return null;
 			}
@@ -166,61 +166,61 @@ public class LwProcessMessageForDbSettings
     *
 	*/
 	private void getSettings()
-							throws LwSettingsException, LwXMLException {
-		LwXMLDocument settingsDoc = null;
+							throws SettingsException, XMLException {
+		XMLDocument settingsDoc = null;
 
-		settingsDoc = LwXMLDocument.createDocFromFile(settingsFileName, settingsFileSchemaValidation);
+		settingsDoc = XMLDocument.createDocFromFile(settingsFileName, settingsFileSchemaValidation);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Get the application general Parameters...
 		//////////////////////////////////////////////////////////////////////////
 		// Get the name SQL driver class
-		jdbcClass = settingsDoc.getValueForTag("Applic/Params/JdbcClass");
+		jdbcClass = settingsDoc.getValueForTag("Params/JdbcClass");
 
 		// Get the database URL
-		dbURL = settingsDoc.getValueForTag("Applic/Params/DbURL");
+		dbURL = settingsDoc.getValueForTag("Params/DbURL");
 
 		// Get the User name for logging on to the database
-		userName = settingsDoc.getValueForTag("Applic/Params/UserName");
+		userName = settingsDoc.getValueForTag("Params/UserName");
 
 		// Get the User password for logging on to the database
-		userPass = settingsDoc.getValueForTag("Applic/Params/UserPass");
+		userPass = settingsDoc.getValueForTag("Params/UserPass");
 
 		// Get the setting for Auto-commit - if on, all transactions will be automatically committed when the connection is closed.
-		String strAutoCommit = settingsDoc.getValueForTag("Applic/Params/AutoCommit");
+		String strAutoCommit = settingsDoc.getValueForTag("Params/AutoCommit");
 		if (strAutoCommit != null) {
 			autoCommit = strAutoCommit.toLowerCase().equals("on");
 		}
 
 		// Get the name to use for database table, for use if none is supplied as part of a transaction.
-		defaultTablename = settingsDoc.getValueForTag("Applic/Params/DefaultTablename");
+		defaultTablename = settingsDoc.getValueForTag("Params/DefaultTablename");
 
 		// Get the strategy to be employed for update locking.
-		updateLockingStrategy = settingsDoc.getValueForTag("Applic/Params/UpdateLockingStrategy");
+		updateLockingStrategy = settingsDoc.getValueForTag("Params/UpdateLockingStrategy");
 		if (updateLockingStrategy == null) {
 			updateLockingStrategy = "optimistic";
 		}
 
 		// Get the format of dates to be used for all queries/updates to the database, for both in- and out-bound date elements.
-		dateFormat = settingsDoc.getValueForTag("Applic/Params/DateFormat");
+		dateFormat = settingsDoc.getValueForTag("Params/DateFormat");
 
 		//////////////////////////////////////////////////////////////////////////
 		// Get any PreparedStatements, if exist...
 		//////////////////////////////////////////////////////////////////////////
 		int i = 0;
-		while (settingsDoc.setCurrentNodeByPath("Applic/PreparedStatements/PreparedStatement", ++i)) {
-			String preparedStatementName = settingsDoc.getValueForTag("PreparedStatement/PreparedStatementName");
-			LwXMLTagValue preparedStatementSQL = settingsDoc.getValueForTagPlusAttributes("PreparedStatement/PreparedStatementSQL");
+		while (settingsDoc.setCurrentNodeByPath("PreparedStatements/PreparedStatement", ++i)) {
+			String preparedStatementName = settingsDoc.getValueForTag("PreparedStatementName");
+			XMLTagValue preparedStatementSQL = settingsDoc.getValueForTagPlusAttributes("PreparedStatementSQL");
 
 			// Get the SQL statement parameter column names (will actually be stored in the value part of the LwXMLTagValue - all Names will be "Column")
 			// This encapsulates the order in which actual values will be applied to the prepared statement
 			ArrayList<String> paramList = null;
-			if (settingsDoc.setCurrentNodeByPath("PreparedStatement/ParameterOrder", 1)) {
-				Vector<LwXMLTagValue> paramColumns = settingsDoc.getValuesForTagsChildren();
+			if (settingsDoc.setCurrentNodeByPath("ParameterOrder", 1)) {
+				Vector<XMLTagValue> paramColumns = settingsDoc.getValuesForTagsChildren();
 
 				// Transfer column names to simple list
 				paramList = new ArrayList<String>(paramColumns.size());
-				for(LwXMLTagValue p : paramColumns) {
+				for(XMLTagValue p : paramColumns) {
 					paramList.add(p.getTagValue());
 				}
 
@@ -237,8 +237,8 @@ public class LwProcessMessageForDbSettings
 		// Get the values for ALL Audit KeyName TAGs, if exist...
 		//////////////////////////////////////////////////////////////////////////
 		i = 0;
-		while (settingsDoc.setCurrentNodeByPath("Applic/Auditing/AuditKeys", ++i)) {
-			LwXMLTagValue auditKeysAggregate = settingsDoc.getValueForTagPlusAttributes("AuditKeys"); // just getting attribute(s) for this aggregate
+		while (settingsDoc.setCurrentNodeByPath("Auditing/AuditKeys", ++i)) {
+			XMLTagValue auditKeysAggregate = settingsDoc.getValueForTagPlusAttributesForCurrentNode(); // just getting attribute(s) for current node
 			String dbAction = auditKeysAggregate.getAttributeValue("DbAction");
 			if (dbAction != null) {
 				if (dbAction.equals("insert")) {
@@ -259,7 +259,7 @@ public class LwProcessMessageForDbSettings
 		}
 
 
-		auditKeysSeparator = settingsDoc.getValueForTag("Applic/Auditing/AuditKeysSeparator");
+		auditKeysSeparator = settingsDoc.getValueForTag("Auditing/AuditKeysSeparator");
 
 	}
 
@@ -284,28 +284,28 @@ public class LwProcessMessageForDbSettings
 
 		// Record Audit key Names, if exist
 		if (auditKeyNamesSetForInserts != null) {
-			for (LwXMLTagValue tv : auditKeyNamesSetForInserts) {
+			for (XMLTagValue tv : auditKeyNamesSetForInserts) {
 				logger.config("Found Audit Insert KeyName Tag at " + tv.getPathToName() + " Value=" + tv.getTagValue());
 			}
 		}
 
 		// Record Audit key Names, if exist
 		if (auditKeyNamesSetForUpdates != null) {
-			for (LwXMLTagValue tv : auditKeyNamesSetForUpdates) {
+			for (XMLTagValue tv : auditKeyNamesSetForUpdates) {
 				logger.config("Found Audit Update KeyName Tag at " + tv.getPathToName() + " Value=" + tv.getTagValue());
 			}
 		}
 
 		// Record Audit key Names, if exist
 		if (auditKeyNamesSetForDeletes != null) {
-			for (LwXMLTagValue tv : auditKeyNamesSetForDeletes) {
+			for (XMLTagValue tv : auditKeyNamesSetForDeletes) {
 				logger.config("Found Audit Delete KeyName Tag at " + tv.getPathToName() + " Value=" + tv.getTagValue());
 			}
 		}
 
 		// Record Audit key Names, if exist
 		if (auditKeyNamesSetForSelects != null) {
-			for (LwXMLTagValue tv : auditKeyNamesSetForSelects) {
+			for (XMLTagValue tv : auditKeyNamesSetForSelects) {
 				logger.config("Found Audit Select KeyName Tag at " + tv.getPathToName() + " Value=" + tv.getTagValue());
 			}
 		}
@@ -329,9 +329,9 @@ public class LwProcessMessageForDbSettings
     														// update(), but will supply the old values for the updating cols in the qualList parameter.
 
 	private Vector<LwPreparedStatementTemplate> preparedStatementTemplates = new Vector<LwPreparedStatementTemplate>();
-	private Vector<LwXMLTagValue> auditKeyNamesSetForInserts = null;
-	private Vector<LwXMLTagValue> auditKeyNamesSetForUpdates = null;
-	private Vector<LwXMLTagValue> auditKeyNamesSetForDeletes = null;
-	private Vector<LwXMLTagValue> auditKeyNamesSetForSelects = null;
+	private Vector<XMLTagValue> auditKeyNamesSetForInserts = null;
+	private Vector<XMLTagValue> auditKeyNamesSetForUpdates = null;
+	private Vector<XMLTagValue> auditKeyNamesSetForDeletes = null;
+	private Vector<XMLTagValue> auditKeyNamesSetForSelects = null;
 	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
 }

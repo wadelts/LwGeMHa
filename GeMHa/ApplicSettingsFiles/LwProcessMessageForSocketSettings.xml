@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForSocketSettings.xsd">
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ProcessMessageForSocketSettings.xsd">
 	<Params>
 		<PortNumber>11819</PortNumber>
 		<HostName>localhost</HostName>

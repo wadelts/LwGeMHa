@@ -3,12 +3,12 @@ package gemha.servers;
 import java.util.logging.*;
 import java.util.concurrent.*;
 
-import gemha.support.LwMessagingException;
-import gemha.interfaces.LwIAcceptMesssages;
+import gemha.support.MessagingException;
+import gemha.interfaces.IAcceptMesssages;
 import lw.sockets.interfaces.*;
 import lw.sockets.*;
 import lw.utils.LwLogger;
-import lw.utils.LwSettingsException;
+import lw.utils.SettingsException;
 
 /**
   * This class retrieves messages from a socket.
@@ -24,13 +24,13 @@ import lw.utils.LwSettingsException;
   * @author Liam Wade
   * @version 1.0 13/01/2009
   */
-public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
+public class AcceptMessagesFromSocket implements IAcceptMesssages
 													,LwIXMLSocketServerListener {
 
     private static final Logger logger = Logger.getLogger("gemha");
 	
-	public LwAcceptMessagesFromSocket(int portNumber)
-																		throws LwSettingsException {
+	public AcceptMessagesFromSocket(int portNumber)
+																		throws SettingsException {
 		this.portNumber = portNumber;
 	}
 
@@ -58,15 +58,15 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  * @return true for success, false for failure
 	  */
 	public boolean performSetup()
-								throws LwMessagingException {
+								throws MessagingException {
 		try {
 			// TODO: NEED TO FIX synchQueue IDEA
-			sockServer = new LwXMLSocketServer(Executors.newFixedThreadPool(2), this, portNumber, synchQueue);
+			sockServer = new XMLSocketServer(Executors.newFixedThreadPool(2), this, portNumber, synchQueue);
 			new Thread(sockServer).start();
 			socketClosed = false;
 			logger.info("sockServer started.");
 		}
-		catch(LwSocketException e) {
+		catch(SocketException e) {
 			logger.severe("Couldn't create new sockServer: " + e.getMessage());
 			return false;
 		}
@@ -80,7 +80,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  * @return the next message retrieved
 	  */
 	public String acceptNextMessage()
-									throws LwMessagingException {
+									throws MessagingException {
 		if (socketClosed) {
 			return null;
 		}
@@ -109,7 +109,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  *
 	  */
 	public void stayMessage(String auditKey)
-							throws LwMessagingException {
+							throws MessagingException {
 
 		consumeMessage = false;
 
@@ -122,7 +122,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  *
 	  */
 	public void consumeMessage(String auditKey)
-							throws LwMessagingException {
+							throws MessagingException {
 
 
 		consumeMessage = true;
@@ -137,7 +137,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  */
 	public void performCleanup(LwLogger shutdownLogger) {
 		socketClosed = true;
-		try {sockServer.close(shutdownLogger);} catch(LwSocketException e) { /* Do nothing - too late */}
+		try {sockServer.close(shutdownLogger);} catch(SocketException e) { /* Do nothing - too late */}
 	}
 
 	//////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  *
 	  * @return true if the supplied message is to be consumed, otherwise false
 	  */
-	public boolean messageReceived(LwSocketEvent event) {
+	public boolean messageReceived(SocketEvent event) {
 		logger.info("Got message from port " + event.getPortNumber() + " for TID " + event.getTID());
 		logger.fine("Got message from port " + event.getPortNumber() + " for TID " + event.getTID() + ": " + event.getReceivedMessage());
 		dataQueue.offer(event.getReceivedMessage()); // no blocking here - caller will block on synchQueue instead
@@ -171,7 +171,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  *
 	  * @return the response to be sent back over the socket
 	  */
-	public String messageReceivedAndWantResponse(LwSocketEvent event) {
+	public String messageReceivedAndWantResponse(SocketEvent event) {
 		return "<MESSAGE></MESSAGE>"; // but it is not expected that this is called in this implementation
 	}
 
@@ -182,9 +182,9 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  * @param exception LwSocketException explaining the problem
 	  *
 	  */
-	public void handleError(LwSocketEvent event, LwSocketException exception) {
+	public void handleError(SocketEvent event, SocketException exception) {
 		logger.info("Handled error from Socket Server on port " + event.getPortNumber() + " for TID " + event.getTID() + " LwSocketException: " + exception.getMessage());
-		messagingException = new LwMessagingException("LwSocketException reported by socket server: " + exception.getMessage());
+		messagingException = new MessagingException("LwSocketException reported by socket server: " + exception.getMessage());
 		dataQueue.offer("exception"); // in case have to wake me up
 	}
 
@@ -197,7 +197,7 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	  *
 	  * @return true if the Socket Server shold close down, false if it should remain open
 	  */
-	public boolean canCloseServerSocket(LwSocketEvent event) {
+	public boolean canCloseServerSocket(SocketEvent event) {
 		logger.info("Agreed to request to close Server Socket on port " + event.getPortNumber() + " for event TID " + event.getTID());
 		socketClosed = true;
 		dataQueue.offer("closedSocket"); // in case have to wake me up
@@ -219,12 +219,12 @@ public class LwAcceptMessagesFromSocket implements LwIAcceptMesssages
 	//				End: Interface LwIXMLSocketServer Methods
 	//////////////////////////////////////////////////////////////////////////
 
-    private LwXMLSocketServer sockServer = null;
+    private XMLSocketServer sockServer = null;
 	private int portNumber = 0;			// the port number for the socket server
 	private SynchronousQueue<String> synchQueue = new SynchronousQueue<String>();	// sychronise messages between this thread and the LwXMLSocketServer thread (SynchronousQueue has no space, so blocks on put and take)
 //	private SynchronousQueue<String> dataQueue = new SynchronousQueue<String>();	// sychronise messages between receiving and getting processed (SynchronousQueue has no space, so blocks on put)
 	private ArrayBlockingQueue<String> dataQueue = new ArrayBlockingQueue<String>(2);	// Allow consumer block put provider can continue (but then blocks on synchQueue)
 	private boolean socketClosed = true;
 	private boolean consumeMessage = true;											// indicate to message supplier if message can be consumed
-	private LwMessagingException messagingException = null;						// will be passed if we encounter a socket exception
+	private MessagingException messagingException = null;						// will be passed if we encounter a socket exception
 }

@@ -5,7 +5,7 @@ import java.io.*;
 
 import lw.XML.*;
 import lw.utils.LwLogger;
-import gemha.interfaces.LwIStoreMesssage;
+import gemha.interfaces.IStoreMesssage;
 import gemha.support.*;
 
 /**
@@ -14,7 +14,7 @@ import gemha.support.*;
   * @author Liam Wade
   * @version 1.0 30/10/2008
   */
-public class LwStoreMesssageToFile implements LwIStoreMesssage {
+public class StoreMesssageToFile implements IStoreMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
@@ -23,7 +23,7 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 
 	private int safetySequenceNo = 0;
 
-	public LwStoreMesssageToFile(String outputFileNameTemplate, String dataFormat) {
+	public StoreMesssageToFile(String outputFileNameTemplate, String dataFormat) {
 		this.outputFileNameTemplate = outputFileNameTemplate;
 		this.dataFormat = dataFormat;
 	}
@@ -34,19 +34,19 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 	/**
 	  * Open any connections
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void openStorage()
-	 			throws LwMessagingException {
+	 			throws MessagingException {
 	}
 
 	/**
 	  * Close any connections
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void closeStorage()
-	 			throws LwMessagingException {
+	 			throws MessagingException {
 	}
 
 	/**
@@ -55,29 +55,29 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 	  * @param message the message to be processed
 	  * @param instructions instructions on how the message is to be processed (will be implementation-specific). Can be null
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void putMessage(String message, String auditKey, String instructions)
-								throws LwMessagingException {
+								throws MessagingException {
 
 		if (outputFileNameTemplate == null) { // am dealing with files for output
-			throw new LwMessagingException("Response message with AuditKey Value " + auditKey + " not output - no outputFileNameTemplate to work with.");
+			throw new MessagingException("Response message with AuditKey Value " + auditKey + " not output - no outputFileNameTemplate to work with.");
 		}
 
 		String outputFileName = createFileNameFromTemplate(outputFileNameTemplate, auditKey);
 
 		if (dataFormat != null && dataFormat.equals("XML")) {
-			LwXMLDocument outputDoc = createXMLDocFromInput(message, false);
+			XMLDocument outputDoc = createXMLDocFromInput(message, false);
 			if (outputDoc == null) {
 				logger.severe("XML Response message with AuditKey Value " + auditKey + " could not be parsed.");
-				throw new LwMessagingException("XML Response message with AuditKey Value " + auditKey + " could not be parsed.");
+				throw new MessagingException("XML Response message with AuditKey Value " + auditKey + " could not be parsed.");
 			}
 			else if (outputDoc.toFile(outputFileName, false)) {
 				logger.info("XML Response message with AuditKey Value " + auditKey + " output to file " + outputFileName);
 			}
 			else {
 				logger.severe("XML Response message with AuditKey Value " + auditKey + " could not be output to file " + outputFileName);
-				throw new LwMessagingException("XML Response message with AuditKey Value " + auditKey + " could not be output to file " + outputFileName);
+				throw new MessagingException("XML Response message with AuditKey Value " + auditKey + " could not be output to file " + outputFileName);
 			}
 		}
 		else { // No format, just send straight to file
@@ -87,7 +87,7 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 			else {
 				// problem putting to file!
 				logger.severe("Response message with AuditKey Value " + auditKey + " could not be output to file " + outputFileName);
-				throw new LwMessagingException("Response message with AuditKey Value " + auditKey + " could not be output to file " + outputFileName);
+				throw new MessagingException("Response message with AuditKey Value " + auditKey + " could not be output to file " + outputFileName);
 			}
 		} // end if (dataFormat != null && dataFormat.equals("XML"))
 	}
@@ -186,15 +186,15 @@ public class LwStoreMesssageToFile implements LwIStoreMesssage {
 	  *
 	  * @return a new LwXMLDocument
 	  */
-	private LwXMLDocument createXMLDocFromInput(String message, boolean validateAgainstSchema) {
+	private XMLDocument createXMLDocFromInput(String message, boolean validateAgainstSchema) {
 
-		LwXMLDocument newDoc = null;
+		XMLDocument newDoc = null;
 
 		try {
-			newDoc = LwXMLDocument.createDoc(message, validateAgainstSchema);
+			newDoc = XMLDocument.createDoc(message, validateAgainstSchema);
 			return newDoc;
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.warning("LwXMLException: " + e.getMessage());
 			return null;
 		}

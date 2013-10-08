@@ -14,16 +14,16 @@ import java.util.logging.*;
 import java.util.*;
 
 import lw.XML.*;
-import lw.sockets.LwSocketComms;
-import lw.sockets.LwSocketException;
-import lw.sockets.LwSocketTransferMessage;
-import lw.sockets.LwSocketComms.SocketType;
+import lw.sockets.SocketComms;
+import lw.sockets.SocketException;
+import lw.sockets.SocketTransferMessage;
+import lw.sockets.SocketComms.SocketType;
 import lw.utils.*;
-import gemha.support.LwProcessMessageForSocketSettings;
-import gemha.support.LwMessagingException;
-import gemha.support.LwProcessResponse;
-import gemha.support.LwProcessResponse.ProcessResponseCode;
-import gemha.interfaces.LwIProcessMesssage;
+import gemha.support.ProcessMessageForSocketSettings;
+import gemha.support.MessagingException;
+import gemha.support.ProcessResponse;
+import gemha.support.ProcessResponse.ProcessResponseCode;
+import gemha.interfaces.IProcessMesssage;
 
 /**
   * This class sends messages over a socket and returns responses, if required.
@@ -31,7 +31,7 @@ import gemha.interfaces.LwIProcessMesssage;
   * @author Liam Wade
   * @version 1.0 10/12/2008
   */
-public class LwProcessMessageForSocket implements LwIProcessMesssage {
+public class ProcessMessageForSocket implements IProcessMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
     
@@ -46,15 +46,15 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
     
     // Queue for handing off responses, with fixed capacity of 1000.
     // End-of-data will be signaled by a null record
-    private final BlockingQueue<Future<LwProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<LwProcessResponse>>(1000);
+    private final BlockingQueue<Future<ProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<ProcessResponse>>(1000);
 
 	volatile private Socket s;
 
-	volatile private LwProcessMessageForSocketSettings settings = null;
+	volatile private ProcessMessageForSocketSettings settings = null;
 	volatile private int fallBackTransactionID = 0; // to be used to create unique trans ids, if no audit keys supplied
-    volatile private LwSocketComms socketComms = null;
+    volatile private SocketComms socketComms = null;
 
-	public LwProcessMessageForSocket() {
+	public ProcessMessageForSocket() {
 	}
 
 	//////////////////////////////////////////////////////////////////
@@ -67,20 +67,20 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  *
 	  * @return true for success, false for failure
 	  */
-	public void performSetup(String settingsFileName) throws LwSettingsException {
+	public void performSetup(String settingsFileName) throws SettingsException {
 
 		if (settingsFileName == null) {
-			throw new LwSettingsException("Parameter settingsFileName was null.");
+			throw new SettingsException("Parameter settingsFileName was null.");
 		}
 
-		settings = new LwProcessMessageForSocketSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
+		settings = new ProcessMessageForSocketSettings(settingsFileName, XMLDocument.SCHEMA_VALIDATION_ON);
 
 		try {
 			socketComms = openSocket(settings.getHostName(), settings.getPortNumber());
 		}
-		catch (LwMessagingException e) {
+		catch (MessagingException e) {
 			logger.severe("LwMessagingException: " + e.getMessage());
-			throw new LwSettingsException("Caught LwMessagingException trying to open a new socket : " + e.getMessage());
+			throw new SettingsException("Caught LwMessagingException trying to open a new socket : " + e.getMessage());
 		}
 	}
 
@@ -94,11 +94,11 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
 	@Override
-	public LwProcessResponse processMessageSynch(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues)
-											throws LwMessagingException {
+	public ProcessResponse processMessageSynch(final String messageText, final XMLDocument inputDoc, String auditKeyValues)
+											throws MessagingException {
 		return processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.SYNCHRONOUS);
 	}
 	
@@ -110,11 +110,11 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  * @param inputDoc the original input message as an XML document, null if message was not XML. To be returned with result - DO NOT MODIFY, is NOT threadsafe!!
 	  * @param auditKeyValues audit Key Values for the message (can be null). To be returned with result
 	  *
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
 	@Override
-	public void processMessageAsynch(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues)
-											throws LwMessagingException {
+	public void processMessageAsynch(final String messageText, final XMLDocument inputDoc, String auditKeyValues)
+											throws MessagingException {
 		processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.ASYNCHRONOUS);
 	}
 
@@ -129,14 +129,14 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
-	private LwProcessResponse processMessage(final String messageText, final LwXMLDocument inputDoc, final String auditKeyValues, final ProcessingMode processingMode)
-											throws LwMessagingException {
+	private ProcessResponse processMessage(final String messageText, final XMLDocument inputDoc, final String auditKeyValues, final ProcessingMode processingMode)
+											throws MessagingException {
 
-		Callable<LwProcessResponse> processMessageTask = new Callable<LwProcessResponse>() {
+		Callable<ProcessResponse> processMessageTask = new Callable<ProcessResponse>() {
 			@Override
-			public LwProcessResponse call() throws LwMessagingException {
+			public ProcessResponse call() throws MessagingException {
 	
 				if (s == null) { // then socket was closed, re-open it
 					socketComms = openSocket(settings.getHostName(), settings.getPortNumber());
@@ -145,14 +145,14 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 				//////////////////////////////////////////////////////////////////
 				// Set up a new XML doc
 				//////////////////////////////////////////////////////////////////
-				LwXMLDocument newDoc = null;
+				XMLDocument newDoc = null;
 				try {
-					newDoc = LwXMLDocument.createDoc(messageText, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+					newDoc = XMLDocument.createDoc(messageText, XMLDocument.SCHEMA_VALIDATION_OFF);
 				}
-				catch(LwXMLException e) {
+				catch(XMLException e) {
 					logger.severe("LwXMLException: " + e.getMessage());
 					logger.warning("InputMessage was :" + messageText);
-					throw new LwMessagingException("Could not create new XML document: " + e.getMessage());
+					throw new MessagingException("Could not create new XML document: " + e.getMessage());
 				}
 		
 				///////////////////////////////////////////////
@@ -163,47 +163,47 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 				///////////////////////////////////////////////
 				// Send the data (in chunks, if necessary)...
 				///////////////////////////////////////////////
-				LwSocketComms.SocketService service = (settings.getApplicationLevelResponse().equals("synchronous") ? LwSocketComms.SocketService.CONSUME_RESPOND : LwSocketComms.SocketService.CONSUME);
+				SocketComms.SocketService service = (settings.getApplicationLevelResponse().equals("synchronous") ? SocketComms.SocketService.CONSUME_RESPOND : SocketComms.SocketService.CONSUME);
 				try {
 					if (socketComms == null) {
 						logger.severe("socketComms IS NULL!!!!!");
-						throw new LwMessagingException("Could not send XML document: socketComms IS NULL!!!!!");
+						throw new MessagingException("Could not send XML document: socketComms IS NULL!!!!!");
 					}
 						
-					socketComms.sendMessage(new LwSocketTransferMessage(new Integer(0), auditKeyValues, service, LwSocketComms.SocketFormat.XML, messageText));
-				} catch (LwSocketException e) {
+					socketComms.sendMessage(new SocketTransferMessage(new Integer(0), auditKeyValues, service, SocketComms.SocketFormat.XML, messageText));
+				} catch (SocketException e) {
 					logger.severe("LwSocketException: " + e.getMessage());
-					throw new LwMessagingException("Could not send XML document: " + e.getMessage());
+					throw new MessagingException("Could not send XML document: " + e.getMessage());
 				}
 				// Get confirmation/error response from server ( just to say got request)
 				try {
 					socketComms.next();
-				} catch (LwSocketException e) {
+				} catch (SocketException e) {
 					logger.severe("LwSocketException: " + e.getMessage());
-					throw new LwMessagingException("Failed to receive response from server: " + e.getMessage());
+					throw new MessagingException("Failed to receive response from server: " + e.getMessage());
 				}
 				
 				// Throw exception if a technical error was encountered
 				int serverRespCode = socketComms.getLastErrorNo();
 				if (serverRespCode != 0) {
 					logger.severe("Socket Server returned error " + serverRespCode + " when trying to send data " + auditKeyValues + ".");
-					throw new LwMessagingException("Socket Server returned error " + serverRespCode + " when trying to send data for message " + auditKeyValues + ".");
+					throw new MessagingException("Socket Server returned error " + serverRespCode + " when trying to send data for message " + auditKeyValues + ".");
 				}
 		
 				///////////////////////////////////////////////
 				// If got here, message was successfully transmitted.
 				// So build Response...
 				///////////////////////////////////////////////
-				LwXMLDocument response = createResponseDoc(); // create doc shell
+				XMLDocument response = createResponseDoc(); // create doc shell
 				response.addElement(null, "SEND_STATUS", "SUCCESS");
 		
 				// Check if we should await an application-level response
 				if (settings.getApplicationLevelResponse().equals("synchronous")) {
-					LwXMLDocument applicResponse = getApplicationResponse();
+					XMLDocument applicResponse = getApplicationResponse();
 					response.importNode(applicResponse.getCurrentNode(), true);
 				}
 				
-				LwProcessResponse.Builder responseBuilder = new LwProcessResponse.Builder(ProcessResponseCode.SUCCESS, 1)
+				ProcessResponse.Builder responseBuilder = new ProcessResponse.Builder(ProcessResponseCode.SUCCESS, 1)
 					.setResponse(response.toString())
 					.setInputDoc(inputDoc)
 					.setAuditKeyValues(auditKeyValues);
@@ -242,7 +242,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 			try {
 				return processMessageTask.call();
 			} catch (Exception e) {
-				throw new LwMessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
+				throw new MessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
 			}
 		}
 	}
@@ -254,19 +254,19 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  * LwProcessResponse is immutable
 	  * 
 	  * @return the next response from process, null if no more results will ever arrive
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  * @throws InterruptedException if CALLING thread is noticed as interrupted while getting response
 	  */
 	@Override
-	public LwProcessResponse getResponse() throws LwMessagingException, InterruptedException {
-		LwProcessResponse response = null;
+	public ProcessResponse getResponse() throws MessagingException, InterruptedException {
+		ProcessResponse response = null;
 		try {
-			Future<LwProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
+			Future<ProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
 			response = fr.get(); // will block here if next task in queue not yet finished
 		} catch (ExecutionException e) {
 			Throwable cause = e.getCause();
-			if (cause instanceof LwMessagingException)
-				throw (LwMessagingException) cause;
+			if (cause instanceof MessagingException)
+				throw (MessagingException) cause;
 			else
 				throw launderThrowable(cause);
 		}
@@ -280,8 +280,8 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	public void goQuiet() {
 		logger.info("All quiet, going to close socket connection.");
 		try {
-			socketComms.sendMessage(new LwSocketTransferMessage(new Integer(0), "AutoRequest", LwSocketComms.SocketService.CLOSE, LwSocketComms.SocketFormat.XML, "Close me"));
-		} catch (LwSocketException e) {
+			socketComms.sendMessage(new SocketTransferMessage(new Integer(0), "AutoRequest", SocketComms.SocketService.CLOSE, SocketComms.SocketFormat.XML, "Close me"));
+		} catch (SocketException e) {
 			logger.severe("Caught LwSocketException trying to tell server to CLOSE connection (no action taken): " + e.getMessage());
 		}
 
@@ -324,8 +324,8 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 		
 		if (s != null && socketComms != null) {
 			try {
-				socketComms.sendMessage(new LwSocketTransferMessage(new Integer(0), "AutoRequest", LwSocketComms.SocketService.CLOSE, LwSocketComms.SocketFormat.XML, "Close me"));
-			} catch (LwSocketException e) {
+				socketComms.sendMessage(new SocketTransferMessage(new Integer(0), "AutoRequest", SocketComms.SocketService.CLOSE, SocketComms.SocketFormat.XML, "Close me"));
+			} catch (SocketException e) {
 				logger.severe("Caught LwSocketException trying to tell server to CLOSE connection (no action taken): " + e.getMessage());
 			}
 			
@@ -361,8 +361,8 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  * Open a socket for communications
 	  *
 	  */
-	private LwSocketComms openSocket(String hostName, int portNo)
-						throws LwMessagingException {
+	private SocketComms openSocket(String hostName, int portNo)
+						throws MessagingException {
 		///////////////////////////////////////////////
 		// Connect to the socket on "this" machine.
 		///////////////////////////////////////////////
@@ -371,21 +371,21 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 		}
 		catch (UnknownHostException e) {
 			logger.severe("UnknownHostException: " + e.getMessage());
-			throw new LwMessagingException("Caught UnknownHostException trying to open a new socket : " + e.getMessage());
+			throw new MessagingException("Caught UnknownHostException trying to open a new socket : " + e.getMessage());
 		}
 		catch (IOException e) {
 			logger.severe("IOException: " + e.getMessage());
-			throw new LwMessagingException("Caught IOException trying to open a new socket : " + e.getMessage());
+			throw new MessagingException("Caught IOException trying to open a new socket : " + e.getMessage());
 		}
 
 		// May throw LwSocketException
 		try {
-			socketComms = new LwSocketComms(s, SocketType.CLIENT);
+			socketComms = new SocketComms(s, SocketType.CLIENT);
 			logger.info("Socket Comms object created.");
 			// Read Server Ready message.
 			socketComms.next();
-		} catch (LwSocketException e) {
-			throw new LwMessagingException("Caught LwSocketException trying to set up communications on socket : " + e.getMessage());
+		} catch (SocketException e) {
+			throw new MessagingException("Caught LwSocketException trying to set up communications on socket : " + e.getMessage());
 		}
 
 		logger.info("Socket opened on port " + portNo + " on host " + hostName);
@@ -403,7 +403,7 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  *
 	  * @return the concatenated audit key values for this message, the empty string if no values
 	  */
-	private String getConcatenatedAuditKeyValues(LwXMLDocument doc, Vector<LwXMLTagValue> auditKeyNamesSet, String separator) {
+	private String getConcatenatedAuditKeyValues(XMLDocument doc, Vector<XMLTagValue> auditKeyNamesSet, String separator) {
 
 		String concatenatedValues = "";
 
@@ -412,9 +412,9 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 			return String.valueOf(++fallBackTransactionID);
 		}
 		else {
-			Enumeration<LwXMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
+			Enumeration<XMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
 			while (enumAuditKeyNames.hasMoreElements()) {
-				LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+				XMLTagValue tv = enumAuditKeyNames.nextElement();
 
 				String nextValue = doc.getValueForTag(tv.getTagValue());
 
@@ -431,17 +431,17 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  * Start a response doc
 	  *
 	  */
-	private LwXMLDocument createResponseDoc()
-								throws LwMessagingException {
+	private XMLDocument createResponseDoc()
+								throws MessagingException {
 
-		LwXMLDocument newResponse = null;
+		XMLDocument newResponse = null;
 
 		try {
-			newResponse = LwXMLDocument.createDoc("<MESSAGE></MESSAGE>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newResponse = XMLDocument.createDoc("<MESSAGE></MESSAGE>", XMLDocument.SCHEMA_VALIDATION_OFF);
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
-			throw new LwMessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
+			throw new MessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
 		}
 		
 		return newResponse;
@@ -452,31 +452,31 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 	  *
 	  * @return an XML document containing the response from the server application
 	  */
-	private LwXMLDocument getApplicationResponse()
-								throws LwMessagingException {
+	private XMLDocument getApplicationResponse()
+								throws MessagingException {
 
 		// Now get confirmation/error response from server for action requested
 		try {
 			socketComms.next();
-		} catch (LwSocketException e) {
-			throw new LwMessagingException("Caught LwSocketException getting Application-level response from server: " + e);
+		} catch (SocketException e) {
+			throw new MessagingException("Caught LwSocketException getting Application-level response from server: " + e);
 		}
 
 		if (socketComms.getLastErrorNo() != 0) {
 			logger.severe("Application-level response not received from server");
-			throw new LwMessagingException("LwProcessMessageForSocket.getApplicationResponse(): Application-level response not received from server");
+			throw new MessagingException("LwProcessMessageForSocket.getApplicationResponse(): Application-level response not received from server");
 		}
 		else { // got something, so create an XM doc and return it...
-			LwXMLDocument applicResponse = null;
+			XMLDocument applicResponse = null;
 	
 			try {
 				logger.finer("Going to create XML doc from returned String:" + socketComms.getLastMessageReceived());
-				applicResponse = LwXMLDocument.createDoc(socketComms.getLastMessageReceived(), LwXMLDocument.SCHEMA_VALIDATION_OFF);
+				applicResponse = XMLDocument.createDoc(socketComms.getLastMessageReceived(), XMLDocument.SCHEMA_VALIDATION_OFF);
 				return applicResponse;
 			}
-			catch(LwXMLException e) {
+			catch(XMLException e) {
 				logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
-				throw new LwMessagingException("LwProcessMessageForSocket.getApplicationResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
+				throw new MessagingException("LwProcessMessageForSocket.getApplicationResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
 			}
 		}
 	}
@@ -509,8 +509,8 @@ public class LwProcessMessageForSocket implements LwIProcessMesssage {
 		logger.info("[" + Thread.currentThread().getName() + "]: Submitting Poison Pill to Executor queue, so will cause responseProcessor to close down.");
 		try {
 			if ( ! execPool.isShutdown()) { // this check in case we,ve already called this method
-				responseQueue.put(execPool.submit( new Callable<LwProcessResponse>() {
-					public LwProcessResponse call() throws LwMessagingException {
+				responseQueue.put(execPool.submit( new Callable<ProcessResponse>() {
+					public ProcessResponse call() throws MessagingException {
 						return null;
 					} // end Callable.call()
 				}));

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForDbSettings.xsd">
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ProcessMessageForDbSettings.xsd">
 	<Params>
 <!--	Oracle connection over JDBC...
 		<JdbcClass>oracle.jdbc.driver.OracleDriver</JdbcClass>

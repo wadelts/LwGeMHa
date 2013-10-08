@@ -8,7 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import lw.utils.LwLogger;
-import gemha.interfaces.LwIStoreMesssage;
+import gemha.interfaces.IStoreMesssage;
 import gemha.support.*;
 
 /**
@@ -17,7 +17,7 @@ import gemha.support.*;
   * @author Liam Wade
   * @version 1.0 09/03/2013
   */
-public class LwStoreMesssageToHTTP implements LwIStoreMesssage {
+public class StoreMesssageToHTTP implements IStoreMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
@@ -27,7 +27,7 @@ public class LwStoreMesssageToHTTP implements LwIStoreMesssage {
 	private boolean HTTPWithBackoff = true;	// should we back off exponentially when trying to connect
 	private String dataFormat;			// the format of outgoing messages e.g "XML"
 
-	public LwStoreMesssageToHTTP(String serverUrl, String endPointName, boolean HTTPWithBackoff, String dataFormat) {
+	public StoreMesssageToHTTP(String serverUrl, String endPointName, boolean HTTPWithBackoff, String dataFormat) {
 		this.serverUrl = serverUrl;
 		this.endPointName = endPointName;
 		this.HTTPWithBackoff = HTTPWithBackoff;
@@ -40,19 +40,19 @@ public class LwStoreMesssageToHTTP implements LwIStoreMesssage {
 	/**
 	  * Open any connections
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void openStorage()
-	 			throws LwMessagingException {
+	 			throws MessagingException {
 	}
 
 	/**
 	  * Close any connections
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void closeStorage()
-	 			throws LwMessagingException {
+	 			throws MessagingException {
 	}
 
 	/**
@@ -61,9 +61,9 @@ public class LwStoreMesssageToHTTP implements LwIStoreMesssage {
 	  * @param message the message to be processed
 	  * @param instructions instructions on how the message is to be processed (will be implementation-specific). Can be null
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
-	public void putMessage(String message, String auditKey, String instructions) throws LwMessagingException {
+	public void putMessage(String message, String auditKey, String instructions) throws MessagingException {
 
 		String endPoint = serverUrl + "/" + endPointName;
 		
@@ -74,7 +74,7 @@ public class LwStoreMesssageToHTTP implements LwIStoreMesssage {
 			else {
 				// problem posting message!
 				logger.severe("Response message with AuditKey Value " + auditKey + " could not be posted to " + endPoint);
-				throw new LwMessagingException("Response message with AuditKey Value " + auditKey + " could not be posted to " + endPoint);
+				throw new MessagingException("Response message with AuditKey Value " + auditKey + " could not be posted to " + endPoint);
 			}
 		} else {
 			if ( postWithNoBackoff(endPoint, message)) {
@@ -83,7 +83,7 @@ public class LwStoreMesssageToHTTP implements LwIStoreMesssage {
 			else {
 				// problem posting message!
 				logger.severe("Response message with AuditKey Value " + auditKey + " could not be posted to " + endPoint);
-				throw new LwMessagingException("Response message with AuditKey Value " + auditKey + " could not be posted to " + endPoint);
+				throw new MessagingException("Response message with AuditKey Value " + auditKey + " could not be posted to " + endPoint);
 			}
 		}
 	}

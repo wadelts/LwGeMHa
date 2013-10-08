@@ -1,6 +1,6 @@
 package gemha;
 
-import gemha.servers.LwGenericMessageHandler;
+import gemha.servers.GenericMessageHandler;
 import lw.utils.IApp;
 import lw.utils.ShutdownInterceptor;
 
@@ -17,7 +17,7 @@ public class GemhaBatch {
 
 		String settingsFileName = args[0];
 
-		IApp app = new LwGenericMessageHandler(settingsFileName);
+		IApp app = new GenericMessageHandler(settingsFileName);
 
 		ShutdownInterceptor shutdownInterceptor = new ShutdownInterceptor(app);
 

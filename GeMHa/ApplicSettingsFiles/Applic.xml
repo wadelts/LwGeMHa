@@ -22,7 +22,7 @@
 		</OutputFile>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>LwProcessMessageDoNothing</MessageProcessingClassName>
+		<MessageProcessingClassName>ProcessMessageDoNothing</MessageProcessingClassName>
 		<SendElements>
 			<ElementName>/MESSAGE/SOCKET_REQUEST</ElementName>
 		</SendElements>
@@ -39,7 +39,7 @@
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
 		<LogFileDir>/mv1/delv/middleware/CRDB/apps/mqXmq/</LogFileDir>
-		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>GenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>GenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

@@ -11,7 +11,7 @@ import lw.utils.*;
   * @author Liam Wade
   * @version 1.0 15/12/2008
   */
-public class LwProcessMessageForFileSettings
+public class ProcessMessageForFileSettings
 {
 	
     private static final Logger logger = Logger.getLogger("gemha");
@@ -25,7 +25,7 @@ public class LwProcessMessageForFileSettings
 	private boolean includeColumnNames = false;			// should column names be included in output?
     private String fileOpenMode = null;					// should we create or append (to) file when first starting up
 
-	private Vector<LwXMLTagValue> auditKeyNamesSet = null;
+	private Vector<XMLTagValue> auditKeyNamesSet = null;
 	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
 
 	/**
@@ -35,10 +35,10 @@ public class LwProcessMessageForFileSettings
 	* @param settingsFileName the name of the settings file, path included
 	* @param settingsFileSchemaValidation the set to true to have the settings file validate against its Schema definition
     */
-	public LwProcessMessageForFileSettings(String settingsFileName, boolean settingsFileSchemaValidation)
-																			throws LwSettingsException {
+	public ProcessMessageForFileSettings(String settingsFileName, boolean settingsFileSchemaValidation)
+																			throws SettingsException {
 		if (settingsFileName == null) {
-			throw new LwSettingsException("LwProcessMessageForFileSettings.constructor(): Required parameter is null.");
+			throw new SettingsException("LwProcessMessageForFileSettings.constructor(): Required parameter is null.");
 		}
 
 		this.settingsFileName = settingsFileName;
@@ -47,8 +47,8 @@ public class LwProcessMessageForFileSettings
 		try {
 			getSettings();
 		}
-		catch(LwXMLException e) {
-			throw new LwSettingsException("LwProcessMessageForFileSettings.constructor(): caught LwXMLException: " + e);
+		catch(XMLException e) {
+			throw new SettingsException("LwProcessMessageForFileSettings.constructor(): caught LwXMLException: " + e);
 		}
 
 		recordSettings();
@@ -105,7 +105,7 @@ public class LwProcessMessageForFileSettings
 	  *
 	  * @return a Vector of the audit Key Names by which to extract audit keys from a messgae
 	  */
-	public Vector<LwXMLTagValue> getAuditKeyNamesSet() {
+	public Vector<XMLTagValue> getAuditKeyNamesSet() {
 		return auditKeyNamesSet;
 
 	}
@@ -124,28 +124,28 @@ public class LwProcessMessageForFileSettings
     *
 	*/
 	private void getSettings()
-							throws LwSettingsException, LwXMLException {
-		LwXMLDocument settingsDoc = null;
+							throws SettingsException, XMLException {
+		XMLDocument settingsDoc = null;
 
-		settingsDoc = LwXMLDocument.createDocFromFile(settingsFileName, settingsFileSchemaValidation);
+		settingsDoc = XMLDocument.createDocFromFile(settingsFileName, settingsFileSchemaValidation);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Get the application general Parameters...
 		//////////////////////////////////////////////////////////////////////////
 		// Get the Columns Location within the received message...
-		String tempColumnsLocation = settingsDoc.getValueForTag("Applic/Params/ColumnsLocation");
+		String tempColumnsLocation = settingsDoc.getValueForTag("Params/ColumnsLocation");
 		if (tempColumnsLocation != null) {
 			columnsLocation = tempColumnsLocation;
 		}
 				
 		// Get the Messages FileName Template
-		messagesFileNameTemplate = settingsDoc.getValueForTag("Applic/Params/MessagesFileNameTemplate");
+		messagesFileNameTemplate = settingsDoc.getValueForTag("Params/MessagesFileNameTemplate");
 		if (messagesFileNameTemplate == null) {
 			messagesFileNameTemplate = "LwProcessMessageForFile_?.txt";
 		}
 
 		// Get the Separator to be used between fields in the output record - default to tab char
-		fieldSeparator = settingsDoc.getValueForTag("Applic/Params/FieldSeparator");
+		fieldSeparator = settingsDoc.getValueForTag("Params/FieldSeparator");
 		if (fieldSeparator == null) {
 			fieldSeparator = "\t";
 		}
@@ -172,13 +172,13 @@ public class LwProcessMessageForFileSettings
 		}
 
 		// Find out if we should include column names in the output file
-		String strIncludeColumnNames = settingsDoc.getValueForTag("Applic/Params/IncludeColumnNames");
+		String strIncludeColumnNames = settingsDoc.getValueForTag("Params/IncludeColumnNames");
 		if (strIncludeColumnNames != null) {
 			includeColumnNames = strIncludeColumnNames.equals("true");
 		}
 
 		// Get the File Open Mode
-		fileOpenMode = settingsDoc.getValueForTag("Applic/Params/FileOpenMode");
+		fileOpenMode = settingsDoc.getValueForTag("Params/FileOpenMode");
 		if (fileOpenMode == null) {
 			fileOpenMode = "create";
 		}
@@ -186,10 +186,10 @@ public class LwProcessMessageForFileSettings
 		//////////////////////////////////////////////////////////////////////////
 		// Get the values for Audit KeyName TAGs, if exist...
 		//////////////////////////////////////////////////////////////////////////
-		auditKeyNamesSet = settingsDoc.getValuesForTag("Applic/Auditing/AuditKeys/KeyName");
+		auditKeyNamesSet = settingsDoc.getValuesForTag("Auditing/AuditKeys/KeyName");
 
 		// Get the separator to use when concatenating audit keys, if exists
-		auditKeysSeparator = settingsDoc.getValueForTag("Applic/Auditing/AuditKeysSeparator");
+		auditKeysSeparator = settingsDoc.getValueForTag("Auditing/AuditKeysSeparator");
 
 	}
 
@@ -207,7 +207,7 @@ public class LwProcessMessageForFileSettings
 
 		// Record Audit key Names, if exist
 		if (auditKeyNamesSet != null) {
-			for (LwXMLTagValue tv : auditKeyNamesSet) {
+			for (XMLTagValue tv : auditKeyNamesSet) {
 				logger.config("Found Audit KeyName Tag at " + tv.getPathToName() + " Value=" + tv.getTagValue());
 			}
 		}

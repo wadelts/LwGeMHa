@@ -8,7 +8,7 @@ import gemha.support.*;
   * @author Liam Wade
   * @version 1.0 21/10/2008
   */
-public interface LwIAcceptMesssages {
+public interface IAcceptMesssages {
 
 /**
   * Set the wait interval for accepting messages
@@ -28,34 +28,34 @@ void setWaitIntervalBlockIndefinitely();
   *
   * @return true for success, false for failure
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-boolean performSetup() throws LwMessagingException;
+boolean performSetup() throws MessagingException;
 
 /**
   * Process a message
   *
   * @return the next message retrieved
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-String acceptNextMessage() throws LwMessagingException;
+String acceptNextMessage() throws MessagingException;
 
 /**
   * Do not consume the message
   *
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-void stayMessage(String auditKey) throws LwMessagingException;
+void stayMessage(String auditKey) throws MessagingException;
 
 /**
   * Consume the message now
   *
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-void consumeMessage(String auditKey) throws LwMessagingException;
+void consumeMessage(String auditKey) throws MessagingException;
 
 /**
   * Perform any clean-up actions before closing down

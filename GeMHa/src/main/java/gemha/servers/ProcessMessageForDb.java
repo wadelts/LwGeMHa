@@ -14,11 +14,11 @@ import java.util.Vector;
 import lw.XML.*;
 import lw.db.*;
 import lw.utils.*;
-import gemha.support.LwProcessMessageForDbSettings;
-import gemha.support.LwMessagingException;
-import gemha.support.LwProcessResponse;
-import gemha.support.LwProcessResponse.ProcessResponseCode;
-import gemha.interfaces.LwIProcessMesssage;
+import gemha.support.ProcessMessageForDbSettings;
+import gemha.support.MessagingException;
+import gemha.support.ProcessResponse;
+import gemha.support.ProcessResponse.ProcessResponseCode;
+import gemha.interfaces.IProcessMesssage;
 
 /**
   * This class transforms an XML message into a SQL statement and submits it to the database for processing.
@@ -26,7 +26,7 @@ import gemha.interfaces.LwIProcessMesssage;
   * @author Liam Wade
   * @version 1.0 20/11/2008
   */
-public class LwProcessMessageForDb implements LwIProcessMesssage {
+public class ProcessMessageForDb implements IProcessMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
@@ -41,12 +41,12 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
     
     // Queue for handing off responses, with fixed capacity of 1000.
     // End-of-data will be signaled by a null record
-    private final BlockingQueue<Future<LwProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<LwProcessResponse>>(1000);
+    private final BlockingQueue<Future<ProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<ProcessResponse>>(1000);
 
-	private LwDbConnection dbConn = null;
-	private LwProcessMessageForDbSettings settings = null;
+	private DbConnection dbConn = null;
+	private ProcessMessageForDbSettings settings = null;
 	
-	public LwProcessMessageForDb() {
+	public ProcessMessageForDb() {
 	}
 
 	//////////////////////////////////////////////////////////////////
@@ -57,22 +57,22 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  *
 	  * @return true for success, false for failure
 	  */
-	public void performSetup(String settingsFileName) throws LwSettingsException {
+	public void performSetup(String settingsFileName) throws SettingsException {
 
 		if (settingsFileName == null) {
-			throw new LwSettingsException("Parameter settingsFileName was null.");
+			throw new SettingsException("Parameter settingsFileName was null.");
 		}
 
-		settings = new LwProcessMessageForDbSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
+		settings = new ProcessMessageForDbSettings(settingsFileName, XMLDocument.SCHEMA_VALIDATION_ON);
 
 		try {
 			// Note: if autoCommitting() true, all SQL statements will be executed and committed as individual transactions
 			// with no need to call commit(), otherwise transactions are grouped until commited
-			 dbConn = new LwDbConnection(settings.getJdbcClass(), settings.getDbURL(), settings.getUserName(), settings.getUserPass(), settings.autoCommitting());
+			 dbConn = new DbConnection(settings.getJdbcClass(), settings.getDbURL(), settings.getUserName(), settings.getUserPass(), settings.autoCommitting());
 		}
-		catch(LwDbException e) {
+		catch(DbException e) {
 			logger.severe("Couldn't create new LwDbConnection: " + e.getMessage());
-			throw new LwSettingsException("Couldn't create new LwDbConnection: " + e.getMessage());
+			throw new SettingsException("Couldn't create new LwDbConnection: " + e.getMessage());
 		}
 
 		//////////////////////////////////////////////////////////////////
@@ -85,9 +85,9 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 				dbConn.setDateFormat(dateFormat);
 			}
 		}
-		catch(LwDbException e) {
+		catch(DbException e) {
 			logger.severe("Couldn't set Date Format: " + e.getMessage());
-			throw new LwSettingsException("Couldn't set Date Format: " + e.getMessage());
+			throw new SettingsException("Couldn't set Date Format: " + e.getMessage());
 		}
 
 		try {
@@ -99,9 +99,9 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 				 dbConn.prepareStatement(pst);
 			 }
 		}
-		catch(LwDbException e) {
+		catch(DbException e) {
 			logger.severe("Couldn't prepare a supplied Prepared Statement: " + e.getMessage());
-			throw new LwSettingsException("Couldn't prepare a supplied Prepared Statement: " + e.getMessage());
+			throw new SettingsException("Couldn't prepare a supplied Prepared Statement: " + e.getMessage());
 		}
 	}
 
@@ -115,11 +115,11 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
 	@Override
-	public LwProcessResponse processMessageSynch(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues)
-											throws LwMessagingException {
+	public ProcessResponse processMessageSynch(final String messageText, final XMLDocument inputDoc, String auditKeyValues)
+											throws MessagingException {
 		return processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.SYNCHRONOUS);
 	}
 	
@@ -131,11 +131,11 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  * @param inputDoc the original input message as an XML document, null if message was not XML. To be returned with result - DO NOT MODIFY, is NOT threadsafe!!
 	  * @param auditKeyValues audit Key Values for the message (can be null). To be returned with result
 	  *
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
 	@Override
-	public void processMessageAsynch(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues)
-											throws LwMessagingException {
+	public void processMessageAsynch(final String messageText, final XMLDocument inputDoc, String auditKeyValues)
+											throws MessagingException {
 		processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.ASYNCHRONOUS);
 	}
 
@@ -153,30 +153,30 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
-	private LwProcessResponse processMessage(final String messageText, final LwXMLDocument inputDoc, final String auditKeyValues, ProcessingMode processingMode)
-											throws LwMessagingException {
+	private ProcessResponse processMessage(final String messageText, final XMLDocument inputDoc, final String auditKeyValues, ProcessingMode processingMode)
+											throws MessagingException {
 
-		Callable<LwProcessResponse> processMessageTask = new Callable<LwProcessResponse>() {
+		Callable<ProcessResponse> processMessageTask = new Callable<ProcessResponse>() {
 			@Override
-			public LwProcessResponse call() throws LwMessagingException {
+			public ProcessResponse call() throws MessagingException {
 				logger.info("Control now in messageProcessor.");
 				logger.finer("Processing message: " + messageText);
 		
-				LwXMLDocument response = createResponseDoc(); // create doc shell
+				XMLDocument response = createResponseDoc(); // create doc shell
 
 				//////////////////////////////////////////////////////////////////
 				// Set up a new XML doc
 				//////////////////////////////////////////////////////////////////
-				LwXMLDocument newDoc = null;
+				XMLDocument newDoc = null;
 				try {
-					newDoc = LwXMLDocument.createDoc(messageText, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+					newDoc = XMLDocument.createDoc(messageText, XMLDocument.SCHEMA_VALIDATION_OFF);
 				}
-				catch(LwXMLException e) {
+				catch(XMLException e) {
 					logger.severe("LwXMLException: " + e.getMessage());
 					logger.warning("InputMessage was :" + messageText);
-					throw new LwMessagingException("Could not create new XML document: " + e.getMessage());
+					throw new MessagingException("Could not create new XML document: " + e.getMessage());
 				}
 		
 
@@ -187,9 +187,9 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 					try {
 						dbConn.reOpen();
 					}
-					catch(LwDbException e) {
+					catch(DbException e) {
 						logger.severe("LwDbException: " + e.getMessage());
-						throw new LwMessagingException("Caught LwDbException trying to re-open database connection: " + e.getMessage());
+						throw new MessagingException("Caught LwDbException trying to re-open database connection: " + e.getMessage());
 					}
 				}
 		
@@ -199,7 +199,7 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 				//////////////////////////////////////////////////////////////////
 		
 				// Store all actions in this Vector
-				Vector<LwProcessMessageForDbAction> allActions = new Vector<LwProcessMessageForDbAction>();
+				Vector<ProcessMessageForDbAction> allActions = new Vector<ProcessMessageForDbAction>();
 		
 				int numActionsApplied;
 				try {
@@ -215,24 +215,24 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 						//////////////////////////////////////////////////////////////////////////
 						// Add all Action results to response, marking appropriate ones as committed...
 						//////////////////////////////////////////////////////////////////////////
-						for (LwProcessMessageForDbAction dbAction : allActions) {
+						for (ProcessMessageForDbAction dbAction : allActions) {
 							dbAction.markExecutedAsCommitted();
 							dbAction.addResultToResponse(response);
 						}
 					}
-					catch(LwDbException e) {
-						throw new LwMessagingException("Caught LwDbException trying to commit transaction(s): " + e.getMessage());
+					catch(DbException e) {
+						throw new MessagingException("Caught LwDbException trying to commit transaction(s): " + e.getMessage());
 					}
 				}
 				catch(Exception e) {
 					// Just temporarily catch ANY exception, so can roll back trancaction, if we got an error...
-					try { dbConn.sessionRollback();} catch(LwDbException e2) {/* can't do any more anyway - already Exceptioned */}
+					try { dbConn.sessionRollback();} catch(DbException e2) {/* can't do any more anyway - already Exceptioned */}
 					logger.warning("Rolled back Db transaction(s). Throwing LwMessagingException...");
 					e.printStackTrace();
-					throw new LwMessagingException(e.toString() + ": see console for Stack Trace."); // gives name and getMessage()
+					throw new MessagingException(e.toString() + ": see console for Stack Trace."); // gives name and getMessage()
 				}
 
-				LwProcessResponse.Builder responseBuilder = new LwProcessResponse.Builder(ProcessResponseCode.SUCCESS, numActionsApplied)
+				ProcessResponse.Builder responseBuilder = new ProcessResponse.Builder(ProcessResponseCode.SUCCESS, numActionsApplied)
 					.setAuditKeyValues(auditKeyValues)
 					.setResponse(response.toString())
 					.setInputDoc(inputDoc);
@@ -270,7 +270,7 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 			try {
 				return processMessageTask.call();
 			} catch (Exception e) {
-				throw new LwMessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
+				throw new MessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
 			}
 		}
 	}
@@ -282,19 +282,19 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  * LwProcessResponse is immutable
 	  * 
 	  * @return the next response from process, null if no more results will ever arrive
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  * @throws InterruptedException if CALLING thread is noticed as interrupted while getting response
 	  */
 	@Override
-	public LwProcessResponse getResponse() throws LwMessagingException, InterruptedException {
-		LwProcessResponse response = null;
+	public ProcessResponse getResponse() throws MessagingException, InterruptedException {
+		ProcessResponse response = null;
 		try {
-			Future<LwProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
+			Future<ProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
 			response = fr.get(); // will block here if next task in queue not yet finished
 		} catch (ExecutionException e) {
 			Throwable cause = e.getCause();
-			if (cause instanceof LwMessagingException)
-				throw (LwMessagingException) cause;
+			if (cause instanceof MessagingException)
+				throw (MessagingException) cause;
 			else
 				throw launderThrowable(cause);
 		}
@@ -350,8 +350,8 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  *
 	  * @return 0 for success with no response necessary, n for success and response(s) ready, less than zero for error that will be explained in the response.
 	  */
-	private int performActions(LwXMLDocument inputDoc, Vector<LwProcessMessageForDbAction> allActions)
-											throws LwMessagingException {
+	private int performActions(XMLDocument inputDoc, Vector<ProcessMessageForDbAction> allActions)
+											throws MessagingException {
 
 		logger.finer("Going to perform all actions...");
 
@@ -360,7 +360,7 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 		//////////////////////////////////////////////////////////////////////////
 		// Find out what to do with errors...
 		//////////////////////////////////////////////////////////////////////////
-		String dbLevelactionOnError = inputDoc.getValueForTag("MESSAGE/DBACTION/ACTION_ON_ERROR"); // respond, exception
+		String dbLevelactionOnError = inputDoc.getValueForTag("/MESSAGE/DBACTION/ACTION_ON_ERROR"); // respond, exception
 		if (dbLevelactionOnError != null) {
 			actionOnError = dbLevelactionOnError;
 		}
@@ -375,9 +375,9 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 		String[] actions = {"INSERT", "UPDATE", "DELETE", "SELECT"}; // aid to select actions in order
 		for (String action : actions) {
 			int numThisTypeOfActionApplied = 0;
-			while (inputDoc.setCurrentNodeByPath("MESSAGE/DBACTION/" + action, ++numThisTypeOfActionApplied)) {
+			while (inputDoc.setCurrentNodeByPath("/MESSAGE/DBACTION/" + action, ++numThisTypeOfActionApplied)) {
 				logger.fine("Found " + action + " action to process.");
-				LwProcessMessageForDbAction dbAction = new LwProcessMessageForDbAction(action, inputDoc, settings.getAuditKeyNamesSet(action), settings.getAuditKeysSeparator());
+				ProcessMessageForDbAction dbAction = new ProcessMessageForDbAction(action, inputDoc, settings.getAuditKeyNamesSet(action), settings.getAuditKeysSeparator());
 				allActions.addElement(dbAction);
 
 				dbAction.buildAction(settings.getDefaultTablename());
@@ -395,17 +395,17 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 	  * Start a response doc
 	  *
 	  */
-	private LwXMLDocument createResponseDoc()
-								throws LwMessagingException {
+	private XMLDocument createResponseDoc()
+								throws MessagingException {
 
-		LwXMLDocument newResponse = null;
+		XMLDocument newResponse = null;
 
 		try {
-			newResponse = LwXMLDocument.createDoc("<MESSAGE><DBACTION></DBACTION></MESSAGE>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newResponse = XMLDocument.createDoc("<MESSAGE><DBACTION></DBACTION></MESSAGE>", XMLDocument.SCHEMA_VALIDATION_OFF);
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
-			throw new LwMessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
+			throw new MessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
 		}
 		
 		return newResponse;
@@ -439,8 +439,8 @@ public class LwProcessMessageForDb implements LwIProcessMesssage {
 		logger.info("Submitting Poison Pill to Executor queue, so will cause responseProcessor to close down.");
 		try {
 			if ( ! execPool.isShutdown()) { // this check in case we,ve already called this method
-				responseQueue.put(execPool.submit( new Callable<LwProcessResponse>() {
-					public LwProcessResponse call() throws LwMessagingException {
+				responseQueue.put(execPool.submit( new Callable<ProcessResponse>() {
+					public ProcessResponse call() throws MessagingException {
 						return null;
 					} // end Callable.call()
 				}));

@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import lw.queues.*;
 import lw.utils.LwLogger;
-import gemha.support.LwMessagingException;
-import gemha.interfaces.LwIStoreMesssage;
+import gemha.support.MessagingException;
+import gemha.interfaces.IStoreMesssage;
 
 /**
   * This class saves messages to a queue.
@@ -14,16 +14,16 @@ import gemha.interfaces.LwIStoreMesssage;
   * @author Liam Wade
   * @version 1.0 30/10/2008
   */
-public class LwStoreMesssageToQueue implements LwIStoreMesssage {
+public class StoreMesssageToQueue implements IStoreMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
-	public LwStoreMesssageToQueue(String outputQueueName, String urlJMSserver) {
+	public StoreMesssageToQueue(String outputQueueName, String urlJMSserver) {
 		this.outputQueueName = outputQueueName;
 		this.urlJMSserver = urlJMSserver;
 	}
 
-	public LwStoreMesssageToQueue(String outputQueueName, String urlJMSserver, String replyToQueueName) {
+	public StoreMesssageToQueue(String outputQueueName, String urlJMSserver, String replyToQueueName) {
 		this.outputQueueName = outputQueueName;
 		this.urlJMSserver = urlJMSserver;
 		this.replyToQueueName = replyToQueueName;
@@ -35,15 +35,15 @@ public class LwStoreMesssageToQueue implements LwIStoreMesssage {
 	/**
 	  * Open any connections
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void openStorage()
-	 			throws LwMessagingException {
+	 			throws MessagingException {
 
 		if (outQueue == null) {
 			outQueue = new OutputQueue();
 			if (outQueue == null) {
-				throw new LwMessagingException("GenericQueueException encountered creating queue connection for queue " + outputQueueName + " on JMS Server " + urlJMSserver);
+				throw new MessagingException("GenericQueueException encountered creating queue connection for queue " + outputQueueName + " on JMS Server " + urlJMSserver);
 			}
 		}
 
@@ -53,17 +53,17 @@ public class LwStoreMesssageToQueue implements LwIStoreMesssage {
 			targetConnectionOpen = true;
 		}
 		catch (GenericQueueException e) {
-			throw new LwMessagingException("GenericQueueException encountered opening queue " + ": " + e);
+			throw new MessagingException("GenericQueueException encountered opening queue " + ": " + e);
 		}
 	}
 
 	/**
 	  * Close any connections
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void closeStorage()
-	 			throws LwMessagingException {
+	 			throws MessagingException {
 
 		if (targetConnectionOpen) {
 			outQueue.close(); // doesn't throw any exceptions if problem encountered
@@ -80,10 +80,10 @@ public class LwStoreMesssageToQueue implements LwIStoreMesssage {
 	  * @param message the message to be processed
 	  * @param instructions instructions on how the message is to be processed. In this case it may hold an Queue Name for a ReplyToQ
 	  *
-	  * @throws LwMessagingException when any error is encountered
+	  * @throws MessagingException when any error is encountered
 	  */
 	public void putMessage(String message, String auditKey, String instructions)
-																		throws LwMessagingException {
+																		throws MessagingException {
 		if ( ! targetConnectionOpen) {
 			// Open targetConnection here
 			openStorage();
@@ -105,7 +105,7 @@ public class LwStoreMesssageToQueue implements LwIStoreMesssage {
 			logger.info("Response message with AuditKey Value " + auditKey + " placed on response queue.");
 		}
 		catch (GenericQueueException e) {
-			throw new LwMessagingException("GenericQueueException encountered placing message with AuditKey Value " + auditKey + " on response queue " + outputQueueName + ": " + e);
+			throw new MessagingException("GenericQueueException encountered placing message with AuditKey Value " + auditKey + " on response queue " + outputQueueName + ": " + e);
 		}
 	}
 
@@ -124,7 +124,7 @@ public class LwStoreMesssageToQueue implements LwIStoreMesssage {
 				System.out.println("LwStoreMesssageToQueue.performCleanup(): could not write to shutDownLogFile.");
 			}
 		}
-		catch(LwMessagingException e) {
+		catch(MessagingException e) {
 			// don't do anything, closing down anyway
 		}
 	}

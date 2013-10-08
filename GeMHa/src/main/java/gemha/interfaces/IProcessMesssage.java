@@ -3,7 +3,7 @@ package gemha.interfaces;
 import java.util.concurrent.TimeUnit;
 
 import lw.utils.*;
-import lw.XML.LwXMLDocument;
+import lw.XML.XMLDocument;
 import gemha.support.*;
 
 /**
@@ -11,16 +11,16 @@ import gemha.support.*;
   * @author Liam Wade
   * @version 1.0 21/10/2008
   */
-public interface LwIProcessMesssage {
+public interface IProcessMesssage {
 
 /**
   * Set up conditions for accepting messages
   *
   * @return true for success, false for failure
   *
-  * @throws LwSettingsException if a problem was encountered performing setup
+  * @throws SettingsException if a problem was encountered performing setup
   */
-public void performSetup(String settingsFileName) throws LwSettingsException;
+public void performSetup(String settingsFileName) throws SettingsException;
 
 /**
  * Process a message on the same thread as the caller, blocking for result.
@@ -32,9 +32,9 @@ public void performSetup(String settingsFileName) throws LwSettingsException;
  *
  * @return the next response from process, null if no more results will ever arrive
  * 
- * @throws LwMessagingException if a problem was encountered processing the message
+ * @throws MessagingException if a problem was encountered processing the message
  */
-public LwProcessResponse processMessageSynch(String message, final LwXMLDocument inputDoc, String auditKeyValues) throws LwMessagingException;
+public ProcessResponse processMessageSynch(String message, final XMLDocument inputDoc, String auditKeyValues) throws MessagingException;
 
 /**
  * Process a message on another thread, non-blocking. Result to be collected by calling getResponse().
@@ -45,9 +45,9 @@ public LwProcessResponse processMessageSynch(String message, final LwXMLDocument
  * @param auditKeyValues audit Key Values for the message (can be null). To be returned with result
  *
  * 
- * @throws LwMessagingException if a problem was encountered processing the message
+ * @throws MessagingException if a problem was encountered processing the message
  */
-public void processMessageAsynch(String message, final LwXMLDocument inputDoc, String auditKeyValues) throws LwMessagingException;
+public void processMessageAsynch(String message, final XMLDocument inputDoc, String auditKeyValues) throws MessagingException;
 /**
  * Return the next response message.
  * When all responses have been received, null will be returned.
@@ -55,10 +55,10 @@ public void processMessageAsynch(String message, final LwXMLDocument inputDoc, S
  * LwProcessResponse is immutable
  * 
  * @return the next response from process, null if no more results will ever arrive
- * @throws LwMessagingException if a problem was encountered processing the message
+ * @throws MessagingException if a problem was encountered processing the message
  * @throws InterruptedException if CALLING thread is noticed as interrupted while retrieving the message
  */
-public LwProcessResponse getResponse() throws LwMessagingException, InterruptedException;
+public ProcessResponse getResponse() throws MessagingException, InterruptedException;
 
 /**
   * Do whatever you like when things are quiet

@@ -1,7 +1,7 @@
 package gemha.support;
 
-import lw.XML.LwXMLDocument;
-import lw.XML.LwXMLException;
+import lw.XML.XMLDocument;
+import lw.XML.XMLException;
 
 /**
   * Encapsulates a response after Processing messages for a target meduim.
@@ -11,7 +11,7 @@ import lw.XML.LwXMLException;
   * 
   * @ThreadSafe
   */
-public class LwProcessResponse {
+public class ProcessResponse {
 	public static enum ProcessResponseCode {
 		SUCCESS,
 		INTERRUPTED,
@@ -32,7 +32,7 @@ public class LwProcessResponse {
 	* @param response the detailed response (can be null)
 	* @param exception the exception thrown during processing, if any (can be null)
     */
-	private LwProcessResponse(Builder builder) {
+	private ProcessResponse(Builder builder) {
 		this.responseCode = builder.responseCode;
 		this.rowsProcessed = builder.rowsProcessed;
 		this.response = builder.response;
@@ -67,13 +67,13 @@ public class LwProcessResponse {
 			{	this.response = val;	return this;		}
 		public Builder setException(Throwable val)
 			{	this.exception = val;	return this;		}
-		public Builder setInputDoc(LwXMLDocument val)
+		public Builder setInputDoc(XMLDocument val)
 			{	this.inputDoc = val.toString();	return this;		}
 		public Builder setAuditKeyValues(String val)
 			{	this.auditKeyValues = val;	return this;	}
 		
-		public LwProcessResponse build() {
-			return new LwProcessResponse(this);
+		public ProcessResponse build() {
+			return new ProcessResponse(this);
 		}
 	}
 
@@ -108,14 +108,14 @@ public class LwProcessResponse {
 	  *
 	  * @return the original input message as an XML document, null if no XML message stored
 	  */
-	public LwXMLDocument getInputDoc() {
+	public XMLDocument getInputDoc() {
 		if (inputDoc == null) return null;
 		
-		LwXMLDocument newDoc = null;
+		XMLDocument newDoc = null;
 		try {
-			newDoc = LwXMLDocument.createDoc(inputDoc, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newDoc = XMLDocument.createDoc(inputDoc, XMLDocument.SCHEMA_VALIDATION_OFF);
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			// Going to return null here as this should never really be thrown - we've created inputDoc
 			// from an LwXMLDocument.
 			return null;

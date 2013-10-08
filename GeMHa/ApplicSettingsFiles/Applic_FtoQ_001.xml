@@ -25,7 +25,7 @@
 		</OutputQueue>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>gemha.servers.LwProcessMessageDoNothing</MessageProcessingClassName>
+		<MessageProcessingClassName>gemha.servers.ProcessMessageDoNothing</MessageProcessingClassName>
 		<MindElements>
 			<ElementName>MESSAGE/C0</ElementName>
 			<ElementName>MESSAGE/XBCCTL</ElementName>
@@ -53,7 +53,7 @@
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
 		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
-		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>GenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>GenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

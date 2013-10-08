@@ -5,7 +5,7 @@ package gemha.support;
   * @author Liam Wade
   * @version 1.0 25/06/2003
   */
-public class LwMessagingException extends Exception
+public class MessagingException extends Exception
 {
   /**
 	 * 
@@ -15,14 +15,14 @@ public class LwMessagingException extends Exception
 /**
     * Will create a new exception.
     */
-	public LwMessagingException() {
+	public MessagingException() {
 	}
 
   /**
     * Will create a new exception with the given reason.
 	* @param reason the text explaining the error
     */
-	public LwMessagingException(String reason) {
+	public MessagingException(String reason) {
 		super(reason);
 	}
 
@@ -31,7 +31,7 @@ public class LwMessagingException extends Exception
 	* @param message, the detail message (which is saved for later retrieval by the Throwable.getMessage() method).
 	* @param cause - the cause (which is saved for later retrieval by the Throwable.getCause() method). (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
     */
-	public LwMessagingException(String message, Throwable cause) {
+	public MessagingException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

@@ -9,7 +9,7 @@
 	<Input>
 		<InputSource>
 			<InputLimit>1000</InputLimit>
-			<!-- Do not add this tag if using LwProcessMessageDoNothing (he doesn't care and would actually return NO response)... 
+			<!-- Do not add this tag if using ProcessMessageDoNothing (he doesn't care and would actually return NO response)... 
 			<DataFormat>XML</DataFormat>
 			-->
 			<InputQueue>
@@ -30,7 +30,7 @@
 		</OutputQueue>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>gemha.servers.LwProcessMessageDoNothing</MessageProcessingClassName>
+		<MessageProcessingClassName>gemha.servers.ProcessMessageDoNothing</MessageProcessingClassName>
 		<SendElements>
 			<ElementName>RexRunNotification</ElementName>
 		</SendElements>
@@ -49,7 +49,7 @@
 			<EnvironmentLoggingLevel>Development</EnvironmentLoggingLevel>
 		</Level>
 		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
-		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>GenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>GenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

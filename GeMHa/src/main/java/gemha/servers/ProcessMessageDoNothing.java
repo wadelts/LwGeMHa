@@ -12,14 +12,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
-import lw.XML.LwXMLDocument;
-import lw.XML.LwXMLException;
-import lw.XML.LwXMLTagValue;
+import lw.XML.XMLDocument;
+import lw.XML.XMLException;
+import lw.XML.XMLTagValue;
 import lw.utils.*;
-import gemha.support.LwMessagingException;
-import gemha.support.LwProcessResponse;
-import gemha.support.LwProcessResponse.ProcessResponseCode;
-import gemha.interfaces.LwIProcessMesssage;
+import gemha.support.MessagingException;
+import gemha.support.ProcessResponse;
+import gemha.support.ProcessResponse.ProcessResponseCode;
+import gemha.interfaces.IProcessMesssage;
 
 /**
   * This class does nothing with a message. It is only to plug "a hole".
@@ -27,7 +27,7 @@ import gemha.interfaces.LwIProcessMesssage;
   * @author Liam Wade
   * @version 1.0 21/10/2008
   */
-public class LwProcessMessageDoNothing implements LwIProcessMesssage {
+public class ProcessMessageDoNothing implements IProcessMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
@@ -42,10 +42,10 @@ public class LwProcessMessageDoNothing implements LwIProcessMesssage {
     
     // Queue for handing off responses, with fixed capacity of 1000.
     // End-of-data will be signaled by a null record
-    private final BlockingQueue<Future<LwProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<LwProcessResponse>>(1000);
+    private final BlockingQueue<Future<ProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<ProcessResponse>>(1000);
 
 
-    public LwProcessMessageDoNothing() {
+    public ProcessMessageDoNothing() {
 	}
 
 	//////////////////////////////////////////////////////////////////
@@ -57,19 +57,19 @@ public class LwProcessMessageDoNothing implements LwIProcessMesssage {
 	  * @return true for success, false for failure
 	  */
 	@Override
-	public void performSetup(String settingsFileName) throws LwSettingsException {
+	public void performSetup(String settingsFileName) throws SettingsException {
 	}
 
 	@Override
-	public LwProcessResponse processMessageSynch(String messageText, LwXMLDocument inputDoc, String auditKeyValues)
-																		throws LwMessagingException {
+	public ProcessResponse processMessageSynch(String messageText, XMLDocument inputDoc, String auditKeyValues)
+																		throws MessagingException {
 		logger.fine("My job is just to return original message.");
 		return processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.SYNCHRONOUS);
 	}
 
 	@Override
-	public void processMessageAsynch(String messageText, LwXMLDocument inputDoc, String auditKeyValues)
-																		throws LwMessagingException {
+	public void processMessageAsynch(String messageText, XMLDocument inputDoc, String auditKeyValues)
+																		throws MessagingException {
 		logger.fine("My job is just to return original message.");
 		processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.ASYNCHRONOUS);
 	}
@@ -86,19 +86,19 @@ public class LwProcessMessageDoNothing implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
-	private LwProcessResponse processMessage(final String messageText, final LwXMLDocument inputDoc, final String auditKeyValues, ProcessingMode processingMode)
-											throws LwMessagingException {
+	private ProcessResponse processMessage(final String messageText, final XMLDocument inputDoc, final String auditKeyValues, ProcessingMode processingMode)
+											throws MessagingException {
 
-		Callable<LwProcessResponse> processMessageTask = new Callable<LwProcessResponse>() {
+		Callable<ProcessResponse> processMessageTask = new Callable<ProcessResponse>() {
 			@Override
-			public LwProcessResponse call() throws LwMessagingException {
+			public ProcessResponse call() throws MessagingException {
 				///////////////////////////////////////////////
 				// If got here, message was successfully transmitted.
 				// So build Response...
 				///////////////////////////////////////////////
-				LwProcessResponse.Builder responseBuilder = new LwProcessResponse.Builder(ProcessResponseCode.SUCCESS, 1)
+				ProcessResponse.Builder responseBuilder = new ProcessResponse.Builder(ProcessResponseCode.SUCCESS, 1)
 						.setAuditKeyValues(auditKeyValues)
 						.setResponse(messageText);
 				
@@ -134,7 +134,7 @@ public class LwProcessMessageDoNothing implements LwIProcessMesssage {
 			try {
 				return processMessageTask.call();
 			} catch (Exception e) {
-				throw new LwMessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
+				throw new MessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
 			}
 		}
 	}
@@ -146,19 +146,19 @@ public class LwProcessMessageDoNothing implements LwIProcessMesssage {
 	  * LwProcessResponse is immutable
 	  * 
 	  * @return the next response from process, null if no more results will ever arrive
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  * @throws InterruptedException if CALLING thread is noticed as interrupted while getting response
 	  */
 	@Override
-	public LwProcessResponse getResponse() throws LwMessagingException, InterruptedException {
-		LwProcessResponse response = null;
+	public ProcessResponse getResponse() throws MessagingException, InterruptedException {
+		ProcessResponse response = null;
 		try {
-			Future<LwProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
+			Future<ProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
 			response = fr.get(); // will block here if next task in queue not yet finished
 		} catch (ExecutionException e) {
 			Throwable cause = e.getCause();
-			if (cause instanceof LwMessagingException)
-				throw (LwMessagingException) cause;
+			if (cause instanceof MessagingException)
+				throw (MessagingException) cause;
 			else
 				throw launderThrowable(cause);
 		}
@@ -229,8 +229,8 @@ public class LwProcessMessageDoNothing implements LwIProcessMesssage {
 		logger.info("Submitting Poison Pill to Executor queue, so will cause responseProcessor to close down.");
 		try {
 			if ( ! execPool.isShutdown()) { // this check in case we,ve already called this method
-				responseQueue.put(execPool.submit( new Callable<LwProcessResponse>() {
-					public LwProcessResponse call() throws LwMessagingException {
+				responseQueue.put(execPool.submit( new Callable<ProcessResponse>() {
+					public ProcessResponse call() throws MessagingException {
 						return null;
 					} // end Callable.call()
 				}));

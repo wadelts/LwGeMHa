@@ -40,8 +40,8 @@
 		</OutputFile>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>gemha.servers.LwProcessMessageForSocket</MessageProcessingClassName>
-		<MessageProcessingSettingsFileName>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\LwProcessMessageForSocketSettings.xml</MessageProcessingSettingsFileName>
+		<MessageProcessingClassName>gemha.servers.ProcessMessageForSocket</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\ProcessMessageForSocketSettings.xml</MessageProcessingSettingsFileName>
 		<SendElements>
 			<ElementName>/MESSAGE/DBACTION</ElementName>
 		</SendElements>
@@ -62,7 +62,7 @@
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
 		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
-		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>GenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>GenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

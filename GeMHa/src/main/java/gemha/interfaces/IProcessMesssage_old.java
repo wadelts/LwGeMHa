@@ -8,16 +8,16 @@ import gemha.support.*;
   * @author Liam Wade
   * @version 1.0 21/10/2008
   */
-public interface LwIProcessMesssage_old {
+public interface IProcessMesssage_old {
 
 /**
   * Set up conditions for accepting messages
   *
   * @return true for success, false for failure
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-void performSetup(String settingsFileName) throws LwSettingsException;
+void performSetup(String settingsFileName) throws SettingsException;
 
 /**
   * Process a message
@@ -25,7 +25,7 @@ void performSetup(String settingsFileName) throws LwSettingsException;
   * @param messageText the message to be processed
   * @return 0 for success with no response necessary, 1 for success and response is ready, less than zero for error
   */
-int processMessage(String message) throws LwMessagingException;
+int processMessage(String message) throws MessagingException;
 
 /**
   * Return the response message

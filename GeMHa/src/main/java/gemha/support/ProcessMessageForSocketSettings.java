@@ -12,7 +12,7 @@ import lw.utils.*;
   * @author Liam Wade
   * @version 1.0 07/11/2008
   */
-public class LwProcessMessageForSocketSettings
+public class ProcessMessageForSocketSettings
 {
 
     private static final Logger logger = Logger.getLogger("gemha");
@@ -24,7 +24,7 @@ public class LwProcessMessageForSocketSettings
     private String hostName = null;
     private String applicationLevelResponse = null;
 
-	private Vector<LwXMLTagValue> auditKeyNamesSet = null; // Note: the concatenated values of these keys should not generally exceed 255 chars (to include any separators)
+	private Vector<XMLTagValue> auditKeyNamesSet = null; // Note: the concatenated values of these keys should not generally exceed 255 chars (to include any separators)
 															// If they do exceed this value, only the first 255 chars will be used as the Transaction ID for socket sends
 	private String auditKeysSeparator = null;			// if exists, will be used to separate values for concatenated audit keys
 
@@ -35,10 +35,10 @@ public class LwProcessMessageForSocketSettings
 	* @param settingsFileName the name of the settings file, path included
 	* @param settingsFileSchemaValidation the set to true to have the settings file validate against its Schema definition
     */
-	public LwProcessMessageForSocketSettings(String settingsFileName, boolean settingsFileSchemaValidation)
-																			throws LwSettingsException {
+	public ProcessMessageForSocketSettings(String settingsFileName, boolean settingsFileSchemaValidation)
+																			throws SettingsException {
 		if (settingsFileName == null) {
-			throw new LwSettingsException("LwProcessMessageForSocketSettings.constructor(): Required parameter is null.");
+			throw new SettingsException("LwProcessMessageForSocketSettings.constructor(): Required parameter is null.");
 		}
 
 		this.settingsFileName = settingsFileName;
@@ -47,8 +47,8 @@ public class LwProcessMessageForSocketSettings
 		try {
 			getSettings();
 		}
-		catch(LwXMLException e) {
-			throw new LwSettingsException("LwProcessMessageForSocketSettings.constructor(): caught LwXMLException: " + e);
+		catch(XMLException e) {
+			throw new SettingsException("LwProcessMessageForSocketSettings.constructor(): caught LwXMLException: " + e);
 		}
 
 		recordSettings();
@@ -87,7 +87,7 @@ public class LwProcessMessageForSocketSettings
 	  *
 	  * @return a Vector of the audit Key Names by which to extract audit keys from a messgae
 	  */
-	public Vector<LwXMLTagValue> getAuditKeyNamesSet() {
+	public Vector<XMLTagValue> getAuditKeyNamesSet() {
 		return auditKeyNamesSet;
 
 	}
@@ -106,10 +106,10 @@ public class LwProcessMessageForSocketSettings
     *
 	*/
 	private void getSettings()
-							throws LwSettingsException, LwXMLException {
-		LwXMLDocument settingsDoc = null;
+							throws SettingsException, XMLException {
+		XMLDocument settingsDoc = null;
 
-		settingsDoc = LwXMLDocument.createDocFromFile(settingsFileName, settingsFileSchemaValidation);
+		settingsDoc = XMLDocument.createDocFromFile(settingsFileName, settingsFileSchemaValidation);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Get the application general Parameters...
@@ -117,36 +117,36 @@ public class LwProcessMessageForSocketSettings
 		//////////////////////////////////////////////////////////////////////////
 		// Get the Port Number to use for the socket...
 		//////////////////////////////////////////////////////////////////////////
-		String strPortNumber = settingsDoc.getValueForTag("Applic/Params/PortNumber");
+		String strPortNumber = settingsDoc.getValueForTag("Params/PortNumber");
 		if (strPortNumber != null) {
 			try {
 				portNumber = Integer.parseInt(strPortNumber);
 			}
 			catch(NumberFormatException e) {
-				throw new LwSettingsException("LwProcessMessageForSocketSettings.getSettings(): Invalid PortNumber.");
+				throw new SettingsException("LwProcessMessageForSocketSettings.getSettings(): Invalid PortNumber.");
 			}
 		}
 
 		if (portNumber < 1) {
-			throw new LwSettingsException("LwProcessMessageForSocketSettings.getSettings(): Invalid PortNumber. 0 not allowed");
+			throw new SettingsException("LwProcessMessageForSocketSettings.getSettings(): Invalid PortNumber. 0 not allowed");
 		}
 
 		// Get the Host Name
-		hostName = settingsDoc.getValueForTag("Applic/Params/HostName");
+		hostName = settingsDoc.getValueForTag("Params/HostName");
 		if (hostName == null) {
 			hostName = "localhost";
 		}
 
 		// Get the Response type at application level
-		applicationLevelResponse = settingsDoc.getValueForTag("Applic/Params/ApplicationLevelResponse");
+		applicationLevelResponse = settingsDoc.getValueForTag("Params/ApplicationLevelResponse");
 
 		//////////////////////////////////////////////////////////////////////////
 		// Get the values for Audit KeyName TAGs, if exist...
 		//////////////////////////////////////////////////////////////////////////
-		auditKeyNamesSet = settingsDoc.getValuesForTag("Applic/Auditing/AuditKeys/KeyName");
+		auditKeyNamesSet = settingsDoc.getValuesForTag("Auditing/AuditKeys/KeyName");
 
 		// Get the separator to use when concatenating audit keys, if exists
-		auditKeysSeparator = settingsDoc.getValueForTag("Applic/Auditing/AuditKeysSeparator");
+		auditKeysSeparator = settingsDoc.getValueForTag("Auditing/AuditKeysSeparator");
 
 	}
 
@@ -162,7 +162,7 @@ public class LwProcessMessageForSocketSettings
 
 		// Record Audit key Names, if exist
 		if (auditKeyNamesSet != null) {
-			for (LwXMLTagValue tv : auditKeyNamesSet) {
+			for (XMLTagValue tv : auditKeyNamesSet) {
 				logger.config("Found Audit KeyName Tag at " + tv.getPathToName() + " Value=" + tv.getTagValue());
 			}
 		}

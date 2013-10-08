@@ -1,0 +1,99 @@
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 4900
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 11:47:16 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 4976
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 11:59:18 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 4376
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:02:57 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 3624
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:10:56 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 1364
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:13:28 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 4540
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:15:31 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 3332
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:17:59 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 2776
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:18:45 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Log Level initialised to CONFIG
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Shut-Down Log file is .\LwGenericMessageHandler_shutdown.log
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Parent Process ID is $PPID
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Process ID (of Java VM) is 4216
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Will expect input-supplying object to be specified in the Constructor of LwGenericMessageHandler
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings HTTP Post will  back off incrementally when trying to connect
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings MessageProcessingClassName is null
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings 1 or more Response(s) expected/allowed from Processing class null
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings Error files will be named according to the following template: ErrorMessage_*_?.txt
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings TargetMainDocElementName is null
+2013-10-07 12:19:24 CONFIG gemha.support.LwGenericMessageHandlerSettings recordSettings ResponseMainDocElementName is null

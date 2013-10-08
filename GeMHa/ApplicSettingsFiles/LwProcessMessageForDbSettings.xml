@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LwProcessMessageForDbSettings.xsd">
+<Applic  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ProcessMessageForDbSettings.xsd">
 	<Params>
 <!--	Oracle connection over JDBC...
 		<JdbcClass>oracle.jdbc.driver.OracleDriver</JdbcClass>
@@ -86,19 +86,19 @@
 	</PreparedStatements>
 	<Auditing>
 		<AuditKeys DbAction="insert">
-			<KeyName>INSERT/COLUMNS/USERID</KeyName>
-			<KeyName>INSERT/COLUMNS/USERCODENAME</KeyName>
+			<KeyName>COLUMNS/USERID</KeyName>
+			<KeyName>COLUMNS/USERCODENAME</KeyName>
 		</AuditKeys>
 		<AuditKeys DbAction="update">
-			<KeyName>UPDATE/WHERE/USERID</KeyName>
-			<KeyName>UPDATE/WHERE/USERCODENAME</KeyName>
+			<KeyName>WHERE/USERID</KeyName>
+			<KeyName>WHERE/USERCODENAME</KeyName>
 		</AuditKeys>
 		<AuditKeys DbAction="delete">
-			<KeyName>DELETE/WHERE/USERID</KeyName>
-			<KeyName>DELETE/WHERE/USERCODENAME</KeyName>
+			<KeyName>WHERE/USERID</KeyName>
+			<KeyName>WHERE/USERCODENAME</KeyName>
 		</AuditKeys>
 		<AuditKeys DbAction="select">
-			<KeyName>SELECT/WHERE/USERSTATUS</KeyName>
+			<KeyName>WHERE/USERSTATUS</KeyName>
 		</AuditKeys>
 		<AuditKeysSeparator>-</AuditKeysSeparator>
 	</Auditing>

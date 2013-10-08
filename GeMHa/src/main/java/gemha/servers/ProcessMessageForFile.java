@@ -13,13 +13,15 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.io.*;
 
+import org.w3c.dom.Node;
+
 import lw.utils.*;
 import lw.XML.*;
-import gemha.support.LwProcessMessageForFileSettings;
-import gemha.support.LwMessagingException;
-import gemha.support.LwProcessResponse;
-import gemha.support.LwProcessResponse.ProcessResponseCode;
-import gemha.interfaces.LwIProcessMesssage;
+import gemha.support.ProcessMessageForFileSettings;
+import gemha.support.MessagingException;
+import gemha.support.ProcessResponse;
+import gemha.support.ProcessResponse.ProcessResponseCode;
+import gemha.interfaces.IProcessMesssage;
 
 /**
   * This class processes an XML message to send a record to a file.
@@ -40,7 +42,7 @@ import gemha.interfaces.LwIProcessMesssage;
   * @version 1.0 16/12/2008
   * 
   */
-public class LwProcessMessageForFile implements LwIProcessMesssage {
+public class ProcessMessageForFile implements IProcessMesssage {
 
     private static final Logger logger = Logger.getLogger("gemha");
     
@@ -55,14 +57,14 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
     
     // Queue for handing off responses, with fixed capacity of 1000.
     // End-of-data will be signaled by a null record
-    private final BlockingQueue<Future<LwProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<LwProcessResponse>>(1000);
+    private final BlockingQueue<Future<ProcessResponse>> responseQueue = new LinkedBlockingQueue<Future<ProcessResponse>>(1000);
 
 	volatile private String messagesFileName = null;
 	volatile private PrintWriter outFile;			// Write access to this file is limited to our execPool
 	volatile private boolean outFileIsEmpty = true;	// true if nothing yet written to file
-	volatile private LwProcessMessageForFileSettings fileSettings = null;
+	volatile private ProcessMessageForFileSettings fileSettings = null;
 
-	public LwProcessMessageForFile() {
+	public ProcessMessageForFile() {
 	}
 
 	//////////////////////////////////////////////////////////////////
@@ -74,27 +76,27 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  * @param settingsFileName the file from which to get set-up information
 	  *
 	  * @return true for success, false for failure
-	  * @throws LwSettingsException if a problem was encountered performing setup
+	  * @throws SettingsException if a problem was encountered performing setup
 	  */
 	@Override
-	public void performSetup(String settingsFileName) throws LwSettingsException {
+	public void performSetup(String settingsFileName) throws SettingsException {
 		if (fileSettings != null)
 			throw new IllegalStateException("LwProcessMessageForFile.performSetup can only be called once");
 
 		if (settingsFileName == null) {
-			throw new LwSettingsException("Parameter settingsFileName was null.");
+			throw new SettingsException("Parameter settingsFileName was null.");
 		}
 
-		fileSettings = new LwProcessMessageForFileSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
+		fileSettings = new ProcessMessageForFileSettings(settingsFileName, XMLDocument.SCHEMA_VALIDATION_ON);
 
 		messagesFileName = LwLogger.createFileNameFromTemplate(fileSettings.getMessagesFileNameTemplate(), null);
 
 		try {
 			openMessagesFile(messagesFileName, fileSettings.getFileOpenMode().equals("append"));
 		}
-		catch (LwMessagingException e) {
+		catch (MessagingException e) {
 			logger.severe("LwMessagingException: " + e.getMessage());
-			throw new LwSettingsException("Caught LwMessagingException trying to open new output file " + messagesFileName + ": " + e.getMessage());
+			throw new SettingsException("Caught LwMessagingException trying to open new output file " + messagesFileName + ": " + e.getMessage());
 		}
 	}
 
@@ -108,11 +110,11 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
 	@Override
-	public LwProcessResponse processMessageSynch(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues)
-											throws LwMessagingException {
+	public ProcessResponse processMessageSynch(final String messageText, final XMLDocument inputDoc, String auditKeyValues)
+											throws MessagingException {
 		return processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.SYNCHRONOUS);
 	}
 	
@@ -124,11 +126,11 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  * @param inputDoc the original input message as an XML document, null if message was not XML. To be returned with result - DO NOT MODIFY, is NOT threadsafe!!
 	  * @param auditKeyValues audit Key Values for the message (can be null). To be returned with result
 	  *
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
 	@Override
-	public void processMessageAsynch(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues)
-											throws LwMessagingException {
+	public void processMessageAsynch(final String messageText, final XMLDocument inputDoc, String auditKeyValues)
+											throws MessagingException {
 		processMessage(messageText, inputDoc, auditKeyValues, ProcessingMode.ASYNCHRONOUS);
 	}
 
@@ -144,14 +146,14 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  *
 	  * @return the next response from process, null if no more results will ever arrive
 	  * 
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  */
-	private LwProcessResponse processMessage(final String messageText, final LwXMLDocument inputDoc, String auditKeyValues, ProcessingMode processingMode)
-											throws LwMessagingException {
+	private ProcessResponse processMessage(final String messageText, final XMLDocument inputDoc, String auditKeyValues, ProcessingMode processingMode)
+											throws MessagingException {
 
-		Callable<LwProcessResponse> processMessageTask = new Callable<LwProcessResponse>() {
+		Callable<ProcessResponse> processMessageTask = new Callable<ProcessResponse>() {
 			@Override
-			public LwProcessResponse call() throws LwMessagingException {
+			public ProcessResponse call() throws MessagingException {
 				logger.info("[" + Thread.currentThread().getName() + "]: Control now in messageProcessor.");
 		
 				if (outFile == null) { // then out file was closed, re-open it, appending
@@ -163,14 +165,14 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 				//////////////////////////////////////////////////////////////////
 				// Set up a new XML doc
 				//////////////////////////////////////////////////////////////////
-				LwXMLDocument newDoc = null;
+				XMLDocument newDoc = null;
 				try {
-					newDoc = LwXMLDocument.createDoc(messageText, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+					newDoc = XMLDocument.createDoc(messageText, XMLDocument.SCHEMA_VALIDATION_OFF);
 				}
-				catch(LwXMLException e) {
+				catch(XMLException e) {
 					logger.severe("[" + Thread.currentThread().getName() + "]: LwXMLException: " + e.getMessage());
 					logger.warning("[" + Thread.currentThread().getName() + "]: InputMessage was :" + messageText);
-					throw new LwMessagingException("Could not create new XML document: " + e.getMessage());
+					throw new MessagingException("Could not create new XML document: " + e.getMessage());
 				}
 		
 				///////////////////////////////////////////////
@@ -186,10 +188,10 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 					outFileIsEmpty = false;
 					// Just take names from first-found row
 					if (newDoc.setCurrentNodeByPath(fileSettings.getColumnsLocation(), 1)) {
-						Vector<LwXMLTagValue> row = newDoc.getValuesForTagsChildren();
+						Vector<XMLTagValue> row = newDoc.getValuesForTagsChildren();
 		
 						int colNum = 0;
-						for (LwXMLTagValue col : row) {
+						for (XMLTagValue col : row) {
 							outFile.print(col.getTagName());
 							if (++colNum < row.size()) { // then not last column, so add separator
 								outFile.print(fileSettings.getFieldSeparator());
@@ -203,12 +205,16 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 				///////////////////////////////////////////////
 				// Send all rows of data to the file...
 				///////////////////////////////////////////////
+				
 				int numRowsProcessed = 0;
+				logger.info("[" + Thread.currentThread().getName() + "]: Column Location will be " + fileSettings.getColumnsLocation() + "[position()=" + (numRowsProcessed+1) + "]");
 				while (newDoc.setCurrentNodeByPath(fileSettings.getColumnsLocation(), ++numRowsProcessed)) {
-					Vector<LwXMLTagValue> row = newDoc.getValuesForTagsChildren();
+					logger.info("[" + Thread.currentThread().getName() + "]: Path to parent = " + XMLDocument.pathFromRoot(newDoc.getCurrentNode(), ""));
+					logger.info("[" + Thread.currentThread().getName() + "]: Path to node = " + XMLDocument.pathFromRoot(newDoc.getCurrentNode(), newDoc.getCurrentNodeName()));
+					Vector<XMLTagValue> row = newDoc.getValuesForTagsChildren();
 		
 					int colNum = 0;
-					for (LwXMLTagValue col : row) {
+					for (XMLTagValue col : row) {
 						outFile.print(col.getTagValue());
 						if (++colNum < row.size()) { // then not last column, so add separator
 							outFile.print(fileSettings.getFieldSeparator());
@@ -216,6 +222,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 					}
 					outFile.println();
 					logger.info("[" + Thread.currentThread().getName() + "]: Wrote record for audit key value " + auditKeyValues);
+					newDoc.setCurrentNodeToFirstElement(); // For looping
 				}
 				numRowsProcessed--; // just need to roll back by one to get actual number processed
 		
@@ -224,11 +231,11 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 				// If got here, message was successfully transmitted.
 				// So build Response...
 				///////////////////////////////////////////////
-				LwXMLDocument response = createResponseDoc(); // create doc shell
+				XMLDocument response = createResponseDoc(); // create doc shell
 				response.addElement(null, "SEND_STATUS", "SUCCESS");
 				response.addElement(null, "NUM_ROWS_WRITTEN", String.valueOf(numRowsProcessed));
 				
-				LwProcessResponse.Builder responseBuilder = new LwProcessResponse.Builder(ProcessResponseCode.SUCCESS, numRowsProcessed)
+				ProcessResponse.Builder responseBuilder = new ProcessResponse.Builder(ProcessResponseCode.SUCCESS, numRowsProcessed)
 						.setResponse(response.toString())
 						.setInputDoc(inputDoc)
 						.setAuditKeyValues(auditKeyValues);
@@ -265,7 +272,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 			try {
 				return processMessageTask.call();
 			} catch (Exception e) {
-				throw new LwMessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
+				throw new MessagingException("[" + Thread.currentThread().getName() + "]: Caught Exception calling processMessageTask: " + e);
 			}
 		}
 	}
@@ -277,19 +284,19 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  * LwProcessResponse is immutable
 	  * 
 	  * @return the next response from process, null if no more results will ever arrive
-	  * @throws LwMessagingException if a problem was encountered processing the message
+	  * @throws MessagingException if a problem was encountered processing the message
 	  * @throws InterruptedException if CALLING thread is noticed as interrupted while getting response
 	  */
 	@Override
-	public LwProcessResponse getResponse() throws LwMessagingException, InterruptedException {
-		LwProcessResponse response = null;
+	public ProcessResponse getResponse() throws MessagingException, InterruptedException {
+		ProcessResponse response = null;
 		try {
-			Future<LwProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
+			Future<ProcessResponse> fr = responseQueue.take(); // will block here if queue empty (will never return null - BlockingQueue doesn't allow)
 			response = fr.get(); // will block here if next task in queue not yet finished
 		} catch (ExecutionException e) {
 			Throwable cause = e.getCause();
-			if (cause instanceof LwMessagingException)
-				throw (LwMessagingException) cause;
+			if (cause instanceof MessagingException)
+				throw (MessagingException) cause;
 			else
 				throw launderThrowable(cause);
 		}
@@ -382,7 +389,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  *
 	  */
 	private void openMessagesFile(String fileName, boolean append)
-										throws LwMessagingException {
+										throws MessagingException {
 		///////////////////////////////////////////////
 		// Open a new messages file.
 		///////////////////////////////////////////////
@@ -394,7 +401,7 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 		}
 		catch (IOException e) {
 			logger.severe("IOException: " + e.getMessage());
-			throw new LwMessagingException("Caught IOException trying to open a new messages output file " + fileName + ": " + e.getMessage());
+			throw new MessagingException("Caught IOException trying to open a new messages output file " + fileName + ": " + e.getMessage());
 		}
 	}
 
@@ -408,14 +415,14 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  *
 	  * @return the concatenated audit key values for this message, the empty string if no values
 	  */
-	private String getConcatenatedAuditKeyValues(LwXMLDocument doc, Vector<LwXMLTagValue> auditKeyNamesSet, String separator) {
+	private String getConcatenatedAuditKeyValues(XMLDocument doc, Vector<XMLTagValue> auditKeyNamesSet, String separator) {
 
 		String concatenatedValues = "";
 
 		// Using Enumeration instead of for-each loop, so could use hasMoreElements() when adding separator
-		Enumeration<LwXMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
+		Enumeration<XMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
 		while (enumAuditKeyNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+			XMLTagValue tv = enumAuditKeyNames.nextElement();
 
 			String nextValue = doc.getValueForTag(tv.getTagValue());
 
@@ -431,17 +438,17 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 	  * Start a response doc
 	  *
 	  */
-	private LwXMLDocument createResponseDoc()
-								throws LwMessagingException {
+	private XMLDocument createResponseDoc()
+								throws MessagingException {
 
-		LwXMLDocument newResponse = null;
+		XMLDocument newResponse = null;
 
 		try {
-			newResponse = LwXMLDocument.createDoc("<FILE_REQUEST></FILE_REQUEST>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newResponse = XMLDocument.createDoc("<FILE_REQUEST></FILE_REQUEST>", XMLDocument.SCHEMA_VALIDATION_OFF);
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
-			throw new LwMessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
+			throw new MessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
 		}
 		
 		return newResponse;
@@ -475,8 +482,8 @@ public class LwProcessMessageForFile implements LwIProcessMesssage {
 		logger.info("Submitting Poison Pill to Executor queue, so will cause responseProcessor to close down.");
 		try {
 			if ( ! execPool.isShutdown()) { // this check in case we,ve already called this method
-				responseQueue.put(execPool.submit( new Callable<LwProcessResponse>() {
-					public LwProcessResponse call() throws LwMessagingException {
+				responseQueue.put(execPool.submit( new Callable<ProcessResponse>() {
+					public ProcessResponse call() throws MessagingException {
 						return null;
 					} // end Callable.call()
 				}));

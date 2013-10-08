@@ -39,27 +39,27 @@
 		</dependency>
   	    <dependency>
 	      <groupId>${project.groupId}</groupId>
-	      <artifactId>LwUtils</artifactId>
+	      <artifactId>Utils</artifactId>
 	      <version>0.0.1-SNAPSHOT</version>
 	    </dependency>
 	    <dependency>
 	      <groupId>${project.groupId}</groupId>
-	      <artifactId>LwXML</artifactId>
+	      <artifactId>XML</artifactId>
 	      <version>0.0.1-SNAPSHOT</version>
 	    </dependency>
 	    	    <dependency>
 	      <groupId>${project.groupId}</groupId>
-	      <artifactId>LwSockets</artifactId>
+	      <artifactId>Sockets</artifactId>
 	      <version>0.0.1-SNAPSHOT</version>
 	    </dependency>
 	    	    <dependency>
 	      <groupId>${project.groupId}</groupId>
-	      <artifactId>LwQueues</artifactId>
+	      <artifactId>Queues</artifactId>
 	      <version>0.0.1-SNAPSHOT</version>
 	    </dependency>
 	    	    	    <dependency>
 	      <groupId>${project.groupId}</groupId>
-	      <artifactId>LwDb</artifactId>
+	      <artifactId>Db</artifactId>
 	      <version>0.0.1-SNAPSHOT</version>
 	    </dependency>
 	    <dependency>

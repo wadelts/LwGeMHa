@@ -2,8 +2,8 @@ package gemha.servers;
 
 import java.util.logging.*;
 
-import gemha.support.LwMessagingException;
-import gemha.interfaces.LwIAcceptMesssages;
+import gemha.support.MessagingException;
+import gemha.interfaces.IAcceptMesssages;
 import lw.queues.GenericQueueException;
 import lw.queues.InputQueue;
 import lw.queues.NoMessageFoundException;
@@ -15,11 +15,11 @@ import lw.utils.LwLogger;
   * @author Liam Wade
   * @version 1.0 30/10/2008
   */
-public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
+public class AcceptMessagesFromQueue implements IAcceptMesssages {
 
     private static final Logger logger = Logger.getLogger("gemha");
 	
-	public LwAcceptMessagesFromQueue(String inputQueueName, String urlJMSserver) {
+	public AcceptMessagesFromQueue(String inputQueueName, String urlJMSserver) {
 		this.inputQueueName = inputQueueName;
 		this.urlJMSserver = urlJMSserver;
 	}
@@ -49,7 +49,7 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 	  *
 	  * @return true for success, false for failure
 	  */
-	public boolean performSetup() throws LwMessagingException {
+	public boolean performSetup() throws MessagingException {
 		if (inputQueueName == null) {
 			logger.severe("Could not perform setup. Missing Queue information");
 			return false;
@@ -74,10 +74,10 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 	  *
 	  * @return the next message retrieved
 	  */
-	public String acceptNextMessage() throws LwMessagingException {
+	public String acceptNextMessage() throws MessagingException {
 		if (inQueue == null) {
 			logger.severe("Could not accept messages. inQueue is null.");
-			throw new LwMessagingException("Could not accept messages. inQueue is null.");
+			throw new MessagingException("Could not accept messages. inQueue is null.");
 		}
 
 		try {
@@ -90,7 +90,7 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 			// Is OK. Doesn't cause a problem.
 		}
 		catch (GenericQueueException e) {
-			throw new LwMessagingException("GenericQueueException encountered while accepting next message from Queue: " + e);
+			throw new MessagingException("GenericQueueException encountered while accepting next message from Queue: " + e);
 		}
 
 		return null;
@@ -101,7 +101,7 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 	  *
 	  */
 	public void stayMessage(String auditKey)
-							 throws LwMessagingException {
+							 throws MessagingException {
 		if (inQueue == null) {
 			return;
 		}
@@ -111,7 +111,7 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 			logger.warning("Message with AuditKey Value " + auditKey + " left on queue (rolledback).");
 		}
 		catch (GenericQueueException e) {
-			throw new LwMessagingException("GenericQueueException encountered while leaving message (key=" + auditKey + ") on Queue: " + e);
+			throw new MessagingException("GenericQueueException encountered while leaving message (key=" + auditKey + ") on Queue: " + e);
 		}
 	}
 
@@ -120,7 +120,7 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 	  *
 	  */
 	public void consumeMessage(String auditKey)
-							 throws LwMessagingException{
+							 throws MessagingException{
 		if (inQueue == null) {
 			return;
 		}
@@ -129,7 +129,7 @@ public class LwAcceptMessagesFromQueue implements LwIAcceptMesssages {
 			inQueue.sessionCommit();
 		}
 		catch (GenericQueueException e) {
-			throw new LwMessagingException("GenericQueueException encountered while commiting message (key=" + auditKey + ") on Queue: " + e);
+			throw new MessagingException("GenericQueueException encountered while commiting message (key=" + auditKey + ") on Queue: " + e);
 		}
 	}
 

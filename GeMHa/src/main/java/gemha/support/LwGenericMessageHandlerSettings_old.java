@@ -29,11 +29,11 @@ public class LwGenericMessageHandlerSettings_old {
 	 *            Schema definition
 	 */
 	public LwGenericMessageHandlerSettings_old(String settingsFileName, boolean settingsFileSchemaValidation)
-			throws LwSettingsException {
+			throws SettingsException {
 
 		
 		if (settingsFileName == null) {
-			throw new LwSettingsException(
+			throw new SettingsException(
 					"LwGenericMessageHandlerSettings.constructor(): Required parameter is null.");
 		}
 
@@ -42,8 +42,8 @@ public class LwGenericMessageHandlerSettings_old {
 
 		try {
 			getSettings();
-		} catch (LwXMLException e) {
-			throw new LwSettingsException(
+		} catch (XMLException e) {
+			throw new SettingsException(
 					"LwGenericMessageHandlerSettings.constructor(): caught LwXMLException: "
 							+ e);
 		}
@@ -154,7 +154,7 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return the dataContractName
 	 */
-	public LwXMLTagValue getDataContractName() {
+	public XMLTagValue getDataContractName() {
 		return dataContractName;
 	}
 
@@ -318,7 +318,7 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return the inputValidationSettings
 	 */
-	public LwXMLTagValue getInputValidationSettings() {
+	public XMLTagValue getInputValidationSettings() {
 		return inputValidationSettings;
 	}
 
@@ -354,7 +354,7 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return the auditKeysAggregate
 	 */
-	public LwXMLTagValue getAuditKeysAggregate() {
+	public XMLTagValue getAuditKeysAggregate() {
 		return auditKeysAggregate;
 	}
 
@@ -363,9 +363,9 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return an enumeration of the auditKeyNamesSet
 	 */
-	public Enumeration<LwXMLTagValue> getAuditKeyNamesSet() {
+	public Enumeration<XMLTagValue> getAuditKeyNamesSet() {
 		if (auditKeyNamesSet == null) { // return an empty enumeration
-			return (new Vector<LwXMLTagValue>()).elements();
+			return (new Vector<XMLTagValue>()).elements();
 		} else {
 			return auditKeyNamesSet.elements();
 		}
@@ -403,9 +403,9 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return an enumeration of the mindElementSet
 	 */
-	public Enumeration<LwXMLTagValue> getMindElementSet() {
+	public Enumeration<XMLTagValue> getMindElementSet() {
 		if (mindElementSet == null) { // return an empty enumeration
-			return (new Vector<LwXMLTagValue>()).elements();
+			return (new Vector<XMLTagValue>()).elements();
 		} else {
 			return mindElementSet.elements();
 		}
@@ -416,9 +416,9 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return an enumeration of the sendElementSet
 	 */
-	public Enumeration<LwXMLTagValue> getSendElementSet() {
+	public Enumeration<XMLTagValue> getSendElementSet() {
 		if (sendElementSet == null) { // return an empty enumeration
-			return (new Vector<LwXMLTagValue>()).elements();
+			return (new Vector<XMLTagValue>()).elements();
 		} else {
 			return sendElementSet.elements();
 		}
@@ -429,9 +429,9 @@ public class LwGenericMessageHandlerSettings_old {
 	 * 
 	 * @return an enumeration of the responseLiteralsSet
 	 */
-	public Enumeration<LwXMLTagValue> getResponseLiteralsSet() {
+	public Enumeration<XMLTagValue> getResponseLiteralsSet() {
 		if (responseLiteralsSet == null) { // return an empty enumeration
-			return (new Vector<LwXMLTagValue>()).elements();
+			return (new Vector<XMLTagValue>()).elements();
 		} else {
 			return responseLiteralsSet.elements();
 		}
@@ -485,10 +485,10 @@ public class LwGenericMessageHandlerSettings_old {
 	 * Get the settings from the settings file
 	 * 
 	 */
-	private void getSettings() throws LwSettingsException, LwXMLException {
+	private void getSettings() throws SettingsException, XMLException {
 		String fileSeparator = System.getProperty("file.separator");
 		
-		LwXMLDocument settingsDoc = new LwXMLDocument();
+		XMLDocument settingsDoc = new XMLDocument();
 
 		settingsDoc.createDocFromFile(settingsFileName,
 				settingsFileSchemaValidation);
@@ -537,12 +537,12 @@ public class LwGenericMessageHandlerSettings_old {
 			try {
 				inputLimit = Integer.parseInt(strInputLimit);
 			} catch (NumberFormatException e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid InputLimit.");
 			}
 
 			if (inputLimit < 1) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid InputLimit. 0 not allowed");
 			}
 		}
@@ -572,12 +572,12 @@ public class LwGenericMessageHandlerSettings_old {
 				milliMilliSecondsBeforeQuiet = Integer
 						.parseInt(strMilliSecondsBeforeQuiet);
 			} catch (NumberFormatException e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid MilliSecondsBeforeQuiet.");
 			}
 
 			if (milliMilliSecondsBeforeQuiet < 1) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid MilliSecondsBeforeQuiet. 0 not allowed");
 			}
 		}
@@ -591,12 +591,12 @@ public class LwGenericMessageHandlerSettings_old {
 			try {
 				portNumber = Integer.parseInt(strPortNumber);
 			} catch (NumberFormatException e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid PortNumber.");
 			}
 
 			if (portNumber < 1) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid PortNumber. 0 not allowed");
 			}
 		}
@@ -669,12 +669,12 @@ public class LwGenericMessageHandlerSettings_old {
 			try {
 				maxRecsPerMessage = Integer.parseInt(strMaxRecsPerMessage);
 			} catch (NumberFormatException e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid MaxRecsPerMessage.");
 			}
 
 			if (maxRecsPerMessage < 1) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid MaxRecsPerMessage. 0 not allowed");
 			}
 		}
@@ -689,7 +689,7 @@ public class LwGenericMessageHandlerSettings_old {
 			try {
 				numRecordsToSkip = Integer.parseInt(strNumRecordsToSkip);
 			} catch (NumberFormatException e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid NumRecordsToSkip.");
 			}
 		}
@@ -702,12 +702,12 @@ public class LwGenericMessageHandlerSettings_old {
 		// ////////////////////////////////////////////////////////////////////////
 		if (settingsDoc.setCurrentNodeByPath(
 				"/Applic/Input/InputSource/InputFile/CSVParams/ColumnOrder", 1)) {
-			Vector<LwXMLTagValue> paramColumns = settingsDoc
+			Vector<XMLTagValue> paramColumns = settingsDoc
 					.getValuesForTagsChildren();
 
 			// Transfer column names to simple list
 			colNameList = new ArrayList<String>(paramColumns.size());
-			for (LwXMLTagValue p : paramColumns) {
+			for (XMLTagValue p : paramColumns) {
 				colNameList.add(p.getTagValue());
 			}
 
@@ -838,12 +838,12 @@ public class LwGenericMessageHandlerSettings_old {
 				minResponsesExpected = Integer
 						.parseInt(strMinResponsesExpected);
 			} catch (NumberFormatException e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid MinResponsesExpected.");
 			}
 
 			if (minResponsesExpected < 0) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.getSettings(): Invalid MinResponsesExpected. Less than 0 not allowed");
 			}
 		}
@@ -922,7 +922,7 @@ public class LwGenericMessageHandlerSettings_old {
 	 * filehandler(s) to the Logger.
 	 * 
 	 */
-	public void setUpLoggingToFile() throws LwSettingsException {
+	public void setUpLoggingToFile() throws SettingsException {
 		try {
 			fh = new FileHandler(logFileName, true);
 			// Change default format from XML records (XMLFormatter) to
@@ -930,7 +930,7 @@ public class LwGenericMessageHandlerSettings_old {
 			fh.setFormatter(new SimpleFormatter());
 
 		} catch (IOException e) {
-			throw new LwSettingsException(
+			throw new SettingsException(
 					"LwGenericMessageHandlerSettings.setUpLoggingToFile(): Couldn't open log file "
 							+ logFileName + ": " + e);
 		}
@@ -946,7 +946,7 @@ public class LwGenericMessageHandlerSettings_old {
 			try {
 				logger.setLevel(Level.parse(loggingLevel));
 			} catch (Exception e) {
-				throw new LwSettingsException(
+				throw new SettingsException(
 						"LwGenericMessageHandlerSettings.setUpLoggingToFile(): Invalid LogLevel in settings file! "
 								+ e);
 			}
@@ -1089,10 +1089,10 @@ public class LwGenericMessageHandlerSettings_old {
 		}
 
 		// Record Audit key Names, if exist
-		Enumeration<LwXMLTagValue> enumAuditKeyNames = auditKeyNamesSet
+		Enumeration<XMLTagValue> enumAuditKeyNames = auditKeyNamesSet
 				.elements();
 		while (enumAuditKeyNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+			XMLTagValue tv = enumAuditKeyNames.nextElement();
 			logger.info("Found Audit KeyName Tag at " + tv.getPathToName()
 					+ " Value=" + tv.getTagValue());
 		}
@@ -1107,17 +1107,17 @@ public class LwGenericMessageHandlerSettings_old {
 				+ errorFileNameTemplate);
 
 		// Record 'mind' aggregate Names, if exist
-		Enumeration<LwXMLTagValue> enumMindAggNames = mindElementSet.elements();
+		Enumeration<XMLTagValue> enumMindAggNames = mindElementSet.elements();
 		while (enumMindAggNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumMindAggNames.nextElement();
+			XMLTagValue tv = enumMindAggNames.nextElement();
 			logger.info("Found 'Mind' Element Tag at " + tv.getPathToName()
 					+ " Value=" + tv.getTagValue());
 		}
 
 		// Record 'send' aggregate Names
-		Enumeration<LwXMLTagValue> enumSendAggNames = sendElementSet.elements();
+		Enumeration<XMLTagValue> enumSendAggNames = sendElementSet.elements();
 		while (enumSendAggNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumSendAggNames.nextElement();
+			XMLTagValue tv = enumSendAggNames.nextElement();
 			logger.info("Found Send Element Tag at " + tv.getPathToName()
 					+ " Value=" + tv.getTagValue());
 		}
@@ -1127,10 +1127,10 @@ public class LwGenericMessageHandlerSettings_old {
 				+ responseMainDocElementName);
 
 		// Record response literal Names, if exist
-		Enumeration<LwXMLTagValue> enumRespLiteralNames = responseLiteralsSet
+		Enumeration<XMLTagValue> enumRespLiteralNames = responseLiteralsSet
 				.elements();
 		while (enumRespLiteralNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumRespLiteralNames.nextElement();
+			XMLTagValue tv = enumRespLiteralNames.nextElement();
 			logger.info("Found Response Literal Tag at " + tv.getPathToName()
 					+ " Value=" + tv.getTagValue());
 		}
@@ -1170,7 +1170,7 @@ public class LwGenericMessageHandlerSettings_old {
 													// before going quiet
 													// (closing down resources)
 	private String inputDataFormat = null;
-	private LwXMLTagValue dataContractName = null;
+	private XMLTagValue dataContractName = null;
 	private int portNumber = 0; // port on which a socket server wuold listen
 	private String outputUrlJMSserver = null;
 	private String outputQueueName = null;
@@ -1213,7 +1213,7 @@ public class LwGenericMessageHandlerSettings_old {
 													// "current date & time & sequence number"
 
 	// Input message Validation requirements
-	private LwXMLTagValue inputValidationSettings = null; // optional
+	private XMLTagValue inputValidationSettings = null; // optional
 
 	// Message-Procesing class variables
 	private String messageProcessingClassName = null;
@@ -1224,12 +1224,12 @@ public class LwGenericMessageHandlerSettings_old {
 											// Class 0..n, default = 1
 
 	// Names of TAGs in which audit keys will be found in messages
-	private LwXMLTagValue auditKeysAggregate = null; // if exists, will have an
+	private XMLTagValue auditKeysAggregate = null; // if exists, will have an
 														// attribute to say what
 														// happens if a value is
 														// not found for an
 														// Audit key
-	private Vector<LwXMLTagValue> auditKeyNamesSet = null;
+	private Vector<XMLTagValue> auditKeyNamesSet = null;
 	private String auditKeysSeparator = null; // if exists, will be used to
 												// separate values for
 												// concatenated audit keys
@@ -1244,12 +1244,12 @@ public class LwGenericMessageHandlerSettings_old {
 													// be taken off queue
 
 	// Name(s) of element(s) to be 'minded' and returned in response
-	private Vector<LwXMLTagValue> mindElementSet = null;
+	private Vector<XMLTagValue> mindElementSet = null;
 	// Name(s) of element(s) to be sent to the processor Class
-	private Vector<LwXMLTagValue> sendElementSet = null;
+	private Vector<XMLTagValue> sendElementSet = null;
 	// Name(s) of response literals - tags for which values will be set in the
 	// response
-	private Vector<LwXMLTagValue> responseLiteralsSet = null;
+	private Vector<XMLTagValue> responseLiteralsSet = null;
 
 	// wrapper aggregates, for target and response messages
 	private String targetMainDocElementName = null;

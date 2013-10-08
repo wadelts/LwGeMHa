@@ -7,9 +7,9 @@ import java.io.*;
 
 import lw.XML.*;
 import lw.utils.*;
-import gemha.support.LwProcessMessageForFileSettings;
-import gemha.support.LwMessagingException;
-import gemha.interfaces.LwIProcessMesssage_old;
+import gemha.support.ProcessMessageForFileSettings;
+import gemha.support.MessagingException;
+import gemha.interfaces.IProcessMesssage_old;
 
 /**
   * This class processes an XML message to send a record to a file.
@@ -17,7 +17,7 @@ import gemha.interfaces.LwIProcessMesssage_old;
   * @author Liam Wade
   * @version 1.0 16/12/2008
   */
-public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
+public class LwProcessMessageForFile_old implements IProcessMesssage_old {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
@@ -34,22 +34,22 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 	  *
 	  * @return true for success, false for failure
 	  */
-	public void performSetup(String settingsFileName) throws LwSettingsException {
+	public void performSetup(String settingsFileName) throws SettingsException {
 
 		if (settingsFileName == null) {
-			throw new LwSettingsException("Parameter settingsFileName was null.");
+			throw new SettingsException("Parameter settingsFileName was null.");
 		}
 
-		settings = new LwProcessMessageForFileSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
+		settings = new ProcessMessageForFileSettings(settingsFileName, XMLDocument.SCHEMA_VALIDATION_ON);
 
 		messagesFileName = LwLogger.createFileNameFromTemplate(settings.getMessagesFileNameTemplate(), null);
 
 		try {
 			openMessagesFile(messagesFileName, settings.getFileOpenMode().equals("append"));
 		}
-		catch (LwMessagingException e) {
+		catch (MessagingException e) {
 			logger.severe("LwMessagingException: " + e.getMessage());
-			throw new LwSettingsException("Caught LwMessagingException trying to open new output file " + messagesFileName + ": " + e.getMessage());
+			throw new SettingsException("Caught LwMessagingException trying to open new output file " + messagesFileName + ": " + e.getMessage());
 		}
 	}
 
@@ -61,7 +61,7 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 	  * @return 0 for success with no response necessary, 1 for success and response is ready, less than zero for error
 	  */
 	public int processMessage(String messageText)
-											throws LwMessagingException {
+											throws MessagingException {
 
 		logger.info("Control now in messageProcessor.");
 
@@ -78,14 +78,14 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 		//////////////////////////////////////////////////////////////////
 		// Set up a new XML doc
 		//////////////////////////////////////////////////////////////////
-		LwXMLDocument newDoc = new LwXMLDocument();
+		XMLDocument newDoc = new XMLDocument();
 		try {
-			newDoc.createDoc(messageText, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newDoc.createDoc(messageText, XMLDocument.SCHEMA_VALIDATION_OFF);
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.severe("LwXMLException: " + e.getMessage());
 			logger.warning("InputMessage was :" + messageText);
-			throw new LwMessagingException("Could not create new XML document: " + e.getMessage());
+			throw new MessagingException("Could not create new XML document: " + e.getMessage());
 		}
 
 		///////////////////////////////////////////////
@@ -101,10 +101,10 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 			outFileIsEmpty = false;
 			// Just take names from first-found row
 			if (newDoc.setCurrentNodeByPath("/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS", 1)) {
-				Vector<LwXMLTagValue> saveColumns = newDoc.getValuesForTagsChildren();
+				Vector<XMLTagValue> saveColumns = newDoc.getValuesForTagsChildren();
 
 				int colNum = 0;
-				for (LwXMLTagValue tv : saveColumns) {
+				for (XMLTagValue tv : saveColumns) {
 					outFile.print(tv.getTagName());
 					if (++colNum < saveColumns.size()) { // then not last column, so add separator
 						outFile.print(settings.getFieldSeparator());
@@ -120,10 +120,10 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 		///////////////////////////////////////////////
 		int i = 0;
 		while (newDoc.setCurrentNodeByPath("/MESSAGE/FILE_REQUEST/TABLE/ROW/COLUMNS", ++i)) {
-			Vector<LwXMLTagValue> saveColumns = newDoc.getValuesForTagsChildren();
+			Vector<XMLTagValue> saveColumns = newDoc.getValuesForTagsChildren();
 
 			int colNum = 0;
-			for (LwXMLTagValue tv : saveColumns) {
+			for (XMLTagValue tv : saveColumns) {
 				outFile.print(tv.getTagValue());
 				if (++colNum < saveColumns.size()) { // then not last column, so add separator
 					outFile.print(settings.getFieldSeparator());
@@ -152,7 +152,7 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 	  * @return the response, null if none exists
 	  */
 	public String getResponse() {
-		LwXMLDocument tempResponse = response;
+		XMLDocument tempResponse = response;
 		response = null;
 		return tempResponse.toString();
 	}
@@ -200,7 +200,7 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 	  *
 	  */
 	private void openMessagesFile(String fileName, boolean append)
-										throws LwMessagingException {
+										throws MessagingException {
 		///////////////////////////////////////////////
 		// Open a new messages file.
 		///////////////////////////////////////////////
@@ -212,7 +212,7 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 		}
 		catch (IOException e) {
 			logger.severe("IOException: " + e.getMessage());
-			throw new LwMessagingException("Caught IOException trying to open a new messages output file " + fileName + ": " + e.getMessage());
+			throw new MessagingException("Caught IOException trying to open a new messages output file " + fileName + ": " + e.getMessage());
 		}
 	}
 
@@ -226,14 +226,14 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 	  *
 	  * @return the concatenated audit key values for this message, the empty string if no values
 	  */
-	private String getConcatenatedAuditKeyValues(LwXMLDocument doc, Vector<LwXMLTagValue> auditKeyNamesSet, String separator) {
+	private String getConcatenatedAuditKeyValues(XMLDocument doc, Vector<XMLTagValue> auditKeyNamesSet, String separator) {
 
 		String concatenatedValues = "";
 
 		// Using Enumeration instead of for-each loop, so could use hasMoreElements() when adding separator
-		Enumeration<LwXMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
+		Enumeration<XMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
 		while (enumAuditKeyNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+			XMLTagValue tv = enumAuditKeyNames.nextElement();
 
 			String nextValue = doc.getValueForTag(tv.getTagValue());
 
@@ -250,23 +250,23 @@ public class LwProcessMessageForFile_old implements LwIProcessMesssage_old {
 	  *
 	  */
 	private void createResponseDoc()
-								throws LwMessagingException {
+								throws MessagingException {
 
-		response = new LwXMLDocument();
+		response = new XMLDocument();
 
 		try {
-			response.createDoc("<FILE_REQUEST></FILE_REQUEST>", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			response.createDoc("<FILE_REQUEST></FILE_REQUEST>", XMLDocument.SCHEMA_VALIDATION_OFF);
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for response: " + e.getMessage());
-			throw new LwMessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
+			throw new MessagingException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for error response: " + e.getMessage());
 		}
 	}
 
-	private LwXMLDocument response = null;
+	private XMLDocument response = null;
 	private String messagesFileName = null;
 	private PrintWriter outFile = null;
 	private boolean outFileIsEmpty = true;	// true if nothing yet written to file
-	private LwProcessMessageForFileSettings settings = null;
+	private ProcessMessageForFileSettings settings = null;
 	private String auditKeyValues = null; // the audit key values as a concatenated string
 }

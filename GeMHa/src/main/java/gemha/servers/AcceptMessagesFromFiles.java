@@ -9,9 +9,9 @@ import java.io.*;
 import lw.XML.*;
 import lw.utils.LwFilenameFilter;
 import lw.utils.LwLogger;
-import lw.utils.LwSettingsException;
-import gemha.support.LwMessagingException;
-import gemha.interfaces.LwIAcceptMesssages;
+import lw.utils.SettingsException;
+import gemha.support.MessagingException;
+import gemha.interfaces.IAcceptMesssages;
 
 /**
   * This class retrieves messages from files.
@@ -22,14 +22,14 @@ import gemha.interfaces.LwIAcceptMesssages;
   * @author Liam Wade
   * @version 1.0 30/10/2008
   */
-public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
+public class AcceptMessagesFromFiles implements IAcceptMesssages {
 
     private static final Logger logger = Logger.getLogger("gemha");
 
-	public LwAcceptMessagesFromFiles(String inputFileDir, String inputFileNameFilter, boolean sortOnFileName, ArrayList<String> colNameList,
+	public AcceptMessagesFromFiles(String inputFileDir, String inputFileNameFilter, boolean sortOnFileName, ArrayList<String> colNameList,
 										String dataFormat, String fieldSeparator, int maxRecsPerMessage, String XMLFormat,
 										String actionOnError, String preparedStatementName, String immediateCommit, int numRecsToSkip)
-																								throws LwSettingsException {
+																								throws SettingsException {
 		this.inputFileDir = inputFileDir;
 		this.inputFileNameFilter = inputFileNameFilter;
 		this.sortOnFileName = sortOnFileName;
@@ -44,12 +44,12 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 		this.numRecsToSkip = numRecsToSkip;
 
 		if (dataFormat == null) {
-			throw new LwSettingsException("LwAcceptMessagesFromFiles.constructor(): dataFormat parameter is null.");
+			throw new SettingsException("LwAcceptMessagesFromFiles.constructor(): dataFormat parameter is null.");
 		}
 
 		if (dataFormat.equals("CSV")) {
 			if (colNameList == null) {
-				throw new LwSettingsException("LwAcceptMessagesFromFiles.constructor(): colNameList parameter is null.");
+				throw new SettingsException("LwAcceptMessagesFromFiles.constructor(): colNameList parameter is null.");
 			}
 		}
 	}
@@ -81,7 +81,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  */
 	@Override
 	public boolean performSetup()
-								throws LwMessagingException {
+								throws MessagingException {
 
 		logger.finer("Starting Files-input setup now...");
 
@@ -98,7 +98,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 
 		if (inputFileNames == null || inputFileNames.length < 1) {
 			logger.severe("No files matched the FileNameFilter pattern. Nothing to process.");
-			throw new LwMessagingException("No files matched the FileNameFilter pattern. Nothing to process.");
+			throw new MessagingException("No files matched the FileNameFilter pattern. Nothing to process.");
 		}
 		else {
 			if (sortOnFileName) { // sort the file names first, using the compareTo() method of String
@@ -123,7 +123,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  */
 	@Override
 	public String acceptNextMessage()
-									throws LwMessagingException {
+									throws MessagingException {
 
 		if (inputFileNames == null || fileNum > (inputFileNames.length-1)) { // then am finished file list
 			return null;
@@ -146,10 +146,10 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 			}
 		}
 		catch(IOException e) {
-			throw new LwMessagingException("IOException encountered while reading next message from File " + inputFileName + ": " + e);
+			throw new MessagingException("IOException encountered while reading next message from File " + inputFileName + ": " + e);
 		}
-		catch(LwXMLException e) {
-			throw new LwMessagingException("LwXMLException encountered while reading CSV messages from File " + inputFileName + ": " + e);
+		catch(XMLException e) {
+			throw new MessagingException("LwXMLException encountered while reading CSV messages from File " + inputFileName + ": " + e);
 		}
 
 		if (receivedMessage == null) { // then no records left - report
@@ -168,7 +168,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  */
 	@Override
 	public void stayMessage(String auditKey)
-							throws LwMessagingException {
+							throws MessagingException {
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  */
 	@Override
 	public void consumeMessage(String auditKey)
-							throws LwMessagingException {
+							throws MessagingException {
 	}
 
 	/**
@@ -256,7 +256,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  * @return the the next message built from CSV records
 	  */
 	private String getNextMessage()
-								throws IOException, LwXMLException {
+								throws IOException, XMLException {
 
 		// Start new doc
 		recsReturnedForCurrentMessage = 0;
@@ -341,10 +341,10 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  *
 	  * @return the new Feeder XML doc
 	  */
-	private LwXMLDocument createFeederDoc()
-								throws LwXMLException {
+	private XMLDocument createFeederDoc()
+								throws XMLException {
 
-		LwXMLDocument newFeederDoc = null;
+		XMLDocument newFeederDoc = null;
 
 		try {
 			if (XMLFormat != null && XMLFormat.equals("INSERT")) {
@@ -352,7 +352,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 			}
 
 			String newDoc = "<MESSAGE><" + actionObject + "></" + actionObject + "></MESSAGE>";
-			newFeederDoc = LwXMLDocument.createDoc(newDoc, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+			newFeederDoc = XMLDocument.createDoc(newDoc, XMLDocument.SCHEMA_VALIDATION_OFF);
 
 			// Go to DBACTION node and add ACTION_ON_ERROR value, if exists
 			newFeederDoc.setCurrentNodeByPath("/MESSAGE/DBACTION", 1);
@@ -360,9 +360,9 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 				newFeederDoc.addElement(null, "ACTION_ON_ERROR", actionOnError);
 			}
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.severe("Caught LwXMLException creating a new XML doc for feeding: " + e.getMessage());
-			throw new LwXMLException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for feeding: " + e.getMessage());
+			throw new XMLException("LwProcessMessageForDb.buildErrorResponse(): Caught Exception creating a new XML doc for feeding: " + e.getMessage());
 		}
 
 		return newFeederDoc;
@@ -374,8 +374,8 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	  * @param responseXML the XML document to which a row should be added.
 	  * @param row the data to be parsed and added to the doc.
 	  */
-	private void addRecToResponse(LwXMLDocument responseXML, String row)
-															throws LwXMLException {
+	private void addRecToResponse(XMLDocument responseXML, String row)
+															throws XMLException {
 
 		// Defaults are for format of a SELECT statement...
 		String action = "ROW";
@@ -440,7 +440,7 @@ public class LwAcceptMessagesFromFiles implements LwIAcceptMesssages {
 	private int recsReturnedForCurrentMessage = 0;	// number of records added to the current message being processed (when handling CSV file(s))
 	private int recsReturnedForAllMessages = 0;		// number of records returned from all files being processed (when handling CSV file(s))
 	private int recsRead = 0;						// number of records read so far from all files being processed (when handling CSV file(s))
-	private LwXMLDocument feederXML = null;		// build XML message in this doc (when handling CSV file(s))
+	private XMLDocument feederXML = null;		// build XML message in this doc (when handling CSV file(s))
 	private ArrayList<String> colNameList = null;	// the list of column names for naming XML tags (when handling CSV file(s))
 	private BufferedReader inputSource = null;		// Used when we're reading single CSV records from file(s)
 

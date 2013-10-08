@@ -10,11 +10,11 @@ import lw.XML.*;
 import lw.utils.IApp;
 import lw.utils.LwFilenameFilter;
 import lw.utils.LwLogger;
-import lw.utils.LwSettingsException;
+import lw.utils.SettingsException;
 import lw.utils.ShutdownInterceptor;
-import gemha.support.LwMessagingException;
-import gemha.interfaces.LwIAcceptMesssages;
-import gemha.servers.LwGenericMessageHandler;
+import gemha.support.MessagingException;
+import gemha.interfaces.IAcceptMesssages;
+import gemha.servers.GenericMessageHandler;
 
 /**
   * This class sends messages to a LwGenericMessageHandler for processing.
@@ -22,7 +22,7 @@ import gemha.servers.LwGenericMessageHandler;
   * @author Liam Wade
   * @version 1.0 01/07/2012
   */
-public class GemhaFeedFromCodeExample implements LwIAcceptMesssages {
+public class GemhaFeedFromCodeExample implements IAcceptMesssages {
 
 	/**
 	  * Constructor
@@ -32,7 +32,7 @@ public class GemhaFeedFromCodeExample implements LwIAcceptMesssages {
 	public GemhaFeedFromCodeExample(String settingsFileName) {
 		// Don't use logger until after LwGenericMessageHandler object created
 		// He will call setLogger
-		IApp app = new LwGenericMessageHandler(settingsFileName, this);
+		IApp app = new GenericMessageHandler(settingsFileName, this);
 
 		ShutdownInterceptor shutdownInterceptor = new ShutdownInterceptor(app);
 
@@ -77,10 +77,10 @@ public class GemhaFeedFromCodeExample implements LwIAcceptMesssages {
 	  * Set up conditions for accepting messages
 	  *
 	  * @return true for success, false for failure
-	  * @throws LwMessagingException if problem encountered during setup
+	  * @throws MessagingException if problem encountered during setup
 	  */
 	public boolean performSetup()
-								throws LwMessagingException {
+								throws MessagingException {
 
 		logger.finer("Starting Files-input setup now...");
 
@@ -93,10 +93,10 @@ public class GemhaFeedFromCodeExample implements LwIAcceptMesssages {
 	  * Process a message
 	  *
 	  * @return the next message retrieved, null if none left to send
-	  * @throws LwMessagingException if problem encountered getting next message
+	  * @throws MessagingException if problem encountered getting next message
 	  */
 	public String acceptNextMessage()
-									throws LwMessagingException {
+									throws MessagingException {
 
 		String receivedMessage = null;
 
@@ -112,7 +112,7 @@ public class GemhaFeedFromCodeExample implements LwIAcceptMesssages {
 	  *
 	  */
 	public void stayMessage(String auditKey)
-							throws LwMessagingException {
+							throws MessagingException {
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class GemhaFeedFromCodeExample implements LwIAcceptMesssages {
 	  *
 	  */
 	public void consumeMessage(String auditKey)
-							throws LwMessagingException {
+							throws MessagingException {
 	}
 
 	/**

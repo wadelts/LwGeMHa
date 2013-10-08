@@ -13,8 +13,8 @@
 		<InputValidation SchemaValidation="off" SchemaDefinitionFileName="C:\Users\wadel\git\GeMHa\GeMHa\someMessage.xsd"/>
 	</Input>
 	<Processing>
-		<MessageProcessingClassName>gemha.servers.LwProcessMessageForDb</MessageProcessingClassName>
-		<MessageProcessingSettingsFileName>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\LwProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
+		<MessageProcessingClassName>gemha.servers.ProcessMessageForDb</MessageProcessingClassName>
+		<MessageProcessingSettingsFileName>C:\Users\wadel\git\GeMHa\GeMHa\ApplicSettingsFiles\ProcessMessageForDbSettings.xml</MessageProcessingSettingsFileName>
 		<MindElements>
 			<ElementName>/MESSAGE/DBACTION/KEY</ElementName>
 		</MindElements>
@@ -37,7 +37,7 @@
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
 		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
-		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>GenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>GenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

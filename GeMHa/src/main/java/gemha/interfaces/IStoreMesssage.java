@@ -8,21 +8,21 @@ import gemha.support.*;
   * @author Liam Wade
   * @version 1.0 30/10/2008
   */
-public interface LwIStoreMesssage {
+public interface IStoreMesssage {
 
 /**
   * Open any connections
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-void openStorage() throws LwMessagingException;
+void openStorage() throws MessagingException;
 
 /**
   * Close any connections
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-void closeStorage() throws LwMessagingException;
+void closeStorage() throws MessagingException;
 
 /**
   * Process a message
@@ -30,9 +30,9 @@ void closeStorage() throws LwMessagingException;
   * @param message the message to be processed
   * @param instructions instructions on how the message is to be processed (will be implementation-specific). Can be null
   *
-  * @throws LwMessagingException when any error is encountered
+  * @throws MessagingException when any error is encountered
   */
-void putMessage(String message, String auditKey, String instructions) throws LwMessagingException;
+void putMessage(String message, String auditKey, String instructions) throws MessagingException;
 
 /**
   * Perform any clean-up actions before closing down

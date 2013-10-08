@@ -25,7 +25,7 @@
 		</OutputHTTP>
 	</Output>
 	<Processing>
-		<MessageProcessingClassName>gemha.servers.LwProcessMessageDoNothing</MessageProcessingClassName>
+		<MessageProcessingClassName>gemha.servers.ProcessMessageDoNothing</MessageProcessingClassName>
 		<SendElements>
 			<ElementName>RexRunNotification/SourceMsgType</ElementName>
 			<ElementName>RexRunNotification/NotificationMessage</ElementName>
@@ -47,7 +47,7 @@
 			<GeneralLoggingLevel>FINEST</GeneralLoggingLevel>
 		</Level>
 		<LogFileDir>C:\Users\wadel\git\GeMHa\GeMHa\logs\</LogFileDir>
-		<LogFileNameTemplate>LwGenericMessageHandler.log</LogFileNameTemplate>
-		<ShutDownLogFileNameTemplate>LwGenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
+		<LogFileNameTemplate>GenericMessageHandler.log</LogFileNameTemplate>
+		<ShutDownLogFileNameTemplate>GenericMessageHandler_shutdown.log</ShutDownLogFileNameTemplate>
 	</Logging>
 </Applic>

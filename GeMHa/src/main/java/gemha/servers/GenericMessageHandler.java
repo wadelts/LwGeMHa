@@ -36,15 +36,15 @@ import gemha.support.*;
   * @version 1.0 15/10/2008
   * @version 1.1 30/09/2013 Implemented ResponseProcessorTask as runnable, accepting responses from Processor on separate thread. 
   */
-public class LwGenericMessageHandler implements IApp
+public class GenericMessageHandler implements IApp
 {
     private static final Logger logger = Logger.getLogger("gemha");
 
 	private final String settingsFileName;
-	private volatile LwGenericMessageHandlerSettings settings = null;
-	private LwIAcceptMesssages messageListener = null;		// the interface for accepting messages
-	private LwIProcessMesssage messageProcessor = null;	// the interface for processing messages
-	private LwIStoreMesssage messageResponder = null;		// the interface for storing responses
+	private volatile GenericMessageHandlerSettings settings = null;
+	private IAcceptMesssages messageListener = null;		// the interface for accepting messages
+	private IProcessMesssage messageProcessor = null;	// the interface for processing messages
+	private IStoreMesssage messageResponder = null;		// the interface for storing responses
 	
 	private volatile boolean mainProcessToCloseDown = false;	// controls main while-loop (can be set by ResponseProcessorTask)
     // Executor for processing messages
@@ -58,7 +58,7 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @param settingsFileName (and optionally path) of file from which settings are to be read
 	  */
-	public LwGenericMessageHandler(String settingsFileName) {
+	public GenericMessageHandler(String settingsFileName) {
 		this.settingsFileName = settingsFileName;
 	}
 
@@ -69,7 +69,7 @@ public class LwGenericMessageHandler implements IApp
 	  * @param settingsFileName Name (and optionally path) of file from which settings are to be read
 	  * @param messageListener object that will supply messages.
 	  */
-	public LwGenericMessageHandler(String settingsFileName, LwIAcceptMesssages messageListener) {
+	public GenericMessageHandler(String settingsFileName, IAcceptMesssages messageListener) {
 		this.settingsFileName = settingsFileName;
 		this.messageListener = messageListener;
 	}
@@ -84,7 +84,7 @@ public class LwGenericMessageHandler implements IApp
 	  * @param messageListener object that will supply messages - implements interface LwIAcceptMesssages.
 	  * @param messageResponder object that will forward response messages - implements interface LwIStoreMesssage.
 	  */
-	public LwGenericMessageHandler(String settingsFileName, LwIAcceptMesssages messageListener, LwIStoreMesssage messageResponder) {
+	public GenericMessageHandler(String settingsFileName, IAcceptMesssages messageListener, IStoreMesssage messageResponder) {
 		this.settingsFileName = settingsFileName;
 		this.messageListener = messageListener;
 		this.messageResponder = messageResponder;
@@ -103,9 +103,9 @@ public class LwGenericMessageHandler implements IApp
 		logger.info("<*<*<*<*< Starting Up >*>*>*>*>");
 
 		try {
-			settings = new LwGenericMessageHandlerSettings(settingsFileName, LwXMLDocument.SCHEMA_VALIDATION_ON);
+			settings = new GenericMessageHandlerSettings(settingsFileName, XMLDocument.SCHEMA_VALIDATION_ON);
 		}
-		catch(LwSettingsException e) {
+		catch(SettingsException e) {
 			logger.severe("Exception encountered loading application configuration settings from file " + settingsFileName + ": " + e);
 			System.out.println("Exception encountered loading application configuration settings from file " + settingsFileName + ": " + e);
 			System.exit(-10);
@@ -159,7 +159,7 @@ public class LwGenericMessageHandler implements IApp
 					Thread.currentThread().interrupt();
 				}
 		}
-		catch (LwMessagingException e) {
+		catch (MessagingException e) {
 			logger.severe("Stopped processing: Caught LwMessagingException exception: " + e);
 			System.exit(-16);
 		}
@@ -191,10 +191,10 @@ public class LwGenericMessageHandler implements IApp
 	 *  
 	 *  @return the loaded message processor
 	 */
-	private LwIProcessMesssage loadMessageProcessor() {
-		LwIProcessMesssage messageProcessor = null;
+	private IProcessMesssage loadMessageProcessor() {
+		IProcessMesssage messageProcessor = null;
 		try {
-			messageProcessor = (LwIProcessMesssage)(Class.forName(settings.getMessageProcessingClassName()).newInstance());
+			messageProcessor = (IProcessMesssage)(Class.forName(settings.getMessageProcessingClassName()).newInstance());
 			messageProcessor.performSetup(settings.getMessageProcessingSettingsFileName());
 		}
 		catch(ClassNotFoundException e1) {
@@ -209,7 +209,7 @@ public class LwGenericMessageHandler implements IApp
 			logger.severe("IllegalAccessException instantiating message-processing class " + settings.getMessageProcessingClassName() + ", specified in TagName MessageProcessingClassName. " + e3.getMessage());
 			System.exit(-8);
 		}
-		catch(LwSettingsException e4) {
+		catch(SettingsException e4) {
 			logger.severe("LwSettingsException instantiating message-processing class " + settings.getMessageProcessingClassName() + ", specified in TagName MessageProcessingClassName. " + e4.getMessage());
 			System.exit(-9);
 		}
@@ -229,13 +229,13 @@ public class LwGenericMessageHandler implements IApp
 		if (messageListener == null) {
 			try {
 				if (settings.getInputQueueName() != null) { // then am to read messages from MQ
-					messageListener = new LwAcceptMessagesFromQueue(settings.getInputQueueName(), settings.getInputUrlJMSserver());
+					messageListener = new AcceptMessagesFromQueue(settings.getInputQueueName(), settings.getInputUrlJMSserver());
 				}
 				else if (settings.getPortNumber() > 0) {
-					messageListener = new LwAcceptMessagesFromSocket(settings.getPortNumber());
+					messageListener = new AcceptMessagesFromSocket(settings.getPortNumber());
 				}
 				else if (settings.getInputFileNameFilter() != null) {
-						messageListener = new LwAcceptMessagesFromFiles(settings.getInputFileDir(), settings.getInputFileNameFilter(), settings.sortFilteredFileNames(), settings.getColNameList(),
+						messageListener = new AcceptMessagesFromFiles(settings.getInputFileDir(), settings.getInputFileNameFilter(), settings.sortFilteredFileNames(), settings.getColNameList(),
 																		settings.getInputDataFormat(), settings.getFieldSeparator(), settings.getMaxRecsPerMessage(),
 																		settings.getXMLFormat(), settings.getActionOnError(), settings.getPreparedStatementName(),
 																		settings.getImmediateCommit(), settings.getNumRecordsToSkip());
@@ -244,7 +244,7 @@ public class LwGenericMessageHandler implements IApp
 					logger.severe("Missing essential information for input source - for example inputQueueName, input portNumber or inputFileNameFilter (or was LwGenericMessageHandler called with incorrect Constructor?)");
 					System.exit(-12);
 				}
-			} catch (LwSettingsException e) {
+			} catch (SettingsException e) {
 				logger.severe("Stopped processing at setupMessageListener: Caught LwSettingsException exception: " + e);
 				System.exit(-13);
 			}
@@ -252,7 +252,7 @@ public class LwGenericMessageHandler implements IApp
 
 		try {
 			messageListener.performSetup();
-		} catch (LwMessagingException e) {
+		} catch (MessagingException e) {
 			logger.severe("Stopped processing calling messageListener.performSetup(): Caught LwMessagingException exception: " + e);
 			System.exit(-14);
 		}
@@ -261,23 +261,23 @@ public class LwGenericMessageHandler implements IApp
 	/**
 	 * Instantiate the correct Message Responder and tell it to open the storage medium, if appropriate.
 	 * 
-	 * @throws LwMessagingException if openStorage() encounters a problem
+	 * @throws MessagingException if openStorage() encounters a problem
 	 */
 	private void setupMessageResponder()  {
 		if (messageResponder == null) { // but don't check if has already been supplied in a Constructor
 			if (settings.getOutputQueueName() != null) { // then am to send messages to MQ
 				if (settings.getReplyToQueueName() == null) { // no instruction on where to return a response
-					messageResponder = new LwStoreMesssageToQueue(settings.getOutputQueueName(), settings.getOutputUrlJMSserver());
+					messageResponder = new StoreMesssageToQueue(settings.getOutputQueueName(), settings.getOutputUrlJMSserver());
 				}
 				else {
-					messageResponder = new LwStoreMesssageToQueue(settings.getOutputQueueName(), settings.getReplyToQueueName());
+					messageResponder = new StoreMesssageToQueue(settings.getOutputQueueName(), settings.getReplyToQueueName());
 				}
 			}
 			else if (settings.getOutputFileNameTemplate() != null) {
-				messageResponder = new LwStoreMesssageToFile(settings.getOutputFileNameTemplate(), settings.getConvertedInputDataFormat());
+				messageResponder = new StoreMesssageToFile(settings.getOutputFileNameTemplate(), settings.getConvertedInputDataFormat());
 			}
 			else if (settings.getHTTPServerUrl() != null) {
-				messageResponder = new LwStoreMesssageToHTTP(settings.getHTTPServerUrl(), settings.getHTTPEndPointName(), settings.getHTTPWithBackoff(), settings.getConvertedInputDataFormat());
+				messageResponder = new StoreMesssageToHTTP(settings.getHTTPServerUrl(), settings.getHTTPEndPointName(), settings.getHTTPWithBackoff(), settings.getConvertedInputDataFormat());
 			}
 			
 			// Only set this up if we know messageResponder is one of the "inbuilt" types - i.e. messageResponder was NOT
@@ -292,7 +292,7 @@ public class LwGenericMessageHandler implements IApp
 		if (messageResponder != null) {
 			try {
 				messageResponder.openStorage();
-			} catch (LwMessagingException e) {
+			} catch (MessagingException e) {
 				logger.severe("Stopped processing calling messageResponder.openStorage(): Caught LwMessagingException exception: " + e);
 				System.exit(-15);
 			}
@@ -307,8 +307,8 @@ public class LwGenericMessageHandler implements IApp
 	  * @param settings the loaded application config settings
 	  *
 	  */
-	private void handleMessages(LwGenericMessageHandlerSettings settings)
-																throws LwMessagingException {
+	private void handleMessages(GenericMessageHandlerSettings settings)
+																throws MessagingException {
 		int numMessagesProcessed = 0;
 
 		while ( ! mainProcessToCloseDown) {
@@ -368,15 +368,15 @@ public class LwGenericMessageHandler implements IApp
 	 * @param skipMessage whether message should be skipped or not
 	 * 
 	 * @return the new value for numMessagesProcessed
-	 * @throws LwMessagingException
+	 * @throws MessagingException
 	 */
-	private int handleIncomingMessage(LwGenericMessageHandlerSettings settings, int numMessagesProcessed,
-									  boolean skipMessage, String receivedMessage) throws LwMessagingException {
+	private int handleIncomingMessage(GenericMessageHandlerSettings settings, int numMessagesProcessed,
+									  boolean skipMessage, String receivedMessage) throws MessagingException {
 		numMessagesProcessed++;
 
 		String auditKeyValues = "unknown";
 		String messageForProcessor = null;
-		LwXMLDocument inputDoc = null;			// the XML version of the received input message
+		XMLDocument inputDoc = null;			// the XML version of the received input message
 
 		//////////////////////////////////////////////////////////////////
 		// Perform XML-based checks and actions or simply pass on message "as is"...
@@ -404,10 +404,10 @@ public class LwGenericMessageHandler implements IApp
 						logger.info("Message for target with AuditKey Value " + auditKeyValues + " built. See next line for content (if logging @ level FINE)...");
 						logger.fine(messageForProcessor);
 					}
-					catch (LwXMLException e) {
+					catch (XMLException e) {
 						logger.severe("Message with AuditKey Value " + auditKeyValues + " caused an LwXMLException: "  + e);
 						messageListener.stayMessage(auditKeyValues);
-						throw new LwMessagingException("Caught LwXMLException from buildMessageForTarget() (see root cause)", e);
+						throw new MessagingException("Caught LwXMLException from buildMessageForTarget() (see root cause)", e);
 					}
 				}
 			}
@@ -421,7 +421,7 @@ public class LwGenericMessageHandler implements IApp
 				logger.severe("No Target message was built from Message with AuditKey Value " + auditKeyValues);
 				messageListener.stayMessage(auditKeyValues);
 				mainProcessToCloseDown = true;
-				throw new LwMessagingException("No Target message was built from Message with AuditKey Value " + auditKeyValues);
+				throw new MessagingException("No Target message was built from Message with AuditKey Value " + auditKeyValues);
 			}
 			else {
 				//////////////////////////////////////////////////////////////////
@@ -446,13 +446,13 @@ public class LwGenericMessageHandler implements IApp
 	 * 
 	 * @param settings the application settings
 	 * @return the next message, if is Queue-based input, otherwise null
-	 * @throws LwMessagingException
+	 * @throws MessagingException
 	 */
-	private String handleIncomingEmptyMessage(LwGenericMessageHandlerSettings settings) throws LwMessagingException {
+	private String handleIncomingEmptyMessage(GenericMessageHandlerSettings settings) throws MessagingException {
 		
 //		messageProcessor.goQuiet(); // tell processor we're not busy now, but only when running in blocking mode (i.e. not batch).
 
-		if (messageListener instanceof LwAcceptMessagesFromQueue) { // then want to block now, await next message and, possibly, close output queue
+		if (messageListener instanceof AcceptMessagesFromQueue) { // then want to block now, await next message and, possibly, close output queue
 			// Close targetConnection here, if is a Queue, because not busy
 			if (settings.getOutputQueueName() != null) {
 				if (messageResponder != null) {
@@ -463,11 +463,11 @@ public class LwGenericMessageHandler implements IApp
 			messageListener.setWaitIntervalBlockIndefinitely();
 			return messageListener.acceptNextMessage();
 		}
-		else if (messageListener instanceof LwAcceptMessagesFromSocket) { // then am finished, so close down
+		else if (messageListener instanceof AcceptMessagesFromSocket) { // then am finished, so close down
 			mainProcessToCloseDown = true;
 			logger.info("Socket Server returned null, so closing down.");
 		}
-		else if (messageListener instanceof LwAcceptMessagesFromFiles) { // then am finished, so close down
+		else if (messageListener instanceof AcceptMessagesFromFiles) { // then am finished, so close down
 			mainProcessToCloseDown = true;
 			logger.info("No more files to process, so closing down.");
 		}
@@ -488,11 +488,11 @@ public class LwGenericMessageHandler implements IApp
 	 * @param auditKeyValues transaction ID for message being processed
 	 * @param inputDoc the original input message
 	 * @return true if should skip this message, false if should continue processing the message
-	 * @throws LwMessagingException if problem encountered staying or consuming message
+	 * @throws MessagingException if problem encountered staying or consuming message
 	 */
-	private boolean determineActionOnInvalidDataContractName(LwGenericMessageHandlerSettings settings, boolean skipMessage,
-															 String auditKeyValues, LwXMLDocument inputDoc) throws LwMessagingException {
-		LwXMLTagValue dataContractName = settings.getDataContractName();
+	private boolean determineActionOnInvalidDataContractName(GenericMessageHandlerSettings settings, boolean skipMessage,
+															 String auditKeyValues, XMLDocument inputDoc) throws MessagingException {
+		XMLTagValue dataContractName = settings.getDataContractName();
 		String actionOnError = null;
 		if (dataContractName != null) { actionOnError = dataContractName.getAttributeValue("ActionOnError");}
 
@@ -501,7 +501,7 @@ public class LwGenericMessageHandler implements IApp
 			messageListener.stayMessage(auditKeyValues);
 			skipMessage = true;
 			mainProcessToCloseDown = true;
-			throw new LwMessagingException("Data Contract Name did not match" + (settings.getDataContractName() == null ? "" : " " + settings.getDataContractName().getTagValue()) + ". Message with AuditKey Value " + auditKeyValues + " rejected. Will shut down.");
+			throw new MessagingException("Data Contract Name did not match" + (settings.getDataContractName() == null ? "" : " " + settings.getDataContractName().getTagValue()) + ". Message with AuditKey Value " + auditKeyValues + " rejected. Will shut down.");
 		}
 		else if (actionOnError.equals("discard")) {
 			logger.warning("Data Contract Name did not match" + (settings.getDataContractName() == null ? "" : " " + settings.getDataContractName().getTagValue()) + ". Message with AuditKey Value " + auditKeyValues + " rejected. Will discard message.");
@@ -527,17 +527,17 @@ public class LwGenericMessageHandler implements IApp
 	 * @param auditKeyValues transaction ID for message being processed
 	 * @param inputDoc the original input message
 	 * @return true if should skip this message, false if should continue processing the message
-	 * @throws LwMessagingException if problem encountered staying or consuming message
+	 * @throws MessagingException if problem encountered staying or consuming message
 	 */
-	private boolean determineActionOnMissingAuditKeys(LwGenericMessageHandlerSettings settings, boolean skipMessage,
-														String auditKeyValues, LwXMLDocument inputDoc) throws LwMessagingException {
+	private boolean determineActionOnMissingAuditKeys(GenericMessageHandlerSettings settings, boolean skipMessage,
+														String auditKeyValues, XMLDocument inputDoc) throws MessagingException {
 		String actionOnError = settings.getAuditKeysAggregate().getAttributeValue("ActionOnError");
 		if (actionOnError == null || actionOnError.equals("shutdown")) {
 			logger.severe("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will shut down.");
 			messageListener.stayMessage(auditKeyValues);
 			skipMessage = true;
 			mainProcessToCloseDown = true;
-			throw new LwMessagingException("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will shut down.");
+			throw new MessagingException("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will shut down.");
 		}
 		else if (actionOnError.equals("discard")) {
 			logger.warning("Audit key (or keys) not found in Message with AuditKey Value " + auditKeyValues + " Will discard message.");
@@ -575,13 +575,13 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @return a new LwXMLDocument
 	  */
-	private LwXMLDocument createXMLDocFromInput(String message, LwGenericMessageHandlerSettings settings) {
+	private XMLDocument createXMLDocFromInput(String message, GenericMessageHandlerSettings settings) {
 
-		LwXMLDocument newDoc = null;
+		XMLDocument newDoc = null;
 
 		try {
 			if (settings.getInputValidationSettings() == null) { // then no validation requested
-				newDoc = LwXMLDocument.createDoc(message, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+				newDoc = XMLDocument.createDoc(message, XMLDocument.SCHEMA_VALIDATION_OFF);
 			}
 			else {
 				boolean validateAgainstSchema = (settings.getInputValidationSettings().getAttributeValue("SchemaValidation") == null ? false : (settings.getInputValidationSettings().getAttributeValue("SchemaValidation").equals("on")));
@@ -589,17 +589,17 @@ public class LwGenericMessageHandler implements IApp
 					// note that SchemaDefinitionFileName may be null, in which case the message should have the Schema definition
 					// also that SchemaLanguage may be null, in which case the default Schema Language is assumed
 					// neither depends on the other
-					newDoc = LwXMLDocument.createDoc(message, LwXMLDocument.SCHEMA_VALIDATION_ON, settings.getInputValidationSettings().getAttributeValue("SchemaDefinitionFileName"), settings.getInputValidationSettings().getAttributeValue("SchemaLanguage"));
+					newDoc = XMLDocument.createDoc(message, XMLDocument.SCHEMA_VALIDATION_ON, settings.getInputValidationSettings().getAttributeValue("SchemaDefinitionFileName"), settings.getInputValidationSettings().getAttributeValue("SchemaLanguage"));
 					logger.info("Input message was validated successfully.");
 				}
 				else { // then no validation turned off
-					newDoc = LwXMLDocument.createDoc(message, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+					newDoc = XMLDocument.createDoc(message, XMLDocument.SCHEMA_VALIDATION_OFF);
 				}
 			}
 
 			return newDoc;
 		}
-		catch(LwXMLException e) {
+		catch(XMLException e) {
 			logger.warning("LwXMLException: " + e.getMessage());
 			logger.warning("InputMessage was :" + message);
 			return null;
@@ -615,8 +615,8 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @return a the XML string to be sent to the target for processing
 	  */
-	private String buildMessageForTarget(LwXMLDocument inputDoc, LwGenericMessageHandlerSettings settings)
-																	throws LwXMLException {
+	private String buildMessageForTarget(XMLDocument inputDoc, GenericMessageHandlerSettings settings)
+																	throws XMLException {
 		if (inputDoc == null || settings.getSendElementSet() == null) {
 			return null;
 		}
@@ -647,7 +647,7 @@ public class LwGenericMessageHandler implements IApp
 		//			Import the node into targetDoc at the found parent
 		//
 		//////////////////////////////////////////////////////////////////////////
-		LwXMLDocument targetDoc = null;
+		XMLDocument targetDoc = null;
 
 
 		if (sendAllElementsToTarget(settings)) { // then import ALL from the inputDoc - just send whole input message
@@ -658,12 +658,12 @@ public class LwGenericMessageHandler implements IApp
 			}
 			else { // wrap input doc in new tag...
 				try {
-					targetDoc = LwXMLDocument.createDoc("<" + targetMainDocElementName + "></" + targetMainDocElementName + ">", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+					targetDoc = XMLDocument.createDoc("<" + targetMainDocElementName + "></" + targetMainDocElementName + ">", XMLDocument.SCHEMA_VALIDATION_OFF);
 					inputDoc.setCurrentNodeToFirstElement(); // go back to beginning of doc
 					targetDoc.importNodesChildren(inputDoc.getCurrentNode(), true);
 				}
-				catch(LwXMLException e2) {
-					throw new LwXMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new doc: " + e2.getMessage());
+				catch(XMLException e2) {
+					throw new XMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new doc: " + e2.getMessage());
 				}
 			}
 		}
@@ -675,29 +675,29 @@ public class LwGenericMessageHandler implements IApp
 			}
 
 			try {
-				targetDoc = LwXMLDocument.createDoc("<" + targetMainDocElementName + "></" + targetMainDocElementName + ">", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+				targetDoc = XMLDocument.createDoc("<" + targetMainDocElementName + "></" + targetMainDocElementName + ">", XMLDocument.SCHEMA_VALIDATION_OFF);
 
 				// Add the elements from inputDoc...
-				Enumeration<LwXMLTagValue> enumAggNames = settings.getSendElementSet();
-				while (enumAggNames.hasMoreElements()) {
-					LwXMLTagValue tv = enumAggNames.nextElement();
+				Enumeration<XMLTagValue> sendElements = settings.getSendElementSet();
+				while (sendElements.hasMoreElements()) {
+					XMLTagValue nextSendElement = sendElements.nextElement();
 
 					inputDoc.setCurrentNodeToFirstElement(); // go back to beginning of doc
 
-					if (inputDoc.setCurrentNodeByPath(tv.getTagValue(), 1)) { // no prob if we don't find the element
+					if (inputDoc.setCurrentNodeByPath(nextSendElement.getTagValue(), 1)) { // no prob if we don't find the element
 
 						targetDoc.setCurrentNodeToFirstElement(); // go back to beginning of doc
 
 						// Position "pointer" in targetDoc to correct parent aggregate, creating it if we have to...
 						// (Note that the first ELEMENT in the path for the input may have a different name than the new Target message, so we may ignore it)
-						LwXMLTagValue tempTagNoValue = new LwXMLTagValue(tv.getTagValue(), null); // just to help split out path e.g. MESSAGE.DELV.ORD or MESSAGE.DELV.ORD.ORDER_NUMBER
+						XMLTagValue tempTagNoValue = new XMLTagValue(nextSendElement.getTagValue(), null); // just to help split out path 
 						String pathToParent = tempTagNoValue.getPathToParent();
 						if (pathToParent == null) { // then SendElement is the top-level element - so no parent
-							pathToParent = tv.getTagValue();
+							pathToParent = nextSendElement.getTagValue();
 						}
 
 						//search under both inputDoc top-level Name and that of Target top-level Name
-						if ( ! (targetDoc.setCurrentNodeByPath(pathToParent, 1) || targetDoc.setCurrentNodeByPath((targetMainDocElementName + "/" + tempTagNoValue.getPathToParentLessFirstElement()), 1))
+						if ( ! (targetDoc.setCurrentNodeByPath(pathToParent, 1) || targetDoc.setCurrentNodeByPath(("/" + targetMainDocElementName + "/" + tempTagNoValue.getPathToParentLessFirstElement()), 1))
 						   ) { // try to go to parent recipient (if specified), create path if can't
 							String pathToParentLessFirstElement = tempTagNoValue.getPathToParentLessFirstElement();
 
@@ -714,8 +714,8 @@ public class LwGenericMessageHandler implements IApp
 				}
 
 			}
-			catch(LwXMLException e2) {
-				throw new LwXMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new doc: " + e2.getMessage());
+			catch(XMLException e2) {
+				throw new XMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new doc: " + e2.getMessage());
 			}
 		}
 
@@ -730,10 +730,10 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @return true if ALL ("*") included in set, otherwise false
 	  */
-	private boolean sendAllElementsToTarget(LwGenericMessageHandlerSettings settings) {
-		Enumeration<LwXMLTagValue> enumAggNames = settings.getSendElementSet();
-		while (enumAggNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumAggNames.nextElement();
+	private boolean sendAllElementsToTarget(GenericMessageHandlerSettings settings) {
+		Enumeration<XMLTagValue> sendElements = settings.getSendElementSet();
+		while (sendElements.hasMoreElements()) {
+			XMLTagValue tv = sendElements.nextElement();
 
 			if (tv.getTagValue().equals("*")) { // then "import ALL from the inputDoc" is requested
 				return true;
@@ -752,11 +752,11 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @return true if a value for all keys found
 	  */
-	private boolean auditKeysFound(LwXMLDocument doc, LwGenericMessageHandlerSettings settings) {
+	private boolean auditKeysFound(XMLDocument doc, GenericMessageHandlerSettings settings) {
 
-		Enumeration<LwXMLTagValue> enumAuditKeyNames = settings.getAuditKeyNamesSet();
+		Enumeration<XMLTagValue> enumAuditKeyNames = settings.getAuditKeyNamesSet();
 		while (enumAuditKeyNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+			XMLTagValue tv = enumAuditKeyNames.nextElement();
 
 			if (doc.getValueForTag(tv.getTagValue()) == null) {
 				return false;
@@ -775,13 +775,13 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @return the concatenated audit key values for this message, the empty string if no values
 	  */
-	private String getAuditKeyValuesForXMLMessage(LwXMLDocument doc, LwGenericMessageHandlerSettings settings) {
+	private String getAuditKeyValuesForXMLMessage(XMLDocument doc, GenericMessageHandlerSettings settings) {
 
 		String concatenatedValues = "";
 
-		Enumeration<LwXMLTagValue> enumAuditKeyNames = settings.getAuditKeyNamesSet();
+		Enumeration<XMLTagValue> enumAuditKeyNames = settings.getAuditKeyNamesSet();
 		while (enumAuditKeyNames.hasMoreElements()) {
-			LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+			XMLTagValue tv = enumAuditKeyNames.nextElement();
 
 			String nextValue = doc.getValueForTag(tv.getTagValue());
 
@@ -802,7 +802,7 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  * @return the true if the name of the contract for this message matches the expected one (or the expected one doesn't exist), otherwise false
 	  */
-	private boolean dataContractNameValid(LwXMLDocument doc, LwGenericMessageHandlerSettings settings) {
+	private boolean dataContractNameValid(XMLDocument doc, GenericMessageHandlerSettings settings) {
 
 		if (settings.getDataContractName() == null) { // then will always return true
 			return true;
@@ -893,12 +893,12 @@ public class LwGenericMessageHandler implements IApp
 	  *
 	  */
 	private class ResponseProcessorTask implements Runnable {
-		private final LwIStoreMesssage messageResponder;
-		private final LwIAcceptMesssages messageListener;		// the interface for accepting messages
+		private final IStoreMesssage messageResponder;
+		private final IAcceptMesssages messageListener;		// the interface for accepting messages
 		private final boolean inLoopMode;						// true if we want to keep looping (i.e. this is run in its own thread)
 		private boolean errorEncountered = false;				// true if we find any error
 
-		public ResponseProcessorTask(boolean inLoopMode, LwIStoreMesssage messageResponder, LwIAcceptMesssages messageListener) {
+		public ResponseProcessorTask(boolean inLoopMode, IStoreMesssage messageResponder, IAcceptMesssages messageListener) {
 			if (messageResponder == null) throw new IllegalArgumentException("ResponseProcessorTask: messageResponder cannot be null.");
 			if (messageListener == null) throw new IllegalArgumentException("ResponseProcessorTask: messageListener cannot be null.");
 
@@ -911,7 +911,7 @@ public class LwGenericMessageHandler implements IApp
 			logger.entering("ResponseProcessorTask", "run");
 			do {
 				// Get the response object from the messageProcessor (may block)...
-				LwProcessResponse processedResponse = getProcessedResponse();
+				ProcessResponse processedResponse = getProcessedResponse();
 				if ( processedResponse == null) { // null is Poison Pill
 					logger.info("Received null value (Poison Pill) from Processor - will stop processing responses now.");
 					break;
@@ -930,7 +930,7 @@ public class LwGenericMessageHandler implements IApp
 					logger.info("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " succcessfully processed by processing class, and no response returned or expected.");
 					try {
 						messageListener.consumeMessage(processedResponse.getAuditKeyValues());
-					} catch (LwMessagingException e) {
+					} catch (MessagingException e) {
 						logger.severe("Error: Received LwMessagingException trying to consume message with AuditKey Value " + processedResponse.getAuditKeyValues() + ": " + e);
 						logger.severe("Going to tell main thread to stop processing.");
 						mainProcessToCloseDown = true;
@@ -949,7 +949,7 @@ public class LwGenericMessageHandler implements IApp
 						try {
 							applicationResponseMessage = buildResponseMessage(processorResponseMessage.toString(), processedResponse.getInputDoc(), settings);
 						}
-						catch (LwXMLException e) {
+						catch (XMLException e) {
 							logger.severe("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " caused an LwXMLException building Response message: " + e);
 							logger.severe("Going to tell main thread to stop processing.");
 							mainProcessToCloseDown = true;
@@ -984,7 +984,7 @@ public class LwGenericMessageHandler implements IApp
 						messageListener.consumeMessage(processedResponse.getAuditKeyValues());
 						logger.info("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " consumed after processing to output medium.");
 					}
-				} catch (LwMessagingException e) {
+				} catch (MessagingException e) {
 					logger.severe("ResponseProcessorTask: Caught LwMessagingException exception Staying or consuming message: " + e);
 					logger.severe("Going to tell main thread to stop processing.");
 					errorEncountered = true;
@@ -1003,11 +1003,11 @@ public class LwGenericMessageHandler implements IApp
 		 * @param processedResponse the response from the processor
 		 * @param applicationResponseMessage the response message to be forwarded (for interpretation by the originating app 
 		 */
-		private void forwardApplicationResponse(LwProcessResponse processedResponse, String applicationResponseMessage) {
+		private void forwardApplicationResponse(ProcessResponse processedResponse, String applicationResponseMessage) {
 			if (messageResponder != null) {
 				String messageResponderInstructions = null;		// Optional, implementation-specific instructions to be passed to the message responder
-				if (messageListener instanceof LwAcceptMessagesFromQueue) { // might have ReplytoQ URI from accepted message
-					String replytoQueueURI = ((LwAcceptMessagesFromQueue)messageListener).getReplytoQueueURI();
+				if (messageListener instanceof AcceptMessagesFromQueue) { // might have ReplytoQ URI from accepted message
+					String replytoQueueURI = ((AcceptMessagesFromQueue)messageListener).getReplytoQueueURI();
 					if (replytoQueueURI != null) {
 						messageResponderInstructions = replytoQueueURI;
 					}
@@ -1015,7 +1015,7 @@ public class LwGenericMessageHandler implements IApp
 
 				try {
 					messageResponder.putMessage(applicationResponseMessage, processedResponse.getAuditKeyValues(), messageResponderInstructions);
-				} catch (LwMessagingException e) {
+				} catch (MessagingException e) {
 					logger.severe("ResponseProcessorTask: Caught LwMessagingException exception from messageResponder.putMessage(): ");
 					errorEncountered = true;
 				}
@@ -1028,10 +1028,10 @@ public class LwGenericMessageHandler implements IApp
 		 * 
 		 * @return the processed response
 		 */
-		private LwProcessResponse getProcessedResponse() {
+		private ProcessResponse getProcessedResponse() {
 			try {
 				return messageProcessor.getResponse();
-			} catch (LwMessagingException e) {
+			} catch (MessagingException e) {
 				logger.severe("ResponseProcessorTask: Caught LwMessagingException exception from messageProcessor.getResponse(): " + e);
 				logger.severe("ResponseProcessorTask: Going to tell main thread to stop processing.");
 				errorEncountered = true;
@@ -1051,7 +1051,7 @@ public class LwGenericMessageHandler implements IApp
 		 * 
 		 * @return true if we encountered a problem
 		 */
-		private boolean foundProblemInResponse(LwProcessResponse processedResponse) {
+		private boolean foundProblemInResponse(ProcessResponse processedResponse) {
 			if (processedResponse == null) {
 				logger.info("ResponseProcessorTask received null response - shutting down");
 				logger.info("Received PoisonPill from Processor: Going to tell main thread to stop processing.");
@@ -1059,7 +1059,7 @@ public class LwGenericMessageHandler implements IApp
 				return true;
 			}
 			
-			if (processedResponse.getResponseCode() != LwProcessResponse.ProcessResponseCode.SUCCESS) {
+			if (processedResponse.getResponseCode() != ProcessResponse.ProcessResponseCode.SUCCESS) {
 				logger.severe("Message with AuditKey Value " + processedResponse.getAuditKeyValues() + " was not processed properly by messageProcessor. Error returned was " + processedResponse.getResponse());
 				logger.severe("ResponseProcessorTask: Going to tell main thread to stop processing.");
 				errorEncountered = true;
@@ -1086,8 +1086,8 @@ public class LwGenericMessageHandler implements IApp
 		  *
 		  * @return a the XML string to be sent to the target for processing
 		  */
-		private String buildResponseMessage(String processedResponse, LwXMLDocument inputDoc, LwGenericMessageHandlerSettings settings)
-																		throws LwXMLException {
+		private String buildResponseMessage(String processedResponse, XMLDocument inputDoc, GenericMessageHandlerSettings settings)
+																		throws XMLException {
 			if (processedResponse == null || inputDoc == null || settings.getMindElementSet() == null) {
 				return null;
 			}
@@ -1095,12 +1095,12 @@ public class LwGenericMessageHandler implements IApp
 			//////////////////////////////////////////////////////////////////////////
 			// Create a new doc from the processed response...
 			//////////////////////////////////////////////////////////////////////////
-			LwXMLDocument processedResponseDoc = null;
+			XMLDocument processedResponseDoc = null;
 			try {
-				processedResponseDoc = LwXMLDocument.createDoc(processedResponse, LwXMLDocument.SCHEMA_VALIDATION_OFF);
+				processedResponseDoc = XMLDocument.createDoc(processedResponse, XMLDocument.SCHEMA_VALIDATION_OFF);
 			}
-			catch(LwXMLException e2) {
-				throw new LwXMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new XML doc from processed response: " + e2.getMessage());
+			catch(XMLException e2) {
+				throw new XMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new XML doc from processed response: " + e2.getMessage());
 			}
 
 			String responseMainDocElementName = settings.getResponseMainDocElementName();
@@ -1108,19 +1108,19 @@ public class LwGenericMessageHandler implements IApp
 			//////////////////////////////////////////////////////////////////////////
 			// Create a new response doc (or just use processedResponse)...
 			//////////////////////////////////////////////////////////////////////////
-			LwXMLDocument responseDoc = null;
+			XMLDocument responseDoc = null;
 			try {
 				if (responseMainDocElementName == null) { // then don't want to wrap response in any tag
 					responseMainDocElementName = processedResponseDoc.getCurrentNodeName();
 					responseDoc = processedResponseDoc;
 				}
 				else {
-					responseDoc = LwXMLDocument.createDoc("<" + responseMainDocElementName + "></" + responseMainDocElementName + ">", LwXMLDocument.SCHEMA_VALIDATION_OFF);
+					responseDoc = XMLDocument.createDoc("<" + responseMainDocElementName + "></" + responseMainDocElementName + ">", XMLDocument.SCHEMA_VALIDATION_OFF);
 					responseDoc.importNode(processedResponseDoc.getCurrentNode(), true);
 				}
 			}
-			catch(LwXMLException e2) {
-				throw new LwXMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new doc: " + e2.getMessage());
+			catch(XMLException e2) {
+				throw new XMLException("LwGenericMessageHandler.buildMessageForTarget(): Fatal Exception creating a new doc: " + e2.getMessage());
 			}
 
 			addMindedElementsToMessage(inputDoc, settings,	responseMainDocElementName, responseDoc);
@@ -1150,17 +1150,17 @@ public class LwGenericMessageHandler implements IApp
 		 * @param settings application settings
 		 * @param responseDoc the XML doc to be amended
 		 */
-		private void setValuesForResponseLiterals( LwGenericMessageHandlerSettings settings, LwXMLDocument responseDoc) {
-			Enumeration<LwXMLTagValue> enumLiteralNames = settings.getResponseLiteralsSet();
+		private void setValuesForResponseLiterals( GenericMessageHandlerSettings settings, XMLDocument responseDoc) {
+			Enumeration<XMLTagValue> enumLiteralNames = settings.getResponseLiteralsSet();
 			while (enumLiteralNames.hasMoreElements()) {
-				LwXMLTagValue tv = enumLiteralNames.nextElement();
+				XMLTagValue tv = enumLiteralNames.nextElement();
 
 				responseDoc.setCurrentNodeToFirstElement(); // go back to beginning of doc
 				if ( responseDoc.setCurrentNodeByPath(tv.getAttributeValue("Location"), 1)) {
 					responseDoc.setTextContentForCurrentNode(tv.getTagValue());
 				}
 				else { // no prob if we don't find the aggregate, we'll add it
-					LwXMLTagValue tempTagNoValue = new LwXMLTagValue(tv.getAttributeValue("Location"), null); // just to help split out path e.g. MESSAGE.DELV.ORD or MESSAGE.DELV.ORD.ORDER_NUMBER
+					XMLTagValue tempTagNoValue = new XMLTagValue(tv.getAttributeValue("Location"), null); // just to help split out path e.g. MESSAGE.DELV.ORD or MESSAGE.DELV.ORD.ORDER_NUMBER
 
 					if (tempTagNoValue.getPathToNameLessFirstElement() != null) {
 						if (responseDoc.addElement(null, tempTagNoValue.getPathToNameLessFirstElement(), null) != null) {
@@ -1203,11 +1203,11 @@ public class LwGenericMessageHandler implements IApp
 		 * @param responseMainDocElementName the name of the root element for the responseDoc
 		 * @param responseDoc the XML doc to be amended
 		 */
-		private void addMindedElementsToMessage(LwXMLDocument inputDoc, LwGenericMessageHandlerSettings settings,
-												String responseMainDocElementName, LwXMLDocument responseDoc) {
-			Enumeration<LwXMLTagValue> enumAggNames = settings.getMindElementSet();
-			while (enumAggNames.hasMoreElements()) {
-				LwXMLTagValue tv = enumAggNames.nextElement();
+		private void addMindedElementsToMessage(XMLDocument inputDoc, GenericMessageHandlerSettings settings,
+												String responseMainDocElementName, XMLDocument responseDoc) {
+			Enumeration<XMLTagValue> mindElements = settings.getMindElementSet();
+			while (mindElements.hasMoreElements()) {
+				XMLTagValue tv = mindElements.nextElement();
 
 				inputDoc.setCurrentNodeToFirstElement(); // go back to beginning of doc
 				responseDoc.setCurrentNodeToFirstElement(); // go back to beginning of doc
@@ -1221,10 +1221,10 @@ public class LwGenericMessageHandler implements IApp
 
 						// Position "pointer" in responseDoc to correct parent aggregate, creating it if we have to...
 						// (Note that the first ELEMENT in the path for the input may have a different name than the response, so we may ignore it)
-						LwXMLTagValue tempTagNoValue = new LwXMLTagValue(tv.getTagValue(), null); // just to help split out path e.g. MESSAGE.DELV.ORD or MESSAGE.DELV.ORD.ORDER_NUMBER
+						XMLTagValue tempTagNoValue = new XMLTagValue(tv.getTagValue(), null); // just to help split out path e.g. MESSAGE.DELV.ORD or MESSAGE.DELV.ORD.ORDER_NUMBER
 
 						//search under both inputDoc top-level Name and that of Target top-level Name
-						if ( ! (responseDoc.setCurrentNodeByPath(tempTagNoValue.getPathToParent(), 1) || responseDoc.setCurrentNodeByPath((responseMainDocElementName + "/" + tempTagNoValue.getPathToParentLessFirstElement()), 1))
+						if ( ! (responseDoc.setCurrentNodeByPath(tempTagNoValue.getPathToParent(), 1) || responseDoc.setCurrentNodeByPath(("/" + responseMainDocElementName + "/" + tempTagNoValue.getPathToParentLessFirstElement()), 1))
 						   ) { // try to go to parent recipient (if specified), create path if can't
 							String pathToParentLessFirstElement = tempTagNoValue.getPathToParentLessFirstElement();
 

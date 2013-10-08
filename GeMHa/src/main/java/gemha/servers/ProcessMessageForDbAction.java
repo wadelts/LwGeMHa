@@ -7,7 +7,7 @@ import java.util.Enumeration;
 
 import lw.XML.*;
 import lw.db.*;
-import gemha.support.LwMessagingException;
+import gemha.support.MessagingException;
 
 /**
   * This class encapsulates the common processing of a database action - e.g. an insert, update, delete or select
@@ -15,14 +15,14 @@ import gemha.support.LwMessagingException;
   * @author Liam Wade
   * @version 1.0 26/11/2008
   */
-public class LwProcessMessageForDbAction {
+public class ProcessMessageForDbAction {
 
 	private String action = "insert";
-	private LwXMLDocument inputDoc = null;
-	private Vector<LwXMLTagValue> auditKeyNameSet = null; // holds just the audit key names
+	private XMLDocument inputDoc = null;
+	private Vector<XMLTagValue> auditKeyNameSet = null; // holds just the audit key names
 	private String auditKeysSeparator = null;			  // the char(s) to separate key values when concatenated
 
-	private Vector<LwXMLTagValue> keySet = null; // holds both the audit key names and their found values
+	private Vector<XMLTagValue> keySet = null; // holds both the audit key names and their found values
 	private int numActions = 0;
 	private String status = "new";		// new, built, failed/executed, committed
 	private int errorCode = 0;
@@ -31,9 +31,9 @@ public class LwProcessMessageForDbAction {
 
 	private String tableName = null;
 	private String preparedStatementName = null;
-	private Vector<LwXMLTagValue> actionColumns = null;
-	private Vector<LwXMLTagValue> actionWhereColumns = null;
-	private LwDbQueryResult queryResult = null;
+	private Vector<XMLTagValue> actionColumns = null;
+	private Vector<XMLTagValue> actionWhereColumns = null;
+	private DbQueryResult queryResult = null;
 	private boolean immediateCommit = false;
 
 
@@ -48,7 +48,7 @@ public class LwProcessMessageForDbAction {
 	  * @param auditKeyNameSet the set of key names to get the key values identifing this action, for auditing purposes
 	  * @param auditKeysSeparator the char(s) to separate key values when concatenated
 	  */
-	public LwProcessMessageForDbAction(String action, LwXMLDocument inputDoc, Vector<LwXMLTagValue> auditKeyNameSet, String auditKeysSeparator) {
+	public ProcessMessageForDbAction(String action, XMLDocument inputDoc, Vector<XMLTagValue> auditKeyNameSet, String auditKeysSeparator) {
 		this.action = action.toUpperCase();
 		this.inputDoc = inputDoc;
 		this.auditKeyNameSet = auditKeyNameSet;
@@ -61,7 +61,7 @@ public class LwProcessMessageForDbAction {
 	  * @param defaultTableName the database table name to use, if not supplied in XML message
 	  */
 	public void buildAction(String defaultTableName)
-						throws LwMessagingException {
+						throws MessagingException {
 		logger.fine("Building " + action + " DB action...");
 
 		/////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ public class LwProcessMessageForDbAction {
 		if ( ! action.equals("SELECT")) {
 			// Check if this action should be committed immediately, so won't be rolled back later, if an error occurs with another action
 			// Remember that committing commits ALL previously uncommitted transactions - not just the current one!
-			String strImmediateCommit = inputDoc.getValueForTag(action + "/IMMEDIATE_COMMIT"); // YES/NO
+			String strImmediateCommit = inputDoc.getValueForTag("IMMEDIATE_COMMIT"); // YES/NO
 			immediateCommit = (strImmediateCommit == null ? false : strImmediateCommit.toUpperCase().equals("YES")) ;
 		}
 
@@ -80,7 +80,7 @@ public class LwProcessMessageForDbAction {
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the table name, or use default
 		/////////////////////////////////////////////////////////////////////////////////
-		tableName = inputDoc.getValueForTag(action + "/TABLENAME");
+		tableName = inputDoc.getValueForTag("TABLENAME");
 		if (tableName == null) {
 			tableName = defaultTableName;
 		}
@@ -88,18 +88,18 @@ public class LwProcessMessageForDbAction {
 		/////////////////////////////////////////////////////////////////////////////////
 		// If still no table name found, look for a prepared statement
 		/////////////////////////////////////////////////////////////////////////////////
-		preparedStatementName = inputDoc.getValueForTag(action + "/PREPARED_STATEMENT_NAME");
+		preparedStatementName = inputDoc.getValueForTag("PREPARED_STATEMENT_NAME");
 
 		if (tableName == null && preparedStatementName == null) { // big problem, need one of these
 			logger.severe("No TABLENAME or PreparedStatementName supplied for " + action + " with AuditKey " + auditKeyValues + " (and no default tablename). See next line for input XML...");
 			logger.severe("InputMessage was :" + inputDoc.toString());
-			throw new LwMessagingException("No TABLENAME or PreparedStatementName supplied for " + action + " with AuditKey " + auditKeyValues + ".");
+			throw new MessagingException("No TABLENAME or PreparedStatementName supplied for " + action + " with AuditKey " + auditKeyValues + ".");
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the column names and values to be inserted/updated/selected
 		/////////////////////////////////////////////////////////////////////////////////
-		if (inputDoc.setCurrentNodeByPath(action + "/COLUMNS", 1)) { // should fail for delete
+		if (inputDoc.setCurrentNodeByPath("COLUMNS", 1)) { // should fail for delete
 			actionColumns = inputDoc.getValuesForTagsChildren();
 			inputDoc.restoreCurrentNode();
 		}
@@ -107,7 +107,7 @@ public class LwProcessMessageForDbAction {
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the column names and values to be involved in SQL WHERE clause
 		/////////////////////////////////////////////////////////////////////////////////
-		if (inputDoc.setCurrentNodeByPath(action + "/WHERE", 1)) { // should fail for insert
+		if (inputDoc.setCurrentNodeByPath("WHERE", 1)) { // should fail for insert
 			actionWhereColumns = inputDoc.getValuesForTagsChildren();
 			inputDoc.restoreCurrentNode();
 		}
@@ -121,8 +121,8 @@ public class LwProcessMessageForDbAction {
 	  * @param dbConn the open database connection
 	  * @param actionOnError describes what to do when an error is encountered - respond or exception out
 	  */
-	public void performAction(LwDbConnection dbConn, String actionOnError)
-						throws LwMessagingException {
+	public void performAction(DbConnection dbConn, String actionOnError)
+						throws MessagingException {
 
 		try {
 			if (action.equals("INSERT")) {
@@ -150,12 +150,12 @@ public class LwProcessMessageForDbAction {
 					status = "committed";
 					logger.info("Immediately Committed transaction for AuditKey " + auditKeyValues + " (immediateCommit was true).");
 				}
-				catch(LwDbException e) {
-					throw new LwMessagingException("Caught LwDbException trying to IMMEDIATELY commit a transaction: " + e.getMessage());
+				catch(DbException e) {
+					throw new MessagingException("Caught LwDbException trying to IMMEDIATELY commit a transaction: " + e.getMessage());
 				}
 			}
 		}
-		catch (LwDbException e) {
+		catch (DbException e) {
 			status = "failed";
 			errorCode = e.getErrorCode();
 			errorText = e.getMessage();
@@ -165,7 +165,7 @@ public class LwProcessMessageForDbAction {
 			}
 			else { // assume EXCEPTION
 				logger.severe("Caught LwDbException exception (will throw LwMessagingException) (AuditKey " + auditKeyValues + "): " + e.getMessage());
-				throw new LwMessagingException("Caught LwDbException (AuditKey " + auditKeyValues + "): " + e.getMessage());
+				throw new MessagingException("Caught LwDbException (AuditKey " + auditKeyValues + "): " + e.getMessage());
 			}
 		}
 	}
@@ -176,8 +176,8 @@ public class LwProcessMessageForDbAction {
 	  * @param response the complete set of responses (from all actions) to which we should add this result
 	  *
 	  */
-	public void addResultToResponse(LwXMLDocument response)
-											throws LwMessagingException {
+	public void addResultToResponse(XMLDocument response)
+											throws MessagingException {
 
 		//////////////////////////////////////////////////////////////////////////
 		// Add the success/error details to the message...
@@ -186,18 +186,15 @@ public class LwProcessMessageForDbAction {
 		//////////////////////////////////////////////////////////////////////////
 		response.setCurrentNodeToFirstElement();
 
-		// First find out how many of these action aggregates we already have (assume less than 1000...
-		LwXMLMutableInteger numOccurrences = new LwXMLMutableInteger(1000);
-		response.findNthElementByPath("MESSAGE/DBACTION/" + action, numOccurrences);
-		int icurrentOccurrences = (1000 - numOccurrences.intValue());
+		// First find out how many of these action aggregates we already have
+		int icurrentOccurrences = response.numElements("/MESSAGE/DBACTION/" + action);
 
 		// Now add the new one
-		response.setCurrentNodeByPath("MESSAGE/DBACTION", 1);
+		response.setCurrentNodeByPath("/MESSAGE/DBACTION", 1);
 		response.addElement(null, action, null);
 
 		// Now go down to the new one...
-		response.setCurrentNodeToFirstElement();
-		response.setCurrentNodeByPath("MESSAGE/DBACTION/" + action, ++icurrentOccurrences);
+		response.setCurrentNodeByPath("/MESSAGE/DBACTION/" + action, icurrentOccurrences+1);
 
 		//////////////////////////////////////////////////////////////////////////
 		// Add the details to the message...
@@ -219,7 +216,7 @@ public class LwProcessMessageForDbAction {
 			keyColsElementName = "WHERE";
 		}
 		if ( keySet != null) {
-			for (LwXMLTagValue tv : keySet) {
+			for (XMLTagValue tv : keySet) {
 				String val = tv.getTagValue();
 				if (val != null) { // add it
 					response.addElement(null, keyColsElementName + "/" + tv.getTagName(), val);
@@ -250,30 +247,30 @@ public class LwProcessMessageForDbAction {
 	 * 
 	 * @param response the complete set of responses (from all actions) to which we should add this result
 	 * 
-	 * @throws LwMessagingException if cannot create XML document from SQL Query result
+	 * @throws MessagingException if cannot create XML document from SQL Query result
 	 */
-	private void addSelectResultRowsToResponse(LwXMLDocument response) throws LwMessagingException {
+	private void addSelectResultRowsToResponse(XMLDocument response) throws MessagingException {
 		// Now create a TABLE aggregate to contain the results...
 		response.addElement(null, "TABLE", null);
-		response.setCurrentNodeByPath(action + "/TABLE", 1); // go to TABLE aggregate
+		response.setCurrentNodeByPath("TABLE", 1); // go to TABLE aggregate
 
 		// Add the rows and columns...
 		int numRows = 0;
 		for (Properties row : queryResult.getResult()) {
 			response.addElement(null, "ROW", null);
-			response.setCurrentNodeByPath("TABLE/ROW", ++numRows); // go to last-created row
+			response.setCurrentNodeByPath("ROW", ++numRows); // go to last-created row
 			for (Object col : row.keySet()) {
 				if (queryResult.getReturnType().equals("COLUMNS")) {
 					response.addElement(null, ((String)col), row.getProperty(((String)col)));
 				}
 				else if (queryResult.getReturnType().equals("XML")) { // create a new Doc and add it to response Doc
 					try {
-						LwXMLDocument resultDoc = null;
-						resultDoc = LwXMLDocument.createDoc(row.getProperty(((String)col)), LwXMLDocument.SCHEMA_VALIDATION_OFF);
+						XMLDocument resultDoc = null;
+						resultDoc = XMLDocument.createDoc(row.getProperty(((String)col)), XMLDocument.SCHEMA_VALIDATION_OFF);
 						response.importNode(resultDoc.getCurrentNode(), true);
 					}
-					catch(LwXMLException e2) {
-						throw new LwMessagingException("Caught LwXMLException creating a new doc from SQL Query result: " + e2.getMessage());
+					catch(XMLException e2) {
+						throw new MessagingException("Caught LwXMLException creating a new doc from SQL Query result: " + e2.getMessage());
 					}
 				}
 			}
@@ -296,7 +293,7 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return a Vector of the keySet for this action (set of tag/value pairs)
 	  */
-	public Vector<LwXMLTagValue> getKeySet() {
+	public Vector<XMLTagValue> getKeySet() {
 			return keySet;
 	}
 
@@ -391,15 +388,15 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return the concatenated audit key values for this message, the empty string if no values
 	  */
-	private String getConcatenatedAuditKeyValues(LwXMLDocument doc, Vector<LwXMLTagValue> auditKeyNamesSet, String separator) {
+	private String getConcatenatedAuditKeyValues(XMLDocument doc, Vector<XMLTagValue> auditKeyNamesSet, String separator) {
 
 		String concatenatedValues = "";
 
 		// Using Enumeration instead of for-each loop, so could use hasMoreElements() when adding separator
 		if (auditKeyNamesSet != null) {
-			Enumeration<LwXMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
+			Enumeration<XMLTagValue> enumAuditKeyNames = auditKeyNamesSet.elements();
 			while (enumAuditKeyNames.hasMoreElements()) {
-				LwXMLTagValue tv = enumAuditKeyNames.nextElement();
+				XMLTagValue tv = enumAuditKeyNames.nextElement();
 
 				String nextValue = doc.getValueForTag(tv.getTagValue());
 
@@ -424,16 +421,16 @@ public class LwProcessMessageForDbAction {
 	  *
 	  *@return a new Vector, containing both the key names and thlw values for this action
 	  */
-	public Vector<LwXMLTagValue> getAuditKeyValues(LwXMLDocument doc, Vector<LwXMLTagValue> auditKeyNamesSet) {
+	public Vector<XMLTagValue> getAuditKeyValues(XMLDocument doc, Vector<XMLTagValue> auditKeyNamesSet) {
 
-		Vector<LwXMLTagValue> keyNameValuePairs = new Vector<LwXMLTagValue>(auditKeyNamesSet.size());
+		Vector<XMLTagValue> keyNameValuePairs = new Vector<XMLTagValue>(auditKeyNamesSet.size());
 
 		if (auditKeyNamesSet != null) { // add key columns and thlw values for reference
 
-			for (LwXMLTagValue tv : auditKeyNamesSet) {
+			for (XMLTagValue tv : auditKeyNamesSet) {
 				String val = doc.getValueForTag(tv.getTagValue());
 				if (val != null) { // add it
-					keyNameValuePairs.addElement(new LwXMLTagValue(tv.getTagValue(), val));
+					keyNameValuePairs.addElement(new XMLTagValue(tv.getTagValue(), val));
 				}
 			}
 		}
@@ -451,8 +448,8 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return 0 for success, <0 for error
 	  */
-	private int performActionInsert(LwDbConnection dbConn, String tableName, String preparedStatementName, Vector<LwXMLTagValue> insertCols)
-																	throws LwDbException {
+	private int performActionInsert(DbConnection dbConn, String tableName, String preparedStatementName, Vector<XMLTagValue> insertCols)
+																	throws DbException {
 
 		logger.finer("Going to insert database row...");
 
@@ -479,8 +476,8 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return 0 for success, <0 for error, n for number of rows updated
 	  */
-	private int performActionUpdate(LwDbConnection dbConn, String tableName, String preparedStatementName, Vector<LwXMLTagValue> updateCols, Vector<LwXMLTagValue> whereCols)
-																	throws LwDbException {
+	private int performActionUpdate(DbConnection dbConn, String tableName, String preparedStatementName, Vector<XMLTagValue> updateCols, Vector<XMLTagValue> whereCols)
+																	throws DbException {
 
 		logger.finer("Going to perform database update...");
 
@@ -505,8 +502,8 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return 0 for success, <0 for error, n for number of rows removed
 	  */
-	private int performActionDelete(LwDbConnection dbConn, String tableName, String preparedStatementName, Vector<LwXMLTagValue> whereCols)
-																	throws LwDbException {
+	private int performActionDelete(DbConnection dbConn, String tableName, String preparedStatementName, Vector<XMLTagValue> whereCols)
+																	throws DbException {
 
 		logger.finer("Going to perform database delete...");
 
@@ -532,8 +529,8 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return a LwDbQueryResult object containing the results
 	  */
-	private LwDbQueryResult performActionSelect(LwDbConnection dbConn, String tableName, String preparedStatementName, Vector<LwXMLTagValue> updateCols, Vector<LwXMLTagValue> whereCols)
-																	throws LwDbException {
+	private DbQueryResult performActionSelect(DbConnection dbConn, String tableName, String preparedStatementName, Vector<XMLTagValue> updateCols, Vector<XMLTagValue> whereCols)
+																	throws DbException {
 
 		logger.finer("Going to perform database select...");
 
@@ -554,14 +551,14 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return the tv pairs in a Properties object
 	  */
-	private Properties convertTVsToProperties(Vector<LwXMLTagValue> tvPairs) {
+	private Properties convertTVsToProperties(Vector<XMLTagValue> tvPairs) {
 		Properties p = new Properties();
 
 		if (tvPairs == null) {
 			return p;
 		}
 
-		for (LwXMLTagValue tv : tvPairs) {
+		for (XMLTagValue tv : tvPairs) {
 			p.put(tv.getTagName(), tv.getTagValue());
 		}
 
@@ -575,14 +572,14 @@ public class LwProcessMessageForDbAction {
 	  *
 	  * @return the tv pairs in a Properties object
 	  */
-	private Properties convertTVsToPropertiesAndMarkAllAsParams(Vector<LwXMLTagValue> tvPairs) {
+	private Properties convertTVsToPropertiesAndMarkAllAsParams(Vector<XMLTagValue> tvPairs) {
 		Properties p = new Properties();
 
 		if (tvPairs == null) {
 			return p;
 		}
 
-		for (LwXMLTagValue tv : tvPairs) {
+		for (XMLTagValue tv : tvPairs) {
 			p.put(tv.getTagName(), "?");
 		}
 
