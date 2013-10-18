@@ -19,7 +19,7 @@
 	</Input>
 	<Output>
 		<OutputFile>
-			<FileNameTemplate>C:\Users\wadel\git\GeMHa\GeMHa\data\response_*_?.xml</FileNameTemplate>
+			<FileNameTemplate>C:\Users\wadel\git\GeMHa\GeMHa\responses\response_*_?.xml</FileNameTemplate>
 		</OutputFile>
 	</Output>
 	<Processing>

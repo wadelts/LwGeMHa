@@ -50,12 +50,6 @@
 			<xs:enumeration value="EXCEPTION"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:simpleType name="Immediate_CommitType">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="YES"/>
-			<xs:enumeration value="NO"/>
-		</xs:restriction>
-	</xs:simpleType>
 	<xs:simpleType name="DbActionType">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="insert"/>
@@ -134,7 +128,7 @@
 																			<xs:sequence>
 																				<xs:element name="Action_On_Error" type="Action_On_ErrorType" minOccurs="0"/>
 																				<xs:element name="Prepared_Statement_Name" type="RequiredString" minOccurs="0"/>
-																				<xs:element name="Immediate_Commit" type="Immediate_CommitType" minOccurs="0"/>
+																				<xs:element name="Immediate_Commit" type="xs:boolean" minOccurs="0"/>
 																			</xs:sequence>
 																		</xs:complexType>
 																	</xs:element>

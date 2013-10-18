@@ -70,8 +70,8 @@ public class ProcessMessageForDbAction {
 		if ( ! action.equals("SELECT")) {
 			// Check if this action should be committed immediately, so won't be rolled back later, if an error occurs with another action
 			// Remember that committing commits ALL previously uncommitted transactions - not just the current one!
-			String strImmediateCommit = inputDoc.getValueForTag("IMMEDIATE_COMMIT"); // YES/NO
-			immediateCommit = (strImmediateCommit == null ? false : strImmediateCommit.toUpperCase().equals("YES")) ;
+			String strImmediateCommit = inputDoc.getValueForTag("IMMEDIATE_COMMIT"); // true/false
+			immediateCommit = (strImmediateCommit == null ? false : strImmediateCommit.toUpperCase().equals("TRUE")) ;
 		}
 
 		auditKeyValues = getConcatenatedAuditKeyValues(inputDoc, auditKeyNameSet, auditKeysSeparator); // works at "current node" level

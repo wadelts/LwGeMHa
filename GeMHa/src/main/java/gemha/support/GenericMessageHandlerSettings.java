@@ -216,8 +216,9 @@ public class GenericMessageHandlerSettings {
 			}
 			inputLimit = tempInputLimit;
 
-			inputDataFormat = settingsDoc
-					.getValueForTag("Input/InputSource/DataFormat");
+			String tempInputDataFormat = settingsDoc.getValueForTag("Input/InputSource/DataFormat");
+			inputDataFormat = (tempInputDataFormat == null ? "XML" : tempInputDataFormat.toUpperCase());
+
 			dataContractName = settingsDoc
 					.getValueForTagPlusAttributes("Input/InputSource/DataContractName");
 

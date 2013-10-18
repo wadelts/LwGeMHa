@@ -242,16 +242,16 @@ public class ProcessMessageForDbSettings
 			String dbAction = auditKeysAggregate.getAttributeValue("DbAction");
 			if (dbAction != null) {
 				if (dbAction.equals("insert")) {
-					auditKeyNamesSetForInserts = settingsDoc.getValuesForTag("AuditKeys/KeyName");
+					auditKeyNamesSetForInserts = settingsDoc.getValuesForTag("KeyName");
 				}
 				else if (dbAction.equals("update")) {
-					auditKeyNamesSetForUpdates = settingsDoc.getValuesForTag("AuditKeys/KeyName");
+					auditKeyNamesSetForUpdates = settingsDoc.getValuesForTag("KeyName");
 				}
 				else if (dbAction.equals("delete")) {
-					auditKeyNamesSetForDeletes = settingsDoc.getValuesForTag("AuditKeys/KeyName");
+					auditKeyNamesSetForDeletes = settingsDoc.getValuesForTag("KeyName");
 				}
 				else if (dbAction.equals("select")) {
-					auditKeyNamesSetForSelects = settingsDoc.getValuesForTag("AuditKeys/KeyName");
+					auditKeyNamesSetForSelects = settingsDoc.getValuesForTag("KeyName");
 				}
 			}
 

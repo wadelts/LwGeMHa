@@ -1,0 +1,21 @@
+.form-1 ul li {
+	/* Default list-style-type is bullets for ul li's and decimal for ol li's... */
+	list-style-type: none;
+}
+	
+.form-1 li {
+	color: #52cfeb;
+	
+	/* Set image as background image (apparently better than list-style-image - more reliably positioned across browsers) */
+
+	padding-top:  5px;
+	padding-left: 1em;
+	
+	cursor: pointer;
+}
+
+.form-1 li.selected{
+	/* Highlight selected... */
+	color: #000000;
+	background-color: #52cfeb;
+}

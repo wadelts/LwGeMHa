@@ -11,3 +11,4 @@ The entry point for using this project are the following classes:
 
 	
 See the document GeMHa_Overview.pdf for a full description.
+Open WebContent/unprotected/gemha_config.html to generate a Configuration file via a Wizard.

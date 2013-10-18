@@ -28,7 +28,7 @@
 					<InsertParams>
 						<Action_On_Error>EXCEPTION</Action_On_Error>
 						<Prepared_Statement_Name>LW_delme1_insert_001</Prepared_Statement_Name>
-						<Immediate_Commit>YES</Immediate_Commit>
+						<Immediate_Commit>true</Immediate_Commit>
 					</InsertParams>
 				</CSVParams>
 			</InputFile>

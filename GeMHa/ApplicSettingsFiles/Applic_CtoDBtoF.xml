@@ -26,7 +26,7 @@
 					<XMLFormat>insert</XMLFormat>
 					<InsertParams>
 						<Action_On_Error>RESPOND</Action_On_Error>
-						<Immediate_Commit>YES</Immediate_Commit>
+						<Immediate_Commit>true</Immediate_Commit>
 					</InsertParams>
 				</CSVParams>
 			</InputFile>
