@@ -359,7 +359,13 @@ function formDataToXML() {
 			theXML += "</InputSocket>";
 		}
 	theXML += "</InputSource>";
-	theXML += formInputFieldToXML("SchemaDefinitionFileName");
+	
+		var inputSchemaDefFileName = $("#inputSchemaDefFileName").val();
+		if (inputSchemaDefFileName != "") {
+			theXML += "<InputValidation SchemaValidation='on' SchemaDefinitionFileName='" + inputSchemaDefFileName + "'>" + 
+					  "</InputValidation>";
+		}
+
 	theXML += "</Input>";
 	
 	var outputMedium = $("#outputMedium").find(" :selected").val();
@@ -426,7 +432,13 @@ function formDataToXML() {
 			// input message that are needed for processing.
 			var auditElementList = $("#auditElementList li");
 			if (auditElementList.length > 0) {
-				theXML += "<AuditKeys>";
+				var auditingActionOnError = $("#actionOnError").find(" :selected").val();
+				if (auditingActionOnError == "none") {
+					theXML += "<AuditKeys>";					
+				} else {
+					theXML += "<AuditKeys ActionOnError='" + auditingActionOnError + "'>";
+				}
+				
 					$(auditElementList).each(function(index) {
 						theXML += "<KeyName>" + $(this).text() + "</KeyName>";
 					} );

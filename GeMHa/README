@@ -1,14 +1,19 @@
-The Generic Message Handler (GeMHa) is an application facilitating communication between applications,
-including across servers, usually in the form of XML messages.
-It also allows presentation of simplified database actions (SELECT, INSERT, UPDATE, DELETE) to a specified
-database and return of a response, all via XML messages.
+The Generic Message Handler (GeMHa) is an application facilitating
+communication between applications, including across servers, usually in the
+form of XML messages.
+
+It also allows presentation of simplified database actions (SELECT, INSERT,
+UPDATE, DELETE) to a specified database and return of a response, all via
+XML messages.
 
 The entry point for using this project are the following classes:
 
-	GemhaBatch				creates a GenericMessageHandler instance and sets things in motion.
-	GenericMessageHandler	controls all the activity of a particular instance, loading the appropriate classes
-							based on the settings in a configuration file.
+	GemhaBatch            creates a GenericMessageHandler instance and sets things in motion.
+	GenericMessageHandler controls all the activity of a particular instance,
+                          loading the appropriate classes based on the settings
+                          in a configuration file.
 
 	
 See the document GeMHa_Overview.pdf for a full description.
-Open WebContent/unprotected/gemha_config.html to generate a Configuration file via a Wizard.
+Open WebContent/unprotected/gemha_config.html to generate a Configuration file via
+a Wizard.

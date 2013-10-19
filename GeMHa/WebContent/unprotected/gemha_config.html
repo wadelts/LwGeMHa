@@ -23,13 +23,13 @@
  </head>
   <body onload='addListeners(); $("#inputMedium").trigger("change"); $("#processingTarget").trigger("change"); $("#outputMedium").trigger("change"); $("#auditing").trigger("change");'>
     <h2>GeMHa Config Generator</h2>
-    <h3>( Template <select id="template" onchange="changeTemplate()">
-						<option value="none" 			selected>None</option>
-						<option value="createTemplateCtoF"		>CSVFile to XMLFile</option>
-						<option value="createTemplateCtoDbtoF" 	>CSVFile to DbInsert to XMLFile</option>
-						<option value="createTemplateFtoFtoQ" 	>XMLFile to CSVFile to Queue</option>
-						<option value="createTemplateFtoStoQ" 	>XMLFile to Socket to Queue</option>
-						<option value="createTemplateStoDbtoH" 	>Socket to DbSelect to HTTP Server</option>
+    <h3>( Template <select id="template" onchange="changeTemplate()" title="From which Template should we populate fields?">
+						<option value="none" 			selected title="Fill fields manually">None</option>
+						<option value="createTemplateCtoF"		title="Transform a file of CSV records into one of XML records">CSVFile to XMLFile</option>
+						<option value="createTemplateCtoDbtoF" 	title="Load CSV records, send to Database as Inserts, send responses to files">CSVFile to DbInsert to XMLFile</option>
+						<option value="createTemplateFtoFtoQ" 	title="Load XML messages from file(s), save to file as CSV records, output count to Queue">XMLFile to CSVFile to Queue</option>
+						<option value="createTemplateFtoStoQ" 	title="Load XML messages from file(s), send to Socket, outpur responses to Queue">XMLFile to Socket to Queue</option>
+						<option value="createTemplateStoDbtoH" 	title="Load Select requests (XML) from Socket, send to Database, return results over HTTP Connection">Socket to DbSelect to HTTP Server</option>
 		</select>
 		)
 	</h3>
@@ -41,24 +41,25 @@
     	<table>
     		<tr>
 				<td><label for="inputFormat">Input Format: </label></td>
-				<td><select id="inputFormat" name="DataFormat" onChange="changeInputFormat()">
-						<option value="xml" selected>XML</option>
-						<option value="csv"			>CSV</option>
+				<td><select id="inputFormat" name="DataFormat" onChange="changeInputFormat()" title="What is the format of the data to be loaded?">
+						<option value="xml" selected title="Input will be in the form of individual XML messages - may be from a file, Queue or Socket">XML</option>
+						<option value="csv"			 title="Input CSV records (currently only relevant for File Input, and will be automatically transformed into XML messages for Database actions)">CSV</option>
 					</select>
 				</td>
 				<td><label for="inputLimit">Input Limit: </label></td>
-				<td><input type="text" id="inputLimit" name="InputLimit" class="GeMHaToBeValidated" GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" align="right"></td>
+				<td><input type="text" id="inputLimit" name="InputLimit" class="GeMHaToBeValidated" GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" title="Stop loading records when we reach this number read"></td>
 			</tr>
     		<tr>
 				<td><label for="inputSchemaDefFileName">Schema Def: </label></td>
-				<td><input type="text" id="inputSchemaDefFileName" name="SchemaDefinitionFileName" align="right"></td>
+				<td><input type="text" id="inputSchemaDefFileName" name="SchemaDefinitionFileName" title="Name and path of .xsd file to be used to validate incoming XML messages"></td>
 			</tr>
     		<tr>
 				<td><label for="inputDataContractChecking">Data Contract Checking: </label></td>
-				<td><select id="inputDataContractChecking" name="inputDataContractChecking" onChange="changeInputDataContractChecking()">
+				<td><select id="inputDataContractChecking" name="inputDataContractChecking" onChange="changeInputDataContractChecking()"
+							title="What action do we take if the message should have a Contract Name and doesn't match that expected?">
 						<option value="none" selected>None</option>
-						<option value="shutdown"     >Shut Down</option>
-						<option value="discard"		 >Discard Message</option>
+						<option value="shutdown"     title="Stop processing immediately and terminate - no more messages will be processed">Shut Down</option>
+						<option value="discard"		 title="Discard the errant message and continue with the next message, reporting the error">Discard Message</option>
 					</select>
 				</td>
 				<td></td>
@@ -72,9 +73,9 @@
 	    	<table>
 	    		<tr>
 					<td><label for="inputDataContractName">Contract Name: </label></td>
-					<td><input type="text" id="inputDataContractName" name="inputDataContractName" align="right"></td>
+					<td><input type="text" id="inputDataContractName" name="inputDataContractName" title="The name of the Contract (must match that in message)"></td>
 					<td><label for="inputDataContractLocation">Location in Message: </label></td>
-					<td><input type="text" id="inputDataContractLocation" name="inputDataContractLocation"></td>
+					<td><input type="text" id="inputDataContractLocation" name="inputDataContractLocation" title="Where to find the Contract Name within the incoming message (path to element, e.g. /Message/ContractName)"></td>
 				</tr>
 			</table>
 	    </fieldset>
@@ -82,7 +83,7 @@
     <br>
 <!-- ----------------------------------- Input Media ----------------------------------------- -->    
     <fieldset class="inputMedia">
-    	<legend><select id="inputMedium" name="inputMedium" onchange="changeInputMedium()">
+    	<legend><select id="inputMedium" name="inputMedium" onchange="changeInputMedium()" title="What is the source type of input data?">
 						<option value="file" selected>File Input</option>
 						<option value="queue"		 >Queue Input</option>
 						<option value="socket"		 >Socket Input</option>
@@ -91,10 +92,10 @@
 		<div id="inputFileDiv">
 	    	<table>
 	    		<tr>
-					<td><label for="inputFileName">Input File: </label></td>
-					<td><input type="text" id="inputFileName" name="inputFileName" class="locallyRequired" GeMHa_Field_isValid="false" align="right"></td>
+					<td><label for="inputFileName">Input File (Name or Template): </label></td>
+					<td><input type="text" id="inputFileName" name="inputFileName" class="locallyRequired" GeMHa_Field_isValid="false" title="The pattern to use to identify the names of files containing input messages, where the pattern is based on regex rules, e.g. input.xml or e.g. input_CSV_[0-9]*.txt"></td>
 					<td><label for="sortFilteredFileNames">Sort on File Name: </label></td>
-					<td><input type="checkbox" id="sortFilteredFileNames" name="SortFilteredFileNames" checked></td>
+					<td><input type="checkbox" id="sortFilteredFileNames" name="SortFilteredFileNames" checked title="Sort list of file names produced from 'Input File'?"></td>
 				</tr>
 			</table>
 		    <br>
@@ -104,18 +105,18 @@
 			    	<table>
 			    		<tr>
 							<td><label for="inputFieldSeparator">Field Separator: </label></td>
-							<td><input type="text" id="inputFieldSeparator" name="FieldSeparator" class="locallyRequired" GeMHa_Field_isValid="true" align="right"></td>
+							<td><input type="text" id="inputFieldSeparator" name="FieldSeparator" class="locallyRequired" GeMHa_Field_isValid="true" title="The character(s) that separate fileds in a row of input data. (If the value \t is supplied, it will be replaced by the actual tab character)"></td>
 							<td><label for="inputNumRecordsToSkip">Skip: </label></td>
-							<td><input type="text" id="inputNumRecordsToSkip" name="NumRecordsToSkip" class="GeMHaToBeValidated" GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" align="right"></td>
+							<td><input type="text" id="inputNumRecordsToSkip" name="NumRecordsToSkip" class="GeMHaToBeValidated" GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" title="When reading from files, first skip this number of records (i.e. don't process them)"></td>
 							<td><label > records</label></td>
 						</tr>
 			    		<tr>
 							<td><label for="inputTargetXMLFormat">Target XML Format: </label></td>
-							<td><select id="inputTargetXMLFormat" name="XMLFormat" onChange="changeTargetXMLFormat()">
-									<option value="select" selected>SELECT</option>
-									<option value="insert" 		   >INSERT</option>
-									<option value="update"		   >UPDATE</option>
-									<option value="delete"		   >DELETE</option>
+							<td><select id="inputTargetXMLFormat" name="XMLFormat" onChange="changeTargetXMLFormat()" title="What form should the XML message take when the input CSV record is transformed? (As is targeted at a database)">
+									<option value="select" selected title="Resulting XML message can be sent to a Database as a Select query">SELECT</option>
+									<option value="insert" 		    title="Resulting XML message can be sent to a Database as an Insert action">INSERT</option>
+									<option value="update"		    title="Resulting XML message can be sent to a Database as an Update action">UPDATE</option>
+									<option value="delete"		    title="Resulting XML message can be sent to a Database as an Delete action">DELETE</option>
 								</select>
 							</td>
 							<td></td>
@@ -130,9 +131,9 @@
 				    	<table>
 				    		<tr>
 								<td><label for="inputActionOnError">Action on Error: </label></td>
-								<td><select id="inputActionOnError" name="Action_On_Error">
-										<option value="respond" selected>Respond to Sender</option>
-										<option value="exception"		>Throw Exception</option>
+								<td><select id="inputActionOnError" name="Action_On_Error" title="What should we do if an error is received by processor (e.g. from a Database)">
+										<option value="respond" selected title="Inform the sender by sending an error message to Output (see Output section) and continue with next message">Respond to Sender</option>
+										<option value="exception"		 title="THrow an exception, stop processing and terminate">Throw Exception</option>
 									</select>
 								</td>
 								<td></td>
@@ -140,9 +141,9 @@
 							</tr>
 				    		<tr>
 								<td><label for="inputPreparedStatementName">Prepared Statement: </label></td>
-								<td><input type="text" id="inputPreparedStatementName" name="Prepared_Statement_Name" align="right"></td>
+								<td><input type="text" id="inputPreparedStatementName" name="Prepared_Statement_Name" title="If we're dealing with an Insert to a Database, the data from each Input record will be supplied to this Prepared Statement and executed (this will be defined in another Config file - for Database actions)"></td>
 								<td><label for="immediateCommit">Immediate Commit: </label></td>
-								<td><input type="checkbox" id="immediateCommit" name="Immediate_Commit" checked></td>
+								<td><input type="checkbox" id="immediateCommit" name="Immediate_Commit" checked title="Should we commit each Insert individually (immediately), or only when all Inserts of a message are executed?"></td>
 							</tr>
 						</table>
 				    </fieldset>
@@ -152,7 +153,7 @@
 			    	<legend>CSV File Column Order</legend>
 			    	<table >
 		    		<tr>
-						<td colspan="2"><div id="columnOrderDiv" class="scrollableLong">
+						<td colspan="2"><div id="columnOrderDiv" class="scrollableLong" title="Give a name to each column in the CSV file. These names will then be used when constructing an XML message for each record">
 				    						<ol id="columnOrderList" class="locallyRequired" GeMHa_Field_isValid="false"></ol>
 				    					</div>
 				    	</td>
@@ -161,16 +162,16 @@
 					</tr>
 					<tr>
 						<td><label for="inputNewColName">New Column: </label></td>
-						<td><input type="text" id="inputNewColName" name="inputNewColName" align="right"></td>
+						<td><input type="text" id="inputNewColName" name="inputNewColName" title="Enter a new Column Name here, then click 'Add' to add it to the above list"></td>
 						<td></td>
 						<td></td>
 					</tr>
 					<tr>
 						<td><div id="columnOrderListButtons">
-								<input id="columnOrderListAdd" type="button" value="Add"></input>
-								<input id="columnOrderListUp" type="button" value="Up" disabled></input>
-								<input id="columnOrderListDown" type="button" value="Down" disabled></input>
-								<input id="columnOrderListRemove" type="button" value="Remove" disabled></input>
+								<input id="columnOrderListAdd" type="button" value="Add" title="Add another column to the above list"></input>
+								<input id="columnOrderListUp" type="button" value="Up" disabled title="Move the selected Column Name up one position in the list"></input>
+								<input id="columnOrderListDown" type="button" value="Down" disabled title="Move the selected Column Name down one position in the list"></input>
+								<input id="columnOrderListRemove" type="button" value="Remove" disabled title="Remove the selected column from the above list (will be moved to the 'New Column' field)"></input>
 							</div>
 						</td>
 					</tr>
@@ -182,13 +183,13 @@
 		    	<table>
 		    		<tr>
 						<td><label for="inputURLJMSServer">Broker URL: </label></td>
-						<td><input type="text" id="inputURLJMSServer" name="UrlJMSserver" class="locallyRequired" GeMHa_Field_isValid="true" align="right"></td>
+						<td><input type="text" id="inputURLJMSServer" name="UrlJMSserver" class="locallyRequired" GeMHa_Field_isValid="true" title="The URL for the Queue Broker e.g. failover://tcp://localhost:61616 for IBM MQ on local machine"></td>
 						<td><label for="inputQueueName">Queue Name: </label></td>
-						<td><input type="text" id="inputQueueName" name="QueueName" class="locallyRequired" GeMHa_Field_isValid="true" align="right"></td>
+						<td><input type="text" id="inputQueueName" name="QueueName" class="locallyRequired" GeMHa_Field_isValid="true" title="The name of the Queue as understood by the Broker"></td>
 					</tr>
 		    		<tr>
 						<td><label for="inputMilliSecondsBeforeQuiet">Go Quiet In (ms): </label></td>
-						<td><input type="text" id="inputMilliSecondsBeforeQuiet" name="MilliSecondsBeforeQuiet" class="GeMHaToBeValidated" GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" align="right"></td>
+						<td><input type="text" id="inputMilliSecondsBeforeQuiet" name="MilliSecondsBeforeQuiet" class="GeMHaToBeValidated" GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" title="Number of milliseconds we'll wait for a message before going quiet (temporarily disconnecting and closing down resources)"></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -198,7 +199,7 @@
 		    	<table>
 		    		<tr>
 						<td><label for="inputPortNumber">Port: </label></td>
-						<td><input type="text" id="inputPortNumber" name="PortNumber" class="GeMHaToBeValidated locallyRequired"  GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" align="right"></td>
+						<td><input type="text" id="inputPortNumber" name="PortNumber" class="GeMHaToBeValidated locallyRequired"  GeMHa_Field_isValid="true" onKeyUp="validateNumericVal(this.id); checkCanGenerate()" title="the Port Number on the local machine at which we'll listen for connection requests"></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -208,23 +209,23 @@
     <br>
 <!-- ------------------------------------- Processing ------------------------------------------- -->    
     <fieldset>
-    	<legend><select id="processingTarget" name="MessageProcessingClassName" onChange="changeProcessingTarget()">
-						<option value="gemha.servers.ProcessMessageForFile" selected>Process to File</option>
-						<option value="gemha.servers.ProcessMessageForDb"			>Process to Database</option>
-						<option value="gemha.servers.ProcessMessageForSocket"		>Process to Socket</option>
-						<option value="gemha.servers.ProcessMessageDoNothing"		>No Processing</option>
+    	<legend><select id="processingTarget" name="MessageProcessingClassName" onChange="changeProcessingTarget()" title="What are we going to do with the input message?">
+						<option value="gemha.servers.ProcessMessageForFile" selected title="Transform messages to CSV records and output to a file">Process to File</option>
+						<option value="gemha.servers.ProcessMessageForDb"			 title="Submit the message to a Database as an action (Insert, Update, Delete or Select)">Process to Database</option>
+						<option value="gemha.servers.ProcessMessageForSocket"		 title="Pass the message over a socket connection, possibly awaiting a response and sending that response to the chosen output medium">Process to Socket</option>
+						<option value="gemha.servers.ProcessMessageDoNothing"		 title="No processor is required. Useful when passing data directly from Input medium to Output medium">No Processing</option>
 		</select></legend>
     	<table>
     		<tr>
 				<td><label for="processingConfigFile">Config File: </label></td>
-				<td><input type="text" id="processingConfigFile" name="MessageProcessingSettingsFileName" align="right"></td>
+				<td><input type="text" id="processingConfigFile" name="MessageProcessingSettingsFileName" title="Depending on the Processing option chosen, this file will contain further Configuration settings, e.g. connection details for a Database"></td>
 			</tr>
 		</table>
 	    <fieldset class="processingElements">
 	    	<legend>Elements to Mind</legend>
 	    	<table >
 	   		<tr>
-				<td colspan="2"><div class="scrollableLong">
+				<td colspan="2"><div class="scrollableLong" title="Name elements (aggregates and tags) in the input message to be retained while processing the message and returned (added back) in the output message e.g. /SomeElement/Mindme">
 		    						<ul id="mindElementList"></ul>
 		    					</div>
 		    	</td>
@@ -233,16 +234,16 @@
 			</tr>
 			<tr>
 				<td><label for="inputNewMindElement">New Element: </label></td>
-				<td><input type="text" id="inputNewMindElement" name="inputNewMindElement" align="right"></td>
+				<td><input type="text" id="inputNewMindElement" name="inputNewMindElement" title="Enter a new Element here, then click 'Add' to add it to the above list"></td>
 				<td></td>
 				<td></td>
 			</tr>
 			<tr>
 				<td><div id="mindElementListButtons">
-						<input id="mindElementListAdd" type="button" value="Add"></input>
-						<input id="mindElementListUp" type="button" value="Up" disabled></input>
-						<input id="mindElementListDown" type="button" value="Down" disabled></input>
-						<input id="mindElementListRemove" type="button" value="Remove" disabled></input>
+						<input id="mindElementListAdd" type="button" value="Add" title="Add another element to the above list"></input>
+						<input id="mindElementListUp" type="button" value="Up" disabled title="Move the selected Element up one position in the list"></input>
+						<input id="mindElementListDown" type="button" value="Down" disabled title="Move the selected Element down one position in the list"></input>
+						<input id="mindElementListRemove" type="button" value="Remove" disabled title="Remove the selected element from the above list (will be moved to the 'New Element' field)"></input>
 					</div>
 				</td>
 			</tr>
@@ -252,7 +253,7 @@
 	    	<legend>Elements for Processing</legend>
 	    	<table >
 		   		<tr>
-					<td colspan="2"><div class="scrollableLong">
+					<td colspan="2"><div class="scrollableLong" title="Name the element(s) in the input message to be sent for processing e.g. /SomeElement/DbAction">
 			    						<ul id="sendElementList" class="locallyRequired" GeMHa_Field_isValid="false"></ul>
 			    					</div>
 			    	</td>
@@ -261,16 +262,16 @@
 				</tr>
 				<tr>
 					<td><label for="inputNewSendElement">New Element: </label></td>
-					<td><input type="text" id="inputNewSendElement" name="inputNewSendElement" align="right"></td>
+					<td><input type="text" id="inputNewSendElement" name="inputNewSendElement" title="Enter a new Element here, then click 'Add' to add it to the above list"></td>
 					<td></td>
 					<td></td>
 				</tr>
 				<tr>
 					<td><div id="sendElementListButtons">
-							<input id="sendElementListAdd" type="button" value="Add"></input>
-							<input id="sendElementListUp" type="button" value="Up" disabled></input>
-							<input id="sendElementListDown" type="button" value="Down" disabled></input>
-							<input id="sendElementListRemove" type="button" value="Remove" disabled></input>
+							<input id="sendElementListAdd" type="button" value="Add" title="Add another element to the above list"></input>
+							<input id="sendElementListUp" type="button" value="Up" disabled title="Move the selected Element up one position in the list"></input>
+							<input id="sendElementListDown" type="button" value="Down" disabled title="Move the selected Element down one position in the list"></input>
+							<input id="sendElementListRemove" type="button" value="Remove" disabled title="Remove the selected element from the above list (will be moved to the 'New Element' field)"></input>
 						</div>
 					</td>
 				</tr>
@@ -280,18 +281,18 @@
     <br>
 <!-- ----------------------------------- Output Media ----------------------------------------- -->    
     <fieldset class="outputMedia">
-    	<legend><select id="outputMedium" name="outputMedium" onchange="changeOutputMedium()">
-						<option value="none" selected>No Output</option>
-						<option value="file" 		 >Output to File</option>
-						<option value="queue"		 >Output to Queue</option>
-						<option value="HTTP"		 >Output to HTTP</option>
+    	<legend><select id="outputMedium" name="outputMedium" onchange="changeOutputMedium()" title="To what medium will we send output/responses?">
+						<option value="none" selected title="No response/output is expected">No Output</option>
+						<option value="file" 		  title="Send each response to a file as an XML message">Output to File</option>
+						<option value="queue"		  title="Send each response to a Queue as an XML message">Output to Queue</option>
+						<option value="HTTP"		  title="Send each response over an HTTP connection as an XML message">Output to HTTP</option>
 				</select>
 		</legend>
 		<div id="outputFileDiv" style="display:none">
 	    	<table>
 	    		<tr>
 					<td><label for="outputFileName">Filename Template: </label></td>
-					<td><input type="text" id="outputFileName" name="FileNameTemplate" class="locallyRequired" align="right"></td>
+					<td><input type="text" id="outputFileName" name="FileNameTemplate" class="locallyRequired" title="The template to use to construct a file name for each output message, including the path to the output directory (if required) e.g. /home/ingelsc/response_*_?.xml, where * is replaced by the Audit Keys for the message and ? is replaced by a Date-time stamp plus a serial number (for uniqueness)"></td>
 				</tr>
 			</table>
 		</div>
@@ -299,13 +300,13 @@
 		    	<table>
 		    		<tr>
 						<td><label for="outputURLJMSServer">Broker URL: </label></td>
-						<td><input type="text" id="outputURLJMSServer" name="UrlJMSserver" class="locallyRequired" align="right"></td>
+						<td><input type="text" id="outputURLJMSServer" name="UrlJMSserver" class="locallyRequired" title="The URL for the Queue Broker e.g. mq://localhost:7676 for Java MQ on local machine"></td>
 						<td><label for="outputQueueName">Queue Name: </label></td>
-						<td><input type="text" id="outputQueueName" name="QueueName" class="locallyRequired" align="right"></td>
+						<td><input type="text" id="outputQueueName" name="QueueName" class="locallyRequired" title="The name of the Queue as understood by the Broker"></td>
 					</tr>
 		    		<tr>
 						<td><label for="replyToQueueName">ReplyToQueue Name: </label></td>
-						<td><input type="text" id="replyToQueueName" name="ReplyToQueueName" align="right"></td>
+						<td><input type="text" id="replyToQueueName" name="ReplyToQueueName" title="The Queue name to stamp on output messages"></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -315,13 +316,13 @@
 		    	<table>
 		    		<tr>
 						<td><label for="outputHTTPServerUrl">Server URL: </label></td>
-						<td><input type="text" id="outputHTTPServerUrl" name="ServerUrl" class="locallyRequired" align="right"></td>
+						<td><input type="text" id="outputHTTPServerUrl" name="ServerUrl" class="locallyRequired" title="The URL of the server hosting the web server, e.g. HTTP://localhost:808"></td>
 						<td><label for="outputEndpointName">End Point: </label></td>
-						<td><input type="text" id="outputEndpointName" name="EndPointName" class="locallyRequired" align="right"></td>
+						<td><input type="text" id="outputEndpointName" name="EndPointName" class="locallyRequired" title="The name of the End Point residing on the server, e.g. the servlet name"></td>
 					</tr>
 		    		<tr>
 						<td><label for="HTTPWithBackoff">With Backoff: </label></td>
-						<td><input type="checkbox" id="HTTPWithBackoff" name="HTTPWithBackoff" checked></td>
+						<td><input type="checkbox" id="HTTPWithBackoff" name="HTTPWithBackoff" checked title="When trying to connect to the server and we receive a 'busy' response, should we 'back off' incrementally? (highly recommended)"></td>
 					</tr>
 				</table>
 		</div>
@@ -329,7 +330,7 @@
     <br>
 <!-- ----------------------------------- Auditing ----------------------------------------- -->    
     <fieldset>
-    	<legend><select id="auditing" onChange="changeAuditing()">
+    	<legend><select id="auditing" onChange="changeAuditing()" title="Will the incoming message have some elements we can use to uniquely identify the message? (log messages will then contain these values)">
 						<option value="yes" selected>Auditing</option>
 						<option value="no"			>No Auditing</option>
 		</select></legend>
@@ -337,10 +338,10 @@
 		   	<table>
 		   		<tr>
 					<td><label for="actionOnError">On Missing Keys: </label></td>
-					<td><select id="actionOnError" name="ActionOnError">
-							<option value="none" selected>Ignore</option>
-							<option value="shutdown"     >Shut Down</option>
-							<option value="discard"		 >Discard Message</option>
+					<td><select id="actionOnError" name="ActionOnError" title="What action should we take if we expect audit key elements but they're not in the message?">
+							<option value="none" selected title="Don't care, just carry on processing message">Ignore</option>
+							<option value="shutdown"      title="Stop processing immediately and terminate - no more messages will be processed">Shut Down</option>
+							<option value="discard"		  title="Discard the errant message and continue with the next message, reporting the error">Discard Message</option>
 						</select>
 					</td>
 					<td></td>
@@ -348,16 +349,16 @@
 				</tr>
 		   		<tr>
 					<td><label for="auditKeysSeparator">Keys Separator: </label></td>
-					<td><input type="text" id="auditKeysSeparator" name="AuditKeysSeparator" align="right"></td>
+					<td><input type="text" id="auditKeysSeparator" name="AuditKeysSeparator" title="If you supply this for messages with multiple Audit Key elements, these character(s) will be used to separate individual values within the Audit Key of a message. Otherwise multiple values will simply be concatenated. A hyphen often works well"></td>
 					<td><label for="errorFileName">Error Filename Template: </label></td>
-					<td><input type="text" id="errorFileName" name="ErrorFileName" align="right"></td>
+					<td><input type="text" id="errorFileName" name="ErrorFileName" title="The template to use to build the filenames for errant messages e.g. (Default is ErrorMessage_*_?.txt)"></td>
 				</tr>
 			</table>
 		    <fieldset>
 		    	<legend>Audit Keys</legend>
 		    	<table >
 			   		<tr>
-						<td colspan="2"><div class="scrollableLong">
+						<td colspan="2"><div class="scrollableLong" title="Add the elements within the incoming message whose values will uniquely identify the message This will be used track messages in the log file (and may possibly be included in the filename, if the output is put to file">
 				    						<ul id="auditElementList" class="locallyRequired" GeMHa_Field_isValid="false"></ul>
 				    					</div>
 				    	</td>
@@ -366,16 +367,16 @@
 					</tr>
 					<tr>
 						<td><label for="inputNewAuditElement">New Element: </label></td>
-						<td><input type="text" id="inputNewAuditElement" name="inputNewAuditElement" align="right"></td>
+						<td><input type="text" id="inputNewAuditElement" name="inputNewAuditElement" title="Enter a new Element here, then click 'Add' to add it to the above list"></td>
 						<td></td>
 						<td></td>
 					</tr>
 					<tr>
 						<td><div id="auditElementListButtons">
-								<input id="auditElementListAdd" type="button" value="Add"></input>
-								<input id="auditElementListUp" type="button" value="Up" disabled></input>
-								<input id="auditElementListDown" type="button" value="Down" disabled></input>
-								<input id="auditElementListRemove" type="button" value="Remove" disabled></input>
+								<input id="auditElementListAdd" type="button" value="Add" title="Add another element to the above list"></input>
+								<input id="auditElementListUp" type="button" value="Up" disabled title="Move the selected Element up one position in the list"></input>
+								<input id="auditElementListDown" type="button" value="Down" disabled title="Move the selected Element down one position in the list"></input>
+								<input id="auditElementListRemove" type="button" value="Remove" disabled title="Remove the selected element from the above list (will be moved to the 'New Element' field)"></input>
 							</div>
 						</td>
 					</tr>
@@ -390,16 +391,16 @@
     	<table>
     		<tr>
 				<td><label for="environmentLoggingLevel">Environment Level: </label></td>
-				<td><select id="environmentLoggingLevel" name="EnvironmentLoggingLevel" onchange="changeEnvironmentLoggingLevel()">
-						<option value="Development" selected>Development</option>
-						<option value="Test"     			>Test</option>
-						<option value="Production"		 	>Production</option>
-						<option value="Ignore"		 		>Ignore</option>
+				<td><select id="environmentLoggingLevel" name="EnvironmentLoggingLevel" onchange="changeEnvironmentLoggingLevel()" title="What level of logging, if any, should be produced by this instance? Choose according to your current environment">
+						<option value="Development" selected title="Sets logging level to FINER">Development</option>
+						<option value="Test"     			 title="Sets logging level to FINE">Test</option>
+						<option value="Production"		 	 title="Sets logging level to CONFIG">Production</option>
+						<option value="Ignore"		 		 title="Turns off logging">Ignore</option>
 					</select>
 				</td>
 				<td><label for="generalLoggingLevel">General Level: </label></td>
-				<td><select id="generalLoggingLevel" name="GeneralLoggingLevel" onchange="changeGeneralLoggingLevel()">
-						<option value="Ignore" selected>Ignore</option>
+				<td><select id="generalLoggingLevel" name="GeneralLoggingLevel" onchange="changeGeneralLoggingLevel()" title="What level of logging, if any, should be produced by this instance? Choose directly from values as defined by the Java java.util.logging.Logger class">
+						<option value="Ignore" selected title="Turns off logging">Ignore</option>
 						<option value="SEVERE"     	   >SEVERE</option>
 						<option value="WARNING"		   >WARNING</option>
 						<option value="INFO"		   >INFO</option>
@@ -412,13 +413,13 @@
 			</tr>
     		<tr>
 				<td><label for="LogFileDir">Directory: </label></td>
-				<td><input type="text" id="logFileDir" name="LogFileDir" align="right"></td>
+				<td><input type="text" id="logFileDir" name="LogFileDir" title="The folder in which log files will be created"></td>
 			</tr>
     		<tr>
 				<td><label for="logFileNameTemplate">Log Filename: </label></td>
-				<td><input type="text" id="logFileNameTemplate" name="LogFileNameTemplate" align="right"></td>
+				<td><input type="text" id="logFileNameTemplate" name="LogFileNameTemplate" title="The template to use to build the Filename for the normal Log file e.g. app1.log or e.g. app1_?.log where ? will be replaced by a Date-time stamp plus a serial number (for uniqueness)"></td>
 				<td><label for="shutDownLogFileNameTemplate">ShutDown Log Filename: </label></td>
-				<td><input type="text" id="shutDownLogFileNameTemplate" name="ShutDownLogFileNameTemplate" align="right"></td>
+				<td><input type="text" id="shutDownLogFileNameTemplate" name="ShutDownLogFileNameTemplate" title="The template to use to build the Filename for the shutdown-process Log file e.g. app1_shutdown.log or e.g. app1_shutdown_?.log where ? will be replaced by a Date-time stamp plus a serial number (for uniqueness)"></td>
 			</tr>
 		</table>
     </fieldset>
@@ -426,7 +427,7 @@
     <br>
 	<div class="taskbar-1">
     	<p class="submit">
-      		<input disabled id="generate" type="button" value="Generate" onClick="showXMLInWindow()"></input>
+      		<input disabled id="generate" type="button" value="Generate" onClick="showXMLInWindow()" title="Click to generate the Config XML and display it in a new window"></input>
       	</p>
     </div>
    </form>
